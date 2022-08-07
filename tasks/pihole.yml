@@ -1,0 +1,42 @@
+- name: Create Pi-hole folder on Pi.
+  ansible.builtin.file:
+    path: "{{ config_dir | realpath }}/pi-hole"
+    state: directory
+    mode: 0755
+  become: false
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+- name: Start and connect container to main network
+  community.docker.docker_container:
+    name: pihole
+    image: "{{ pihole.image }}"
+    state: started
+    restart_policy: always
+    capabilities:
+      - NET_ADMIN
+    hostname: "{{ pihole.hostname }}"
+    dns_servers:
+      - 127.0.0.1
+      - 1.1.1.1
+      - 1.0.0.1
+    exposed_ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+    published_ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "67:67/udp"
+      - "80:80/tcp"
+      - "443:443/tcp"
+    env:
+      TZ: "{{ pihole.timezone }}"
+      WEBPASSWORD: "{{ pihole.password }}"
+      ServerIP: "{{ ansible_facts.default_ipv4.address }}"
+    networks:
+      - name: mainnet
+    volumes:
+      - './etc-pihole/:/etc/pihole/'
+      - './etc-dnsmasq.d/:/etc/dnsmasq.d/'

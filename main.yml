@@ -1,0 +1,78 @@
+- name: Ritsu-pi Project
+  hosts: ritsu_pi
+  become: false
+
+  pre_tasks:
+    - name: Load configuration (with defaults from example file)
+      ansible.builtin.include_vars: "{{ item }}"
+      loop:
+        # - example.config.yml
+        - config.yml
+
+    - name: Ensure apt cache is up to date
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      become: true
+
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+        manager: auto
+      when: ansible_facts.userspace_bits == '32'
+
+    - name: Upgrade libseccomp2 to latest version (32-bit Debian)
+      ansible.builtin.import_tasks: tasks/debian-libseccomp-update.yml
+      when:
+        - ansible_facts.os_family == "Debian"
+        - ansible_facts.userspace_bits == '32'
+        - ansible_facts.packages['libseccomp2'][0]['version'] is version('2.4.4', '<')
+      become: true
+
+  handlers:
+    - name: Import handlers
+      ansible.builtin.import_tasks: tasks/_handlers.yml
+
+  tasks:
+    # System Tools
+    - name: Setup Docker
+      ansible.builtin.import_tasks: tasks/docker.yml
+    # Monitoring Tools
+    - name: Setup Prometheus
+      ansible.builtin.import_tasks: tasks/prometheus_install.yml
+      when: prometheus.enable == true
+    - name: Setup Grafana
+      ansible.builtin.import_tasks: tasks/grafana.yml
+      when: grafana.enable == true
+    - name: Setup Node Exporter
+      ansible.builtin.import_tasks: tasks/node_exporter.yml
+      when: node_exporter.enable == true
+    - name: Setup Blackbox Exporter
+      ansible.builtin.import_tasks: tasks/blackbox_exporter.yml
+      when: blackbox_exporter.enable == true
+    - name: Setup cAdvisor
+      ansible.builtin.import_tasks: tasks/cadvisor.yml
+      when: cadvisor.enable == true
+    # Network Tools
+    - name: Setup SpeedTest Exporter
+      ansible.builtin.import_tasks: tasks/speedtest.yml
+      when: speedtest.enable == true
+    - name: Setup Mikrotik SNMP Exporter
+      ansible.builtin.import_tasks: tasks/mikrotik_snmp.yml
+      when: mikrotik_snmp.enable == true
+    - name: Setup DNSCrypt
+      ansible.builtin.import_tasks: tasks/dnscrypt.yml
+      when: dnscrypt.enable == true
+    - name: Setup Pi-Hole
+      ansible.builtin.import_tasks: tasks/pihole.yml
+      when: pihole.enable == true
+    # Download Managers
+    - name: Setup JDownloader 2
+      ansible.builtin.import_tasks: tasks/jdownloader.yml
+      when: jdownloader.enable == true
+    - name: Setup qBittorrent
+      ansible.builtin.import_tasks: tasks/qbittorrent.yml
+      when: qbittorrent.enable == true
+    # Home Media Server
+    - name: Setup Samba Share
+      ansible.builtin.import_tasks: tasks/samba.yml
+      when: samba.enable == true

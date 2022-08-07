@@ -1,0 +1,246 @@
+# Location where configuration files will be stored.
+# Note: Don't use relative path!
+config_dir: '/home/ramiel/ritsu-pi/config'
+data_dir: '/home/ramiel/ritsu-pi/data'
+
+
+# =====SYSTEM TOOLS=============================================================
+
+# ------------------------------------------------------------------------------
+# Docker
+# Used to run containers. This is the basis of almost all other features.
+# No configuration is required and it is always enabled
+
+# =====MONITORING TOOLS=========================================================
+
+# ------------------------------------------------------------------------------
+# Prometheus
+# Used to collect metrics from the system and acts as time series database.
+prometheus:
+  enable: true
+  image: prom/prometheus:v2.25.2
+  port: 9090
+
+# ------------------------------------------------------------------------------
+# Grafana
+# Used to display metrics in a web interface.
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus as data source.
+#
+# Note:
+# Yes you can run Grafana without prometheus. But you will not be able to display
+# any metrics. If you want a standalone Grafana instance, you can set the
+# `standaonle` option to true.
+grafana:
+  enable: true
+  image: grafana/grafana:latest
+  port: 3015
+  standalone: false
+  password: 'admin'
+
+# ------------------------------------------------------------------------------
+# Prometheus Node Exporter
+# Used to export metrics from the system (CPU, memory, etc).
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus to collect metrics.
+#   If prometheus is disabled, the play will fail.
+# - grafana
+#   If grafana is enabled, a dashboard will be provisioned.
+#
+# Note:
+# Node exporter will be installed in your pi, not in Docker.
+node_exporter:
+  enable: true
+  version: 1.1.2
+  arch: linux-armv7
+  port: 9100
+
+# ------------------------------------------------------------------------------
+# Prometheus Blackbox Exporter
+# The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS,
+# DNS, TCP, ICMP and gRPC.
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus to collect metrics.
+#   If prometheus is disabled, the play will fail.
+# - grafana
+#   If grafana is enabled, a dashboard will be provisioned.
+#
+# Note:
+# This template only comes with minimal HTTP 2xx check. If you want to add more
+# checks, edit the template in the templates/blackbox_exporter.yml.j2
+# Doc: https://github.com/prometheus/blackbox_exporter/blob/master/CONFIGURATION.md
+blackbox_exporter:
+  enable: false
+  image: prom/blackbox-exporter:latest
+  port: 9115
+  target_http:
+  - https://www.google.com
+
+# ------------------------------------------------------------------------------
+# cAdvisor
+# Analyzes resource usage and performance characteristics of running containers.
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus to collect metrics.
+#   If prometheus is disabled, the play will fail.
+# - grafana
+#   If grafana is enabled, a dashboard will be provisioned.
+#
+# Note:
+# cAdvisor will collect data from all docker containers.
+cadvisor:
+  enable: true
+  image: zcube/cadvisor:latest
+  port: 9101
+
+# ------------------------------------------------------------------------------
+# Ookla SpeedTest
+# Periodically run speed test to measure network performance.
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus to collect metrics.
+#   If prometheus is disabled, the play will fail.
+# - grafana
+#   If grafana is enabled, a dashboard will be provisioned.
+#
+# Note:
+# Configure the sample_interval to limit the number of checks interval because
+# the speed test will consume a considerable amount of bandwidth.
+speedtest:
+  enable: false
+  image: miguelndecarvalho/speedtest-exporter:latest
+  port: 9798
+  sample_interval: "1h"
+
+# =====NETWORK TOOLS============================================================
+
+# ------------------------------------------------------------------------------
+# Mikrotik SNMP Exporter
+# Exports SNMP metrics from Mikrotik devices to Prometheus.
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus to collect metrics.
+#   If prometheus is disabled, the play will fail.
+# - grafana
+#   If grafana is enabled, a dashboard will be provisioned.
+mikrotik_snmp:
+  enable: false
+  image: BELUM ADA
+  port: 5053
+
+# ------------------------------------------------------------------------------
+# DNSCrypt
+# DNSCrypt server to secure your DNS queries.
+#
+# Note:
+# This tool works best with pi-hole enabled too. You'll need to configure your
+# system's DNS to use the DNSCrypt server.
+# Edit the templates/dnscrypt.toml.j2 for more options.
+dnscrypt:
+  enable: false
+  image: klutchell/dnscrypt-proxy:latest
+  dns_port: 5053
+  dns_upstream: ["cloudflare", "google"]
+
+# ------------------------------------------------------------------------------
+# Pi-hole
+# Block ads and trackers with optional DNSCrypt integration.
+#
+# Depends on:
+# - dnscrypt
+#   When DNSCrypt is enabled, the DNS server will be set to the DNSCrypt server
+#   and all of the upstream server will be disabled in the Pi-hole config.
+# - dashboard (prometheus, grafana)
+#   If prometheus and grafana is enabled, pi-hole metrics will be collected to
+#   prometheus server and a Grafana dashboard will be provisioned.
+pihole:
+  enable: false
+  image: pihole/pihole:latest
+  port: 3129
+  hostname: pihole
+  timezone: Asia/Jakarta
+  password: "change-this-password"
+  data_dir: "~/data/jdownloader"
+  dnscrypt:
+    enable: true
+  dashboard:
+    enable: true
+    image: ekofr/pihole-exporter:latest
+
+# =====DOWNLOAD MANAGERS========================================================
+
+# ------------------------------------------------------------------------------
+# JDownloader 2
+# All-in-one downloader app.
+#
+# Note:
+# You'll need MyJDownloader account to access the download queue.
+jdownloader:
+  enable: false
+  image: antlafarge/jdownloader:latest
+  port: 3129
+  myjd_email: fahminlb33@gmail.com
+  myjd_password: nothing
+  myjd_device: RAMIEL-PI
+  download_dir: "~/data/jdownloader-downloads"
+
+# ------------------------------------------------------------------------------
+# qBittorrent
+# The best bittorrent client.
+# You can access the download queue from the web interface.
+#
+# Depends on:
+# - dashboard (prometheus, grafana)
+#   If prometheus and grafana is enabled, pi-hole metrics will be collected to
+#   prometheus server and a Grafana dashboard will be provisioned.
+qbittorrent:
+  enable: false
+  image: linuxserver/qbittorrent:latest
+  ports:
+    webui: 8080
+    torrent: 6881
+  dashboard:
+    enable: true
+    image: esanchezm/prometheus-qbittorrent-exporter:latest
+
+# =====HOME MEDIA SERVER========================================================
+
+# ------------------------------------------------------------------------------
+# Samba Share
+# Share your files mounted as a network drive.
+#
+# Note:
+# This will not be installed in Docker, but directly in your pi.
+samba:
+  enable: false
+  mount_points:
+    - name: ramieldriveext
+      path: /media/meong
+      writeable: true
+      create_mask: 0777
+      directory_mask: 0777
+      public: false
+    - name: ramielpublic
+      path: /media/public
+      writeable: true
+      create_mask: 0777
+      directory_mask: 0777
+      public: true
+
+# =====COMING SOON==============================================================
+
+# Radarr - Movie Library
+# Sonarr - TV Library
+# Lidarr - Audio Library
+# Bazarr - Subtitle Library
+# Jackett/Prowlarr - Torrent Indexer
+# Kodi - Media Server

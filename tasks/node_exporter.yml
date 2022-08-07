@@ -1,0 +1,62 @@
+- name: Assert prometheus is enabled
+  ansible.builtin.assert:
+    fail_msg: "Prometheus must be enabled"
+    that:
+      - "{{ prometheus.enable }} == True"
+
+- name: Check if node exporter already installed
+  ansible.builtin.stat:
+    path: "/usr/local/bin/node_exporter"
+  register: __check_node_exporter_present
+
+- name: Create node exporter user
+  ansible.builtin.user:
+    name: node-exporter
+    group: node-exporter
+    append: true
+    shell: /usr/sbin/nologin
+    system: true
+    create_home: false
+  become: true
+  when: __check_node_exporter_present.stat.exists == false
+
+- name: Download and unzip node exporter
+  ansible.builtin.unarchive:
+    src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter.version }}/node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}.tar.gz"
+    dest: /tmp/
+    remote_src: yes
+    validate_certs: no
+  when: __check_node_exporter_present.stat.exists == false
+
+- name: Move node exporter binary to the final destination
+  ansible.builtin.copy:
+    src: "/tmp/node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}/node_exporter"
+    dest: "/usr/local/bin/node_exporter"
+    owner: node-exporter
+    group: node-exporter
+    mode: 0755
+    remote_src: yes
+  become: true
+  when: __check_node_exporter_present.stat.exists == false
+
+- name: Clean temporary files
+  ansible.builtin.file:
+    path: /tmp/node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}/
+    state: absent
+
+- name: Install node exporter as service
+  ansible.builtin.template:
+    src: node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0755
+  become: true
+  notify: reload_daemon_and_restart_node_exporter
+
+- name: Make sure node exporter is started
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: started
+    enabled: yes
+  become: true

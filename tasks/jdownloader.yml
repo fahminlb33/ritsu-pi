@@ -1,0 +1,22 @@
+- name: Pull JDownloader 2 image from Docker Hub
+  community.docker.docker_image:
+    name:
+    source: pull
+
+- name: Start and connect container to main network
+  community.docker.docker_container:
+    name: jdownloader
+    image: "{{ jdownloader.image_tag }}"
+    state: started
+    restart_policy: always
+    exposed_ports:
+      - "{{ jdownloader.port }}:3129"
+    networks:
+      - name: mainnet
+    env:
+      JD_EMAIL: "{{ jdownloader.myjd_email }}"
+      JD_PASSWORD: "{{ jdownloader.myjd_password }}"
+      JD_DEVICENAME: "{{ jdownloader.myjd_device }}"
+    volumes:
+      - "{{ jdownloader.data_dir }}:/etc/prometheus/"
+      - prometheus_data:/prometheus

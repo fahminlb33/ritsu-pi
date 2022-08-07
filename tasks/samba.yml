@@ -1,0 +1,34 @@
+- name: Check if Docker is already present.
+  ansible.builtin.command: which docker
+  failed_when: false
+  changed_when: false
+  check_mode: false
+  register: docker_command_result
+
+- name: Ensure dependencies are installed (Debian).
+  ansible.builtin.apt:
+    name:
+      - samba
+      - samba-common-bin
+    state: present
+
+- name: Install Docker Compose using Pip.
+  ansible.builtin.pip:
+    name: docker-compose
+    state: present
+    executable: pip3
+
+- name: Ensure {{ ansible_user }} user is added to the docker group.
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true
+
+- name: Create docker network
+  community.docker.docker_network:
+    name: mainnet
+    driver: bridge
+    state: present
+
+- name: Reset connection so docker group is picked up.
+  ansible.builtin.meta: reset_connection
