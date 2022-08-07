@@ -1,0 +1,11 @@
+rules:
+  indentation:
+    level: error
+    spaces: 2
+    indent-sequences: consistent
+
+skip_list:
+  - yaml[document-start]
+
+ignore: |
+  .github
