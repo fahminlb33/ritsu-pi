@@ -12,7 +12,6 @@
 - name: Create node exporter user
   ansible.builtin.user:
     name: node-exporter
-    group: node-exporter
     append: true
     shell: /usr/sbin/nologin
     system: true
