@@ -1,9 +1,3 @@
-- name: restart_prometheus
-  community.docker.docker_container:
-    name: "prometheus"
-    restart: true
-  become: false
-
 - name: reload_daemon_and_restart_node_exporter
   systemd:
     name: node_exporter

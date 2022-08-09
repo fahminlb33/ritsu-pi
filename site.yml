@@ -1,0 +1,64 @@
+- name: Ritsu-pi Project
+  hosts: ritsu_pi
+  pre_tasks:
+    - name: Load configuration
+      ansible.builtin.include_vars: "{{ item }}"
+      loop:
+        # - example.config.yml
+        - config.yml
+  roles:
+    - role: common
+    - role: docker
+      tags: [docker]
+  tags: [common]
+
+- name: Networking
+  hosts: ritsu_pi
+  roles:
+    - role: dnscrypt
+      tags: [dnscrypt, dns]
+    - role: pihole
+      tags: [pihole, dns]
+    - role: mikrotik
+      tags: [mikrotik]
+  tags: [networking]
+
+- name: Monitoring
+  hosts: ritsu_pi
+  roles:
+    - role: prometheus
+      tags: [prometheus]
+    - role: grafana
+      tags: [grafana]
+    - role: cadvisor
+      tags: [cadvisor]
+    - role: node_exporter
+      tags: [node_exporter]
+    - role: blackbox_exporter
+      tags: [blackbox_exporter]
+    - role: speedtest
+      tags: [speedtest]
+  tags: [monitoring]
+
+- name: Downloaders
+  hosts: ritsu_pi
+  roles:
+    - role: jdownloader
+      tags: [jdownloader]
+    - role: qbittorrent
+      tags: [qbittorrent]
+  tags: [downloaders]
+
+- name: Media Server
+  hosts: ritsu_pi
+  roles:
+    - role: samba
+      tags: [samba]
+  tags: [media_server]
+
+- name: Reverse Proxy
+  hosts: ritsu_pi
+  roles:
+    - role: reverse_proxy
+      tags: [reverse_proxy, nginx]
+  tags: [reverse_proxy]

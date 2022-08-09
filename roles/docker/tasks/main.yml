@@ -54,11 +54,11 @@
     append: true
   become: true
 
-- name: Reset connection so docker group is picked up.
-  ansible.builtin.meta: reset_connection
-
 - name: Create docker network
   community.docker.docker_network:
     name: mainnet
     driver: bridge
     state: present
+
+- name: Reset connection so docker group is picked up.
+  ansible.builtin.meta: reset_connection

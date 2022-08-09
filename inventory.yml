@@ -1,5 +1,5 @@
 ritsu_pi:
   hosts:
     ramiel:
-      ansible_host: 192.168.21.125
+      ansible_host: 10.20.20.247
       ansible_user: ramiel

@@ -18,7 +18,7 @@ data_dir: '/home/ramiel/ritsu-pi/data'
 # Used to collect metrics from the system and acts as time series database.
 prometheus:
   enable: true
-  image: prom/prometheus:v2.25.2
+  image: prom/prometheus:v2.37.0
   port: 9090
 
 # ------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ prometheus:
 grafana:
   enable: true
   image: grafana/grafana:latest
-  port: 3015
+  port: 3000
   standalone: false
   password: 'admin'
 
@@ -123,8 +123,8 @@ speedtest:
 # =====NETWORK TOOLS============================================================
 
 # ------------------------------------------------------------------------------
-# Mikrotik SNMP Exporter
-# Exports SNMP metrics from Mikrotik devices to Prometheus.
+# Mikrotik Exporter
+# Exports metrics from Mikrotik devices to Prometheus.
 #
 # Depends on:
 # - prometheus
@@ -132,7 +132,7 @@ speedtest:
 #   If prometheus is disabled, the play will fail.
 # - grafana
 #   If grafana is enabled, a dashboard will be provisioned.
-mikrotik_snmp:
+mikrotik:
   enable: false
   image: BELUM ADA
   port: 5053
@@ -175,6 +175,25 @@ pihole:
   dashboard:
     enable: true
     image: ekofr/pihole-exporter:latest
+
+# ------------------------------------------------------------------------------
+# Nginx Reverse Proxy
+# Create subdomains to access your services. You need to install Pi-Hole and
+# use the Pi-Hole as DNS server for all your clients.
+#
+# Note:
+# To expose a service from within docker containers, you can use the service name
+# as the hostname. You can also expose an IP address from your Pi.
+reverse_proxy:
+  enable: true
+  image: nginx:alpine
+  subdomains:
+    - name: prometheus.magi.net
+      service: prometheus
+      port: 9090
+    - name: grafana.magi.net
+      service: grafana
+      port: 3000
 
 # =====DOWNLOAD MANAGERS========================================================
 
