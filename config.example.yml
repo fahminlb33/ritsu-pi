@@ -1,0 +1,60 @@
+---
+# Location where configuration files will be stored.
+# Note: Vaoid the use of relative path!
+config_dir: '/media/primary/ritsu-pi-config'
+data_dir: '/media/primary'
+
+# Global home domain (when you're using pi-hole)
+global_domain: ramiel.local
+
+# Feature toggle
+features:
+  # networking tools
+  dnscrypt: true
+  pihole: true
+  reverse_proxy: true
+
+  # monitoring tools
+  prometheus: true
+  grafana: true
+  cadvisor: true
+  exporter_node: true
+  exporter_blackbox: true
+  exporter_mikrotik: true
+  exporter_speedtest: true
+
+  # downloaders
+  jdownloader: true
+  qbittorrent: true
+
+  # media server
+  samba: true
+
+# MyJDownloader
+myjdownloader:
+  device: RAMIEL-PI
+  email: "fahminlb33@gmail.com"
+  password: "meong"
+
+# MKTXP Mikrotik Exporter
+mktxp:
+  router_hostname: 10.20.20.1
+  router_api_port: 8728
+  router_username: admin
+  router_password: admin
+
+# Samba Network Share
+samba:
+  # user to access the network share
+  user:
+      username: ramiel
+      password: meong
+
+  # directory to share to samba
+  mount_points:
+    - name: ramiel_primary
+      path: /media/primary
+      writeable: true
+      create_mask: 0777
+      directory_mask: 0777
+      public: false

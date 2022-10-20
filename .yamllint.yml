@@ -1,3 +1,4 @@
+---
 yaml-files:
   - '*.yaml'
   - '*.yml'
@@ -17,7 +18,7 @@ rules:
     level: warning
   document-end: disable
   document-start:
-    present: false
+    present: true
   empty-lines: enable
   empty-values: disable
   float-values: disable

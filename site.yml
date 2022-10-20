@@ -2,9 +2,9 @@
   hosts: ritsu_pi
   pre_tasks:
     - name: Load configuration
-      ansible.builtin.include_vars: "{{ item }}"
+      ansible.builtin.include_vars:
       loop:
-        # - example.config.yml
+        - config.example.yml
         - config.yml
   roles:
     - role: common
@@ -16,11 +16,14 @@
   hosts: ritsu_pi
   roles:
     - role: dnscrypt
-      tags: [dnscrypt, dns]
+      tags: [dnscrypt]
+      when: features.dnscrypt == true
     - role: pihole
-      tags: [pihole, dns]
-    - role: mikrotik
-      tags: [mikrotik]
+      tags: [pihole]
+      when: features.pihole == true
+    - role: reverse_proxy
+      tags: [nginx]
+      when: features.reverse_proxy == true
   tags: [networking]
 
 - name: Monitoring
@@ -28,16 +31,25 @@
   roles:
     - role: prometheus
       tags: [prometheus]
+      when: features.prometheus == true
     - role: grafana
       tags: [grafana]
+      when: features.grafana == true
     - role: cadvisor
       tags: [cadvisor]
-    - role: node_exporter
-      tags: [node_exporter]
-    - role: blackbox_exporter
-      tags: [blackbox_exporter]
-    - role: speedtest
-      tags: [speedtest]
+      when: features.cadvisor == true
+    - role: exporter_node
+      tags: [exporter_node]
+      when: features.exporter_node == true
+    - role: exporter_blackbox
+      tags: [exporter_blackbox]
+      when: features.exporter_blackbox == true
+    - role: exporter_mikrotik
+      tags: [mikrotik]
+      when: features.exporter_mikrotik == true
+    - role: exporter_speedtest
+      tags: [exporter_speedtest]
+      when: features.exporter_speedtest == true
   tags: [monitoring]
 
 - name: Downloaders
@@ -45,8 +57,10 @@
   roles:
     - role: jdownloader
       tags: [jdownloader]
+      when: features.jdownloader == true
     - role: qbittorrent
       tags: [qbittorrent]
+      when: features.qbittorrent == true
   tags: [downloaders]
 
 - name: Media Server
@@ -54,11 +68,5 @@
   roles:
     - role: samba
       tags: [samba]
+      when: features.samba == true
   tags: [media_server]
-
-- name: Reverse Proxy
-  hosts: ritsu_pi
-  roles:
-    - role: reverse_proxy
-      tags: [reverse_proxy, nginx]
-  tags: [reverse_proxy]
