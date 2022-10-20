@@ -1,4 +1,5 @@
-- name: reload_daemon_and_restart_node_exporter
+---
+- name: restart_node_exporter
   systemd:
     name: node_exporter
     state: restarted

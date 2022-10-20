@@ -1,3 +1,4 @@
+---
 - name: Assert prometheus is enabled
   ansible.builtin.assert:
     fail_msg: "Prometheus must be enabled"
@@ -51,7 +52,7 @@
     group: root
     mode: 0755
   become: true
-  notify: reload_daemon_and_restart_node_exporter
+  notify: restart_node_exporter
 
 - name: Make sure node exporter is started
   ansible.builtin.systemd:
