@@ -1,2 +1,9 @@
----
-# defaults file for prometheus
+# ------------------------------------------------------------------------------
+# Prometheus
+# Used to collect metrics from the system and acts as time series database.
+prometheus:
+  enable: true
+  image: prom/prometheus:v2.39.1
+  port: 9090
+
+  speedtest_scrape_interval: "2h"

@@ -1,0 +1,33 @@
+---
+- name: Check if data directory is exists
+  ansible.builtin.stat:
+    path: "{{ data_dir }}/prometheus"
+  register: prometheus_data_dir_stat
+
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ data_dir }}/prometheus"
+    state: directory
+    mode: '0755'
+  when: prometheus_data_dir_stat.stat.exists == false
+
+- name: Check if config directory is exists
+  ansible.builtin.stat:
+    path: "{{ config_dir }}/prometheus"
+  register: prometheus_config_dir_stat
+
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/prometheus"
+    state: directory
+    mode: 0644
+  when: prometheus_config_dir_stat.stat.exists == false
+
+- name: Generate config files
+  ansible.builtin.template:
+    src: templates/{{ item.src }}
+    dest: "{{ config_dir }}/prometheus/{{ item.dest }}"
+    mode: 0644
+  loop:
+    - src: prometheus.yml.j2
+      dest: prometheus.yml
