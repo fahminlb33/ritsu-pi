@@ -1,2 +1,27 @@
----
-# defaults file for prometheus
+# ------------------------------------------------------------------------------
+# Pi-hole
+# Block ads and trackers with optional DNSCrypt integration.
+#
+# Depends on:
+# - dnscrypt
+#   When DNSCrypt is enabled, the DNS server will be set to the DNSCrypt server
+#   and all of the upstream server will be disabled in the Pi-hole config.
+# - dashboard (prometheus, grafana)
+#   If prometheus and grafana is enabled, pi-hole metrics will be collected to
+#   prometheus server and a Grafana dashboard will be provisioned.
+pihole:
+  # image to run
+  image: pihole/pihole:latest
+
+  # config
+  config_dir: "{{ config_dir }}/pihole"
+
+  # external access
+  port: 3129
+  hostname: pihole
+
+  # system config
+  timezone: Asia/Jakarta
+  password: "change-this-password"
+  dnscrypt:
+    enable: true
