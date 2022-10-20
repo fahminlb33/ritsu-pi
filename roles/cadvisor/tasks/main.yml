@@ -1,3 +1,4 @@
+---
 - name: Assert prometheus is enabled
   ansible.builtin.assert:
     fail_msg: "Prometheus must be enabled"

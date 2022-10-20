@@ -1,5 +1,6 @@
-- name: restart_prometheus
+---
+- name: restart_cadvisor
   community.docker.docker_container:
-    name: "prometheus"
+    name: "cadvisor"
     restart: true
   become: false
