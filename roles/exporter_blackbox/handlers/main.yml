@@ -1,5 +1,5 @@
-- name: restart_prometheus
+- name: restart_exporter_blackbox
   community.docker.docker_container:
-    name: "prometheus"
+    name: "exporter_blackbox"
     restart: true
   become: false

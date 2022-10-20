@@ -1,0 +1,4 @@
+# {{ ansible_managed }}
+---
+- targets:
+{{ exporter_blackbox.ping_hosts | to_nice_yaml() | indent(4, True) }}
