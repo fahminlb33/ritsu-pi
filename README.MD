@@ -13,16 +13,16 @@ To allow an easy deployment and maintenance, *almost* all of the apps included i
 ritsu-pi packed quite a bunch of apps for your pi server. Docker is mandatory and everything else is optional and can be configured via `config.yml`.
 
 - [x] Docker :strawberry:
-- [x] Prometheus :whale:
+- [ ] Prometheus :whale:
 - [x] Node Exporter :strawberry:
 - [ ] Blackbox Exporter :whale:
 - [x] cAdvisor :whale:
-- [x] Grafana :whale:
+- [ ] Grafana :whale:
 - [ ] DNSCrypt :whale:
 - [ ] Pi-Hole :whale:
-- [ ] JDownloader :whale:
-- [ ] qBittorrent :whale:
-- [ ] Ookla SpeedTest :whale:
+- [x] JDownloader :whale:
+- [x] qBittorrent :strawberry:
+- [x] Ookla SpeedTest :whale:
 
 Note: unchecked items means I want to implement them and I already have a plan but I haven't got the time to write and test the playbook yet.
 
