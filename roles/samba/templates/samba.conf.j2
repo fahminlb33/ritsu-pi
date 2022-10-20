@@ -234,16 +234,12 @@
 # to the drivers directory for these users to have write rights in it
 ;   write list = root, @lpadmin
 
-[ramieldrivelocal]
-path = /home/ramiel/ramiel-drive-local
-writeable=Yes
-create mask=0777
-directory mask=0777
-public=no
-
-[ramieldriveext]
-path = /media/ramiel/Fahmi
-writeable=Yes
-create mask=0777
-directory mask=0777
-public=no
+# List all mount points
+{% for item in samba.mount_points %}
+[{% item.name %}]
+  path = {{ item.path }}
+  writeable = {{ 'yes' if files else 'no' }}
+  create mask = 0777
+  directory mask = 0777
+  public = no
+{% endfor %}

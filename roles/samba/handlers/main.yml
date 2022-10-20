@@ -1,5 +1,7 @@
-- name: restart_prometheus
-  community.docker.docker_container:
-    name: "prometheus"
-    restart: true
-  become: false
+---
+- name: restart_samba
+  systemd:
+    name: smbd
+    state: restarted
+    daemon_reload: yes
+    enabled: yes

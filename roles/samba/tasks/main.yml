@@ -1,10 +1,4 @@
-- name: Check if Docker is already present.
-  ansible.builtin.command: which docker
-  failed_when: false
-  changed_when: false
-  check_mode: false
-  register: docker_command_result
-
+---
 - name: Ensure dependencies are installed (Debian).
   ansible.builtin.apt:
     name:
@@ -12,23 +6,21 @@
       - samba-common-bin
     state: present
 
-- name: Install Docker Compose using Pip.
-  ansible.builtin.pip:
-    name: docker-compose
-    state: present
-    executable: pip3
+- name: Ensure samba user is installed.
+  shell: >
+    set -e -o pipefail
+    && (pdbedit --user={{ samba.user.username }} 2>&1 > /dev/null)
+    || (samba.user '{{ item.password }}'; echo '{{ samba.user.password }}')
+    | smbpasswd -s -a {{ samba.user.username }}
+  args:
+    executable: /bin/bash
+  register: samba_create_users
+  changed_when: "'Added user' in samba_create_users.stdout"
+  no_log: true
 
-- name: Ensure {{ ansible_user }} user is added to the docker group.
-  ansible.builtin.user:
-    name: "{{ ansible_user }}"
-    groups: docker
-    append: true
-
-- name: Create docker network
-  community.docker.docker_network:
-    name: mainnet
-    driver: bridge
-    state: present
-
-- name: Reset connection so docker group is picked up.
-  ansible.builtin.meta: reset_connection
+- name: Make sure samba is started.
+  ansible.builtin.systemd:
+    name: smbd
+    state: started
+    enabled: yes
+  become: true
