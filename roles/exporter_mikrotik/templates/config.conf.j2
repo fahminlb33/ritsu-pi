@@ -1,0 +1,26 @@
+[Sample-Router]
+  enabled = True         # turns metrics collection for this RouterOS device on / off
+
+  hostname = {{ mktxp.router_hostname }}    # RouterOS IP address
+  port = {{ mktxp.router_api_port }}        # RouterOS IP Port
+
+  username = {{ mktxp.router_username }}    # RouterOS user, needs to have 'read' and 'api' permissions
+  password = {{ mktxp.router_password }}
+
+  use_ssl = False                 # enables connection via API-SSL servis
+  no_ssl_certificate = False      # enables API_SSL connect without router SSL certificate
+  ssl_certificate_verify = False  # turns SSL certificate verification on / off
+
+  dhcp = True                     # DHCP general metrics
+  dhcp_lease = True               # DHCP lease metrics
+  pool = True                     # Pool metrics
+  interface = True                # Interfaces traffic metrics
+  firewall = True                 # Firewall rules matching traffic metrics
+  monitor = True                  # Interface monitor metrics
+  route = True                    # Routes metrics
+  wireless = False                # WLAN general metrics
+  wireless_clients = False        # WLAN clients metrics
+  capsman = False                 # CAPsMAN general metrics
+  capsman_clients = False         # CAPsMAN clients metrics
+
+  use_comments_over_names = False  # when available, forces using comments over the interfaces names

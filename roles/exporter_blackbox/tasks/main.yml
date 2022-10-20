@@ -1,3 +1,4 @@
+---
 - name: Pull exporter_blackbox image from Docker Hub
   community.docker.docker_image:
     name: "{{ exporter_blackbox.image }}"

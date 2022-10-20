@@ -1,1 +1,20 @@
----
+# ------------------------------------------------------------------------------
+# Prometheus Node Exporter
+# Used to export metrics from the system (CPU, memory, etc).
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus to collect metrics.
+#   If prometheus is disabled, the play will fail.
+# - grafana
+#   If grafana is enabled, a dashboard will be provisioned.
+#
+# Note:
+# Node exporter will be installed in your pi, not in Docker.
+exporter_node:
+  # exporter version and architecture
+  version: 1.1.2
+  arch: linux-armv7
+
+  # metrics access
+  port: 9100

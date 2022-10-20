@@ -1,1 +1,17 @@
----
+# ------------------------------------------------------------------------------
+# JDownloader 2
+# All-in-one downloader app.
+#
+# Note:
+# You'll need MyJDownloader account to access the download queue.
+jdownloader:
+  # docker image to run
+  image: antlafarge/jdownloader:latest
+
+  # persistent dir
+  logs_dir: "{{ config_dir }}/jdownloader/logs"
+  config_dir: "{{ config_dir }}/jdownloader/config"
+  download_dir: "{{ data_dir }}/downloads"
+
+  # external access
+  port: 3129

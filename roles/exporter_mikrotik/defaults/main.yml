@@ -1,0 +1,19 @@
+# ------------------------------------------------------------------------------
+# Mikrotik Exporter
+# Exports metrics from Mikrotik devices to Prometheus.
+#
+# Depends on:
+# - prometheus
+#   Uses prometheus to collect metrics.
+#   If prometheus is disabled, the play will fail.
+# - grafana
+#   If grafana is enabled, a dashboard will be provisioned.
+exporter_mikrotik:
+  # image to run
+  image: ghcr.io/akpw/mktxp:latest
+
+  # config file location
+  config_dir: "{{ config_dir }}/mktxp"
+
+  # metrics port
+  port: 49090
