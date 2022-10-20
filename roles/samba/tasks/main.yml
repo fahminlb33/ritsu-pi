@@ -6,6 +6,13 @@
       - samba-common-bin
     state: present
 
+- name: Make sure samba is started.
+  ansible.builtin.systemd:
+    name: smbd
+    state: started
+    enabled: yes
+  become: true
+
 - name: Ensure samba user is installed.
   shell: >
     set -e -o pipefail
@@ -17,10 +24,4 @@
   register: samba_create_users
   changed_when: "'Added user' in samba_create_users.stdout"
   no_log: true
-
-- name: Make sure samba is started.
-  ansible.builtin.systemd:
-    name: smbd
-    state: started
-    enabled: yes
-  become: true
+  notify: restart_samba
