@@ -1,2 +1,19 @@
 ---
-# vars file for prometheus
+# ------------------------------------------------------------------------------
+# DNSCrypt
+# DNSCrypt server to secure your DNS queries.
+#
+# Note:
+# This tool works best with pi-hole enabled too. You'll need to configure your
+# system's DNS to use the DNSCrypt server.
+# Edit the templates/dnscrypt.toml.j2 for more options.
+dnscrypt:
+  # image to run in Docker
+  image: klutchell/dnscrypt-proxy:latest
+
+  # persistent path
+  config_path: "{{ config_dir }}/dnscrypt-proxy.toml"
+
+  # configure DNScrypt servers
+  dns_port: 5053
+  dns_upstream: ["cloudflare", "google"]

@@ -1,5 +1,5 @@
-- name: restart_prometheus
+- name: restart_dnscrypt
   community.docker.docker_container:
-    name: "prometheus"
+    name: "dnscrypt"
     restart: true
   become: false
