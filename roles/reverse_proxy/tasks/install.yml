@@ -1,0 +1,23 @@
+---
+- name: Pull image from Docker Hub
+  community.docker.docker_image:
+    name: "{{ reverse_proxy.image }}"
+    source: pull
+
+- name: Start and connect container to main network
+  community.docker.docker_container:
+    name: reverse_proxy
+    image: "{{ reverse_proxy.image }}"
+    state: started
+    restart: true
+    restart_policy: always
+    exposed_ports:
+      - "80:80"
+    published_ports:
+      - "80:80"
+    networks:
+      - name: mainnet
+    volumes:
+      - "{{ reverse_proxy.config_dir }}/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro"
+      - "{{ reverse_proxy.config_dir }}/proxy.conf:/etc/nginx/includes/proxy.conf:ro"
+      - "{{ reverse_proxy.config_dir }}/index.html:/usr/share/nginx/html/index.html:ro"

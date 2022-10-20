@@ -1,2 +1,22 @@
 ---
-# defaults file for prometheus
+# ------------------------------------------------------------------------------
+# Nginx Reverse Proxy
+# Create subdomains to access your services. You need to install Pi-Hole and
+# use the Pi-Hole as DNS server for all your clients.
+#
+# Note:
+# To expose a service from within docker containers, you can use the service name
+# as the hostname. You can also expose an IP address from your Pi.
+reverse_proxy:
+  # image to run
+  image: nginx:alpine
+
+  # config dir
+  config_dir: "{{ config_dir }}/nginx"
+
+  # extra subdomain to setup if you have more services to route
+  subdomains:
+    - subdomain: prometheus     # subdomain to access this service as http://{{subdomain}}.{{global_domain}}
+      service: prometheus       # docker hostname or container name
+      port: 9090                # published port in docker
+      install: false            # set install to true to enable this routing
