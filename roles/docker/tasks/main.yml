@@ -1,3 +1,4 @@
+---
 - name: Check if Docker is already present.
   ansible.builtin.command: which docker
   failed_when: false
