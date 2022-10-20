@@ -18,15 +18,20 @@
     system: true
     create_home: false
   become: true
-  when: __check_node_exporter_present.stat.exists == false
+  when: __check_node_exporter_present.stat.exists
 
 - name: Download and unzip node exporter
   ansible.builtin.unarchive:
-    src: "https://github.com/prometheus/node_exporter/releases/download/v{{ node_exporter.version }}/node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}.tar.gz"
+    src: >-
+      https://github.com/prometheus/node_exporter/releases/download/
+      {#- -#}
+      v{{ node_exporter.version }}/
+      {#- -#}
+      node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}.tar.gz
     dest: /tmp/
-    remote_src: yes
-    validate_certs: no
-  when: __check_node_exporter_present.stat.exists == false
+    remote_src: true
+    validate_certs: false
+  when: not __check_node_exporter_present.stat.exists
 
 - name: Move node exporter binary to the final destination
   ansible.builtin.copy:
@@ -35,9 +40,9 @@
     owner: node-exporter
     group: node-exporter
     mode: 0755
-    remote_src: yes
+    remote_src: true
   become: true
-  when: __check_node_exporter_present.stat.exists == false
+  when: not __check_node_exporter_present.stat.exists
 
 - name: Clean temporary files
   ansible.builtin.file:
@@ -58,5 +63,5 @@
   ansible.builtin.systemd:
     name: node_exporter
     state: started
-    enabled: yes
+    enabled: true
   become: true

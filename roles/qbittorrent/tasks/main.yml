@@ -10,7 +10,7 @@
     name: qbittorrent-nox
     comment: qBittorrent nox user
     shell: /usr/sbin/nologin
-    system: yes
+    system: true
     groups: qbittorrent-nox
     state: present
   register: qbittorrent_nox_user_info
@@ -19,7 +19,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    recurse: yes
+    recurse: true
     owner: "{{ qbittorrent_nox_user_info.name }}"
     group: "{{ qbittorrent_nox_user_info.group }}"
   with_items:
@@ -32,17 +32,26 @@
     regexp: "{{ item.re }}"
     line: "{{ item.line }}"
     insertafter: "{{ item.after | default(omit) }}"
-    create: yes
+    create: true
     owner: "{{ qbittorrent_nox_user_info.name }}"
     group: "{{ qbittorrent_nox_user_info.group }}"
     mode: 0644
   with_items:
-    - { re: '^\[LegalNotice\]$', line: "[LegalNotice]" }
-    - { re: "^Accepted=true$", line: "Accepted=true", after: '^\[LegalNotice\]$' }
-    - { re: '^\[BitTorrent\]$', line: "[BitTorrent]" }
-    - { re: "^Session\\Port$", line: "Session\\Port={{ qbittorrent.ports.torrent }}", after: '^\[BitTorrent\]$' }
-    - { re: '^\[Network\]$', line: "[Network]" }
-    - { re: "^PortForwardingEnabled$", line: "PortForwardingEnabled=false", after: '^\[Network\]$' }
+    - re: '^\[LegalNotice\]$'
+      line: "[LegalNotice]"
+    - re: "^Accepted=true$"
+      line: "Accepted=true"
+      after: '^\[LegalNotice\]$'
+    - re: '^\[BitTorrent\]$'
+      line: "[BitTorrent]"
+    - re: "^Session\\Port$"
+      line: "Session\\Port={{ qbittorrent.ports.torrent }}"
+      after: '^\[BitTorrent\]$'
+    - re: '^\[Network\]$'
+      line: "[Network]"
+    - re: "^PortForwardingEnabled$"
+      line: "PortForwardingEnabled=false"
+      after: '^\[Network\]$'
 
 - name: Ensure systemd unit file is present
   ansible.builtin.template:
@@ -58,5 +67,5 @@
   ansible.builtin.systemd:
     name: qbittorrent-nox
     state: started
-    enabled: yes
+    enabled: true
   become: true

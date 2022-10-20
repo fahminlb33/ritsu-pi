@@ -1,27 +1,11 @@
 ---
-- name: Check if data directory is exists
-  ansible.builtin.stat:
-    path: "{{ data_dir }}/prometheus"
-  register: prometheus_data_dir_stat
-
-- name: Create data directory
+- name: Create config and data directory
   ansible.builtin.file:
-    path: "{{ data_dir }}/prometheus"
-    state: directory
-    mode: '0755'
-  when: prometheus_data_dir_stat.stat.exists == false
-
-- name: Check if config directory is exists
-  ansible.builtin.stat:
-    path: "{{ config_dir }}/prometheus"
-  register: prometheus_config_dir_stat
-
-- name: Create config directory
-  ansible.builtin.file:
-    path: "{{ config_dir }}/prometheus"
+    path: "{{ item }}"
     state: directory
     mode: 0644
-  when: prometheus_config_dir_stat.stat.exists == false
+  loop:
+    - "{{ prometheus.data_dir }}/prometheus"
 
 - name: Generate config files
   ansible.builtin.template:

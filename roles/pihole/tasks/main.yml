@@ -34,7 +34,7 @@
       - "53:53/tcp"
       - "53:53/udp"
       - "67:67/udp"
-      - "443:443/tcp" # expose port 80 IF reverse proxy is disabled, otherwise expose port 38080 from 80
+      - "443:443/tcp"   # expose port 80 IF reverse proxy is disabled, otherwise expose port 38080 from 80
     env:
       TZ: "{{ pihole.timezone }}"
       WEBPASSWORD: "{{ pihole.password }}"

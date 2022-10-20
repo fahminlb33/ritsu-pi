@@ -1,3 +1,4 @@
+---
 - name: restart_dnscrypt
   community.docker.docker_container:
     name: "dnscrypt"

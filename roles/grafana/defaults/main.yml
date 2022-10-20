@@ -30,5 +30,5 @@ grafana:
   provisioning:
     # dashboards
     dashboards:
-      - kind: import
-        id: 13679 # mikrotik exporter
+      - kind: import    # import (from Grafana Cloud) or file (from templates)
+        id: 13679       # mikrotik exporter dashboard ID

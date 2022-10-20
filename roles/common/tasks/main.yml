@@ -15,5 +15,5 @@
   when:
     - ansible_facts.os_family == "Debian"
     - ansible_facts.userspace_bits == '32'
-    - ansible_facts.packages['libseccomp2'][0]['version'] is version('2.4.4', '<')
+    - ansible_facts.packages['libseccomp2'][0]['version'] is version('2.4.4', '<')  # noqa 204
   become: true

@@ -1,3 +1,4 @@
+---
 # ------------------------------------------------------------------------------
 # Mikrotik Exporter
 # Exports metrics from Mikrotik devices to Prometheus.

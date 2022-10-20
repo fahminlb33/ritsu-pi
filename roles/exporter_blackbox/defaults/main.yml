@@ -27,5 +27,5 @@ exporter_blackbox:
 
   # hosts to ping
   ping_hosts:
-  - http://www.google.com/;google.com
-  - https://github.com/;github.com
+    - http://www.google.com/;google.com
+    - https://github.com/;github.com

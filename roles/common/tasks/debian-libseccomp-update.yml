@@ -9,7 +9,13 @@
 
 - name: Add Buster backports for fixed libseccomp2.
   ansible.builtin.apt_repository:
-    repo: deb http://httpredir.debian.org/debian buster-backports main contrib non-free
+    repo: >-
+      deb
+      http://httpredir.debian.org/debian
+      buster-backports
+      main
+      contrib
+      non-free
     state: present
     filename: debian-backports
 

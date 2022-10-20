@@ -47,8 +47,8 @@ mktxp:
 samba:
   # user to access the network share
   user:
-      username: ramiel
-      password: meong
+    username: ramiel
+    password: meong
 
   # directory to share to samba
   mount_points:

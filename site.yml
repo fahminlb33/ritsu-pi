@@ -1,3 +1,4 @@
+---
 - name: Ritsu-pi Project
   hosts: ritsu_pi
   pre_tasks:

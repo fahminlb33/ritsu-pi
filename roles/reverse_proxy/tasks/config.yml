@@ -1,20 +1,16 @@
 ---
-- name: Check if config directory is exists
-  ansible.builtin.stat:
-    path: "{{ reverse_proxy.config_dir }}"
-  register: nginx_config_dir_info
-
-- name: Create data directory
+- name: Create config and data directory
   ansible.builtin.file:
-    path: "{{ reverse_proxy.config_dir }}"
+    path: "{{ item }}"
     state: directory
     mode: 0644
-  when: nginx_config_dir_info.stat.exists == false
+  loop:
+    - "{{ reverse_proxy.config_dir }}"
 
 - name: Generate config files
   ansible.builtin.template:
     src: templates/{{ item.src }}
-    dest: "{{ config_dir }}/{{ item.dest }}"
+    dest: "{{ reverse_proxy.config_dir }}/{{ item.dest }}"
     mode: 0644
   loop:
     - src: nginx.conf.j2

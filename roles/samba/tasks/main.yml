@@ -10,11 +10,11 @@
   ansible.builtin.systemd:
     name: smbd
     state: started
-    enabled: yes
+    enabled: true
   become: true
 
 - name: Ensure samba user is installed.
-  shell: >
+  ansible.builtin.shell: >
     set -e -o pipefail
     && (pdbedit --user={{ samba.user.username }} 2>&1 > /dev/null)
     || (samba.user '{{ item.password }}'; echo '{{ samba.user.password }}')
