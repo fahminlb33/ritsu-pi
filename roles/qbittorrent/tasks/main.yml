@@ -1,30 +1,62 @@
-- name: Pull qBittorrent image from Docker Hub
-  community.docker.docker_image:
-    name: "{{ qbittorrent.image }}"
-    source: pull
+---
+- name: Ensure package is installed
+  ansible.builtin.package:
+    name: qbittorrent-nox
+    state: "{{ qbittorrent_nox_package_state | default(present) }}"
+  notify: restart service
 
-- name: Create configuration
-  ansible.builtin.template:
-    src: templates/qbittorrent-proxt.toml.j2
-    dest: "{{ config_dir }}/qbittorrent-proxy.toml"
+- name: Ensure service user exists
+  ansible.builtin.user:
+    name: qbittorrent-nox
+    comment: qBittorrent nox user
+    shell: /usr/sbin/nologin
+    system: yes
+    groups: qbittorrent-nox
+    state: present
+  register: qbittorrent_nox_user_info
+
+- name: Ensure config directory exists
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    recurse: yes
+    owner: "{{ qbittorrent_nox_user_info.name }}"
+    group: "{{ qbittorrent_nox_user_info.group }}"
+  with_items:
+    - "{{ qbittorrent.config_dir }}/.config/"
+    - "{{ qbittorrent.config_dir }}/.config/qBittorrent/"
+
+- name: Ensure legal notice is accepted
+  ansible.builtin.lineinfile:
+    path: "{{ qbittorrent.config_dir }}/.config/qBittorrent/qBittorrent.conf"
+    regexp: "{{ item.re }}"
+    line: "{{ item.line }}"
+    insertafter: "{{ item.after | default(omit) }}"
+    create: yes
+    owner: "{{ qbittorrent_nox_user_info.name }}"
+    group: "{{ qbittorrent_nox_user_info.group }}"
     mode: 0644
+  with_items:
+    - { re: '^\[LegalNotice\]$', line: "[LegalNotice]" }
+    - { re: "^Accepted=true$", line: "Accepted=true", after: '^\[LegalNotice\]$' }
+    - { re: '^\[BitTorrent\]$', line: "[BitTorrent]" }
+    - { re: "^Session\\Port$", line: "Session\\Port={{ qbittorrent.ports.torrent }}", after: '^\[BitTorrent\]$' }
+    - { re: '^\[Network\]$', line: "[Network]" }
+    - { re: "^PortForwardingEnabled$", line: "PortForwardingEnabled=false", after: '^\[Network\]$' }
 
-- name: Start and connect container to main network
-  community.docker.docker_container:
-    name: qbittorrent
-    image: "{{ qbittorrent.image }}"
+- name: Ensure systemd unit file is present
+  ansible.builtin.template:
+    src: qbittorrent-nox.service.j2
+    dest: /etc/systemd/system/qbittorrent-nox.service
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify: restart_qbittorrent
+
+- name: Ensure qBittorrent-nox is started
+  ansible.builtin.systemd:
+    name: qbittorrent-nox
     state: started
-    restart_policy: always
-    command:
-      - '--config.file=/config/blackbox.yml'
-    exposed_ports:
-      - "{{ qbittorrent.ports.webui }}:{{ qbittorrent.ports.webui }}"
-      - "{{ qbittorrent.ports.torrent }}:6881"
-      - "{{ qbittorrent.ports.torrent }}:6881/udp"
-    networks:
-      - name: mainnet
-    volumes:
-      - "{{ config_dir }}:/config"
-    env:
-      TZ: Asia/Jakarta
-      WEBUI_PORT: "{{ qbittorrent.ports.webui }}"
+    enabled: yes
+  become: true
