@@ -1,6 +1,6 @@
 ---
-- name: restart_pihole
+- name: restart_jdownloader
   community.docker.docker_container:
-    name: "pihole"
+    name: "jdownloader"
     restart: true
   become: false

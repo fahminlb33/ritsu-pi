@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0644
+    mode: 0755
   loop:
     - "{{ grafana.data_dir }}/grafana"
     - "{{ config_dir }}/grafana/provisioning/datasources"
@@ -12,7 +12,7 @@
   ansible.builtin.template:
     src: templates/{{ item.src }}
     dest: "{{ config_dir }}/grafana/{{ item.dest }}"
-    mode: 0644
+    mode: 0755
   loop:
     - src: provisioning/datasources.yml.j2
       dest: provisioning/datasources/datasource.yml

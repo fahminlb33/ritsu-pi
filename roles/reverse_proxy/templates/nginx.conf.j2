@@ -1,28 +1,12 @@
-daemon            off;
-worker_processes  4;
-
-{% if domain_name_enable and domain_name %}
+{% if global_domain and ritsu_components.pihole %}
 server {
   listen 80;
   listen [::]:80;
-  server_name grafana.magi.net;
+  server_name {{ pihole.hostname }}.{{ global_domain }};
 
   location / {
     include /etc/nginx/includes/proxy.conf;
-    proxy_pass http://grafana:3000;
-  }
-}
-{% endif %}
-
-{% if domain_name_enable and domain_name %}
-server {
-  listen 80;
-  listen [::]:80;
-  server_name prometheus.magi.net;
-
-  location / {
-    include /etc/nginx/includes/proxy.conf;
-    proxy_pass http://prometheus:9090;
+    proxy_pass http://pihole:{{ pihole.port }};
   }
 }
 {% endif %}
@@ -31,10 +15,10 @@ server {
 server {
   listen 80;
   listen [::]:80;
-  server_name prometheus.magi.net;
+  server_name {{ global_domain }};
 
   location / {
-    root  html
+    root   /usr/share/nginx/html;
+    index  index.html;
   }
 }
-

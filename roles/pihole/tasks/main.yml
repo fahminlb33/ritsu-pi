@@ -1,10 +1,25 @@
 ---
-- name: Create Pi-hole folder on Pi.
+- name: Create Pi-hole config directory
   ansible.builtin.file:
     path: "{{ pihole.config_dir }}"
     state: directory
-    mode: 0644
+    mode: 0755
   become: false
+
+- name: Create environment variable
+  ansible.builtin.template:
+    src: templates/env.j2
+    dest: "{{ pihole.config_dir }}/pihole.env"
+    mode: 0755
+  register: restart_pihole
+
+- name: Check DNSCrypt settings if it is enabled
+  ansible.builtin.assert:
+    that:
+      - ritsu_components.dnscrypt == true
+    fail_msg: "Before using DNSCrypt with Pi-Hole, DNSCrypt must be enabled"
+    success_msg: "Using Pi-Hole with DNSCrypt integration"
+  when: pihole.dnscrypt == true
 
 - name: Pull image from Docker Hub
   community.docker.docker_image:
@@ -17,10 +32,9 @@
     name: pihole
     image: "{{ pihole.image }}"
     state: started
-    restart_policy: always
+    restart_policy: unless-stopped
     capabilities:
       - NET_ADMIN
-    hostname: "{{ pihole.hostname }}"
     dns_servers:
       - 127.0.0.1
       - 1.1.1.1
@@ -28,19 +42,15 @@
     exposed_ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "67:67/udp"
-      - "443:443/tcp"
     published_ports:
       - "53:53/tcp"
       - "53:53/udp"
-      - "67:67/udp"
-      - "443:443/tcp"   # expose port 80 IF reverse proxy is disabled, otherwise expose port 38080 from 80
-    env:
-      TZ: "{{ pihole.timezone }}"
-      WEBPASSWORD: "{{ pihole.password }}"
-      ServerIP: "{{ ansible_facts.default_ipv4.address }}"
+      # expose port 80 IF reverse proxy is disabled, otherwise expose port 8080 from 80
+      - "{{ pihole.port }}:{{ pihole.port }}/tcp"
+    env_file: '{{ pihole.config_dir }}/pihole.env'
     networks:
       - name: mainnet
     volumes:
       - '{{ pihole.config_dir }}/etc/:/etc/pihole/'
       - '{{ pihole.config_dir }}/dnsmasq.d/:/etc/dnsmasq.d/'
+      - '{{ pihole.config_dir }}/index.html:/usr/share/nginx/html/index.html'

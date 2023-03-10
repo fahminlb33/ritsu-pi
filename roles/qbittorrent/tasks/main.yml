@@ -35,7 +35,7 @@
     create: true
     owner: "{{ qbittorrent_nox_user_info.name }}"
     group: "{{ qbittorrent_nox_user_info.group }}"
-    mode: 0644
+    mode: 0755
   with_items:
     - re: '^\[LegalNotice\]$'
       line: "[LegalNotice]"
@@ -59,7 +59,7 @@
     dest: /etc/systemd/system/qbittorrent-nox.service
     owner: root
     group: root
-    mode: 0644
+    mode: 0755
   become: true
   notify: restart_qbittorrent
 

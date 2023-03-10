@@ -2,33 +2,34 @@
 # Location where configuration files will be stored.
 # Note: Vaoid the use of relative path!
 config_dir: '/media/primary/ritsu-pi-config'
-data_dir: '/media/primary'
+data_dir: '/media/primary/ritsu-pi-data'
 
 # Global home domain (when you're using pi-hole)
 global_domain: ramiel.local
 
 # Feature toggle
-features:
+ritsu_components:
   # networking tools
   dnscrypt: true
   pihole: true
   reverse_proxy: true
 
   # monitoring tools
-  prometheus: true
-  grafana: true
-  cadvisor: true
-  exporter_node: true
-  exporter_blackbox: true
-  exporter_mikrotik: true
-  exporter_speedtest: true
+  prometheus: false
+  grafana: false
+  cadvisor: false
+  exporter_node: false
+  exporter_blackbox: false
+  exporter_mikrotik: false
+  exporter_speedtest: false
 
   # downloaders
-  jdownloader: true
-  qbittorrent: true
+  jdownloader: false
+  qbittorrent: false
 
   # media server
-  samba: true
+  samba: false
+  jellyfin: false
 
 # MyJDownloader
 myjdownloader:

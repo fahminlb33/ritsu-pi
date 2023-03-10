@@ -8,7 +8,7 @@
   ansible.builtin.template:
     src: templates/qbittorrent-proxt.toml.j2
     dest: "{{ exporter_mikrotik.config_dir }}/mktxp.toml"
-    mode: 0644
+    mode: 0755
 
 - name: Start and connect container to main network
   community.docker.docker_container:

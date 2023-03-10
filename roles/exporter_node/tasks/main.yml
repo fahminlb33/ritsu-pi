@@ -55,7 +55,7 @@
     dest: /etc/systemd/system/node_exporter.service
     owner: root
     group: root
-    mode: 0644
+    mode: 0755
   become: true
   notify: restart_node_exporter
 

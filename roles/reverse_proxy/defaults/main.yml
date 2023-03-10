@@ -13,10 +13,3 @@ reverse_proxy:
 
   # config dir
   config_dir: "{{ config_dir }}/nginx"
-
-  # extra subdomain to setup if you have more services to route
-  subdomains:
-    - subdomain: prometheus     # subdomain to access this service as http://{{subdomain}}.{{global_domain}}
-      service: prometheus       # docker hostname or container name
-      port: 9090                # published port in docker
-      install: false            # set install to true to enable this routing

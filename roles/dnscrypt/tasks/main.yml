@@ -1,4 +1,3 @@
----
 - name: Pull DNSCrypt Proxy image from Docker Hub
   community.docker.docker_image:
     name: "{{ dnscrypt.image }}"
@@ -6,9 +5,9 @@
 
 - name: Create configuration
   ansible.builtin.template:
-    src: templates/dnscrypt-proxy.toml.j2
+    src: templates/dnscrypt.toml.j2
     dest: "{{ dnscrypt.config_path }}"
-    mode: 0644
+    mode: 0755
 
 - name: Start and connect container to main network
   community.docker.docker_container:
@@ -16,9 +15,9 @@
     image: "{{ dnscrypt.image }}"
     state: started
     restart_policy: always
-    exposed_ports:
-      - "{{ dnscrypt.port }}:{{ dnscrypt.port }}/udp"
-      - "{{ dnscrypt.port }}:{{ dnscrypt.port }}/tcp"
+    published_ports:
+      - "{{ dnscrypt.dns_port }}:{{ dnscrypt.dns_port }}/udp"
+      - "{{ dnscrypt.dns_port }}:{{ dnscrypt.dns_port }}/tcp"
     networks:
       - name: mainnet
     volumes:

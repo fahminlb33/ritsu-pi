@@ -1,0 +1,24 @@
+---
+- name: Pull image from Docker Hub
+  community.docker.docker_image:
+    name:
+    source: pull
+
+- name: Start and connect container to main network
+  community.docker.docker_container:
+    name: jdownloader
+    image: "{{ jdownloader.image }}"
+    state: started
+    restart_policy: always
+    exposed_ports:
+      - "{{ jdownloader.port }}:3129"
+    networks:
+      - name: mainnet
+    env:
+      JD_EMAIL: "{{ myjdownloader.email }}"
+      JD_PASSWORD: "{{ myjdownloader.password }}"
+      JD_DEVICENAME: "{{ myjdownloader.device }}"
+    volumes:
+      - "{{ jdownloader.download_dir }}:/jdownloader/downloads"
+      - "{{ jdownloader.config_dir }}/grafana:/jdownloader/cfg"
+      - "{{ jdownloader.logs_dir }}/grafana:/jdownloader/logs"

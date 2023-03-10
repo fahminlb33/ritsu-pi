@@ -23,6 +23,8 @@ pihole:
 
   # system config
   timezone: Asia/Jakarta
-  password: "change-this-password"
-  dnscrypt:
-    enable: true
+  password: kucing-oren
+
+  # use dnscrypt with pi-hole
+  # dnscrypt must be enabled first
+  dnscrypt: true

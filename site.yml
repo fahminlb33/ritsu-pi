@@ -4,70 +4,64 @@
   pre_tasks:
     - name: Load configuration
       ansible.builtin.include_vars:
-      loop:
-        - config.example.yml
-        - config.yml
-  roles:
-    - role: common
-    - role: docker
-      tags: [docker]
-  tags: [common]
+        file: config.example.yml
+    - name: Debugggg
+      debug:
+        var: vars
 
-- name: Networking
-  hosts: ritsu_pi
   roles:
+    # common
+    - role: common
+      tags: [common]
+    - role: docker
+      tags: [common, docker]
+
+    # networking
     - role: dnscrypt
       tags: [dnscrypt]
-      when: features.dnscrypt == true
+      when: ritsu_components.dnscrypt == true
     - role: pihole
       tags: [pihole]
-      when: features.pihole == true
+      when: ritsu_components.pihole == true
     - role: reverse_proxy
       tags: [nginx]
-      when: features.reverse_proxy == true
-  tags: [networking]
+      when: ritsu_components.reverse_proxy == true
 
-- name: Monitoring
-  hosts: ritsu_pi
-  roles:
+    # monitoring
     - role: prometheus
       tags: [prometheus]
-      when: features.prometheus == true
+      when: ritsu_components.prometheus == true
     - role: grafana
       tags: [grafana]
-      when: features.grafana == true
+      when: ritsu_components.grafana == true
     - role: cadvisor
       tags: [cadvisor]
-      when: features.cadvisor == true
+      when: ritsu_components.cadvisor == true
     - role: exporter_node
       tags: [exporter_node]
-      when: features.exporter_node == true
+      when: ritsu_components.exporter_node == true
     - role: exporter_blackbox
       tags: [exporter_blackbox]
-      when: features.exporter_blackbox == true
+      when: ritsu_components.exporter_blackbox == true
     - role: exporter_mikrotik
       tags: [mikrotik]
-      when: features.exporter_mikrotik == true
+      when: ritsu_components.exporter_mikrotik == true
     - role: exporter_speedtest
       tags: [exporter_speedtest]
-      when: features.exporter_speedtest == true
-  tags: [monitoring]
+      when: ritsu_components.exporter_speedtest == true
 
-- name: Downloaders
-  hosts: ritsu_pi
-  roles:
+    # downloaders
     - role: jdownloader
       tags: [jdownloader]
-      when: features.jdownloader == true
+      when: ritsu_components.jdownloader == true
     - role: qbittorrent
       tags: [qbittorrent]
-      when: features.qbittorrent == true
-  tags: [downloaders]
+      when: ritsu_components.qbittorrent == true
 
-- name: Media Server
-  hosts: ritsu_pi
-  roles:
+    # media server
     - role: samba
       tags: [samba]
-      when: features.samba == true
-  tags: [media_server]
+      when: ritsu_components.samba == true
+    - role: jellyfin
+      tags: [jellyfin]
+      when: ritsu_components.jellyfin == true

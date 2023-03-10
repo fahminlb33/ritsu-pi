@@ -11,8 +11,6 @@
     state: started
     restart: true
     restart_policy: always
-    exposed_ports:
-      - "80:80"
     published_ports:
       - "80:80"
     networks:
