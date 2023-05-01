@@ -1,6 +1,0 @@
----
-- name: restart_jdownloader
-  community.docker.docker_container:
-    name: "jdownloader"
-    restart: true
-  become: false

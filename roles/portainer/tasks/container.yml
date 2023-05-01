@@ -1,0 +1,20 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name: "{{ ritsu.components.portainer.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: portainer
+    image: "{{ ritsu.components.portainer.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ ritsu.components.portainer.port }}:9443"
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    volumes:
+      - "{{ ritsu.config_dir }}/portainer:/data"
+      - /var/run/docker.sock:/var/run/docker.sock

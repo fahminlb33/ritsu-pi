@@ -1,6 +1,0 @@
----
-- name: restart_prometheus
-  community.docker.docker_container:
-    name: "prometheus"
-    restart: true
-  become: false

@@ -1,31 +1,28 @@
 ---
-- name: Assert prometheus is enabled
-  ansible.builtin.assert:
-    fail_msg: "Prometheus must be enabled"
-    that:
-      - "{{ prometheus.enable }} == True"
-
-- name: Pull image from Docker Hub
+- name: Pull image from registry
   community.docker.docker_image:
-    name: "{{ cadvisor.image }}"
+    name: "{{ ritsu.components.cadvisor.image }}"
     source: pull
 
-- name: Start and connect container to main network
+- name: Start and connect container to network
   community.docker.docker_container:
-    name: cadvisor
-    image: "{{ cadvisor.image }}"
     state: started
+    name: cadvisor
+    image: "{{ ritsu.components.cadvisor.image }}"
     restart: true
-    restart_policy: always
-    hostname: cadvisor
+    restart_policy: unless-stopped
+    privileged: true
     exposed_ports:
-      - "{{ cadvisor.port }}:8080"
+      - 8080:8080
     published_ports:
-      - "{{ cadvisor.port }}:8080"
+      - "{{ ritsu.components.cadvisor.port }}:8080"
     networks:
-      - name: mainnet
+      - name: "{{ ritsu.network.name }}"
     volumes:
       - /:/rootfs:ro
       - /sys:/sys:ro
       - /var/run:/var/run:rw
       - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg

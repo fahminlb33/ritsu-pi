@@ -13,9 +13,15 @@
 # Note:
 # Configure the sample_interval to limit the number of checks interval because
 # the speed test will consume a considerable amount of bandwidth.
-exporter_speedtest:
-  # docker image to run
-  image: miguelndecarvalho/speedtest-exporter:latest
+ritsu:
+  components:
+    exporter_speedtest:
+      # docker image to run
+      image: miguelndecarvalho/speedtest-exporter:latest
 
-  # metrics port
-  port: 9798
+      # metrics port
+      port: 8105
+      scrape_interval: 1h
+
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: speedtest

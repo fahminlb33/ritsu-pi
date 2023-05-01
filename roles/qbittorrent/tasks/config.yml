@@ -1,0 +1,17 @@
+---
+- name: Create config and data directory
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0775
+  loop:
+    - "{{ ritsu.config_dir }}/qbittorrent/config"
+
+- name: Create download directory
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0775
+  loop:
+    - "{{ ritsu.components.qbittorrent.download_dir }}"
+

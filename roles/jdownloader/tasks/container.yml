@@ -1,0 +1,28 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name:
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: jdownloader
+    image: "{{ ritsu.components.jdownloader.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ ritsu.components.jdownloader.port }}:5800"
+      - "3129:3129"
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    env:
+      MYJDOWNLOADER_EMAIL: "{{ ritsu.components.jdownloader.email }}"
+      MYJDOWNLOADER_PASSWORD: "{{ ritsu.components.jdownloader.password }}"
+      MYJDOWNLOADER_DEVICE_NAME: "{{ ritsu.components.jdownloader.device }}"
+    volumes:
+      - "{{ ritsu.config_dir }}/jdownloader:/config"
+    mounts:
+      - source: "{{ ritsu.components.jdownloader.download_dir }}"
+        target: "/output"
+        type: bind

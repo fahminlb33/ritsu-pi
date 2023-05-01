@@ -1,67 +1,19 @@
 ---
 - name: Assert prometheus is enabled
   ansible.builtin.assert:
-    fail_msg: "Prometheus must be enabled"
+    fail_msg: Prometheus must be enabled
     that:
-      - "{{ prometheus.enable }} == True"
+      - "{{ ritsu.components.prometheus.enabled }} == True"
 
-- name: Check if node exporter already installed
+- name: Check if node exporter service is already installed
   ansible.builtin.stat:
-    path: "/usr/local/bin/node_exporter"
-  register: __check_node_exporter_present
+    path: "/etc/systemd/system/node_exporter.service"
+  register: node_exporter_present
 
-- name: Create node exporter user
-  ansible.builtin.user:
-    name: node-exporter
-    append: true
-    shell: /usr/sbin/nologin
-    system: true
-    create_home: false
-  become: true
-  when: __check_node_exporter_present.stat.exists
+- name: Create user and group for node exporter
+  ansible.builtin.import_tasks: user.yml
+  when: node_exporter_present.stat.exists == False
 
-- name: Download and unzip node exporter
-  ansible.builtin.unarchive:
-    src: >-
-      https://github.com/prometheus/node_exporter/releases/download/
-      {#- -#}
-      v{{ node_exporter.version }}/
-      {#- -#}
-      node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}.tar.gz
-    dest: /tmp/
-    remote_src: true
-    validate_certs: false
-  when: not __check_node_exporter_present.stat.exists
-
-- name: Move node exporter binary to the final destination
-  ansible.builtin.copy:
-    src: "/tmp/node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}/node_exporter"
-    dest: "/usr/local/bin/node_exporter"
-    owner: node-exporter
-    group: node-exporter
-    mode: 0755
-    remote_src: true
-  become: true
-  when: not __check_node_exporter_present.stat.exists
-
-- name: Clean temporary files
-  ansible.builtin.file:
-    path: /tmp/node_exporter-{{ node_exporter.version }}.{{ node_exporter.arch }}/
-    state: absent
-
-- name: Install node exporter as service
-  ansible.builtin.template:
-    src: node_exporter.service.j2
-    dest: /etc/systemd/system/node_exporter.service
-    owner: root
-    group: root
-    mode: 0755
-  become: true
-  notify: restart_node_exporter
-
-- name: Make sure node exporter is started
-  ansible.builtin.systemd:
-    name: node_exporter
-    state: started
-    enabled: true
-  become: true
+- name: Download and install node exporter
+  ansible.builtin.import_tasks: install.yml
+  when: node_exporter_present.stat.exists == False

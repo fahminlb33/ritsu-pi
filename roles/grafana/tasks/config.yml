@@ -1,18 +1,27 @@
 ---
-- name: Create config and data directory
+- name: Create Grafana directories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0755
+    mode: 0777
   loop:
-    - "{{ grafana.data_dir }}/grafana"
-    - "{{ config_dir }}/grafana/provisioning/datasources"
+    - "{{ ritsu.config_dir }}/grafana/data"
+    - "{{ ritsu.config_dir }}/grafana/import_dashboards"
+    - "{{ ritsu.config_dir }}/grafana/provisioning/dashboards"
+    - "{{ ritsu.config_dir }}/grafana/provisioning/datasources"
 
-- name: Generate config files
+- name: Generate data source provisioning config
   ansible.builtin.template:
     src: templates/{{ item.src }}
-    dest: "{{ config_dir }}/grafana/{{ item.dest }}"
-    mode: 0755
+    dest: "{{ ritsu.config_dir }}/grafana/provisioning/{{ item.dest }}"
+    mode: 0777
   loop:
-    - src: provisioning/datasources.yml.j2
-      dest: provisioning/datasources/datasource.yml
+    - src: provision_dashboard.yml.j2
+      dest: dashboards/all.yml
+    - src: provision_datasource.yml.j2
+      dest: datasources/all.yml
+
+- name: Download Grafana dashboard
+  ansible.builtin.shell: "curl -s https://grafana.com/api/dashboards/{{ item.id }}.json | jq '.json' >> {{ ritsu.config_dir }}/grafana/import_dashboards/{{ item.id }}.json"
+  when: ritsu.components.grafana.dashboard_provisioning is defined
+  loop: "{{ ritsu.components.grafana.dashboard_provisioning }}"

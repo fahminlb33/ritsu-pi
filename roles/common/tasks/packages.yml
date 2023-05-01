@@ -1,0 +1,9 @@
+---
+- name: Install cURL, jq
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: latest
+  become: true
+  loop:
+    - curl
+    - jq

@@ -12,10 +12,16 @@
 #
 # Note:
 # Node exporter will be installed in your pi, not in Docker.
-exporter_node:
-  # exporter version and architecture
-  version: 1.1.2
-  arch: linux-armv7
+ritsu:
+  components:
+    exporter_node:
+      # exporter version and architecture
+      version: 1.1.2
+      arch: linux-armv7
+      install_path: /usr/local/bin/node_exporter
 
-  # metrics access
-  port: 9100
+      # metrics access
+      port: 8104
+
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: node-exporter

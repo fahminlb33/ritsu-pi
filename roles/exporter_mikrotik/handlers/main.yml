@@ -1,6 +1,0 @@
----
-- name: restart_exporter_mikrotik
-  community.docker.docker_container:
-    name: "exporter_mikrotik"
-    restart: true
-  become: false

@@ -1,16 +1,19 @@
 ---
-- name: Pull image from Docker Hub
+- name: Pull image from registry
   community.docker.docker_image:
-    name: "{{ exporter_speedtest.image }}"
+    name: "{{ ritsu.components.exporter_speedtest.image }}"
     source: pull
 
-- name: Start and connect container to main network
+- name: Start and connect container to network
   community.docker.docker_container:
-    name: exporter_speedtest
-    image: "{{ exporter_speedtest.image }}"
     state: started
-    restart_policy: always
+    name: exporter_speedtest
+    image: "{{ ritsu.components.exporter_speedtest.image }}"
+    restart: true
+    restart_policy: unless-stopped
     exposed_ports:
-      - "{{ exporter_speedtest.port }}:9798"
+      - 9798:9798
+    published_ports:
+      - "{{ ritsu.components.exporter_speedtest.port }}:9798"
     networks:
-      - name: mainnet
+      - name: "{{ ritsu.network.name }}"

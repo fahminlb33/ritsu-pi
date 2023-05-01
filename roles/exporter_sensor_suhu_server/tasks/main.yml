@@ -1,0 +1,24 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name: "{{ ritsu.components.exporter_sensor_suhu_server.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: exporter_sensor_suhu_server
+    image: "{{ ritsu.components.exporter_sensor_suhu_server.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    exposed_ports:
+      - 9000:9000
+    published_ports:
+      - "{{ ritsu.components.exporter_sensor_suhu_server.port }}:9000"
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    mounts:
+      - type: tmpfs
+        target: "/data"
+        tmpfs_size: 50M
+        read_only: false

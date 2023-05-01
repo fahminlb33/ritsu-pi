@@ -7,9 +7,15 @@
 # Note:
 # To expose a service from within docker containers, you can use the service name
 # as the hostname. You can also expose an IP address from your Pi.
-reverse_proxy:
-  # image to run
-  image: nginx:alpine
+ritsu:
+  components:
+    reverse_proxy:
+      # image to run
+      image: nginx:alpine
 
-  # config dir
-  config_dir: "{{ config_dir }}/nginx"
+      # port to expose
+      root_domain: ramiel.local
+      subdomains:
+        - subdomain: qbittorrent
+          port: 8006
+          container_name: qbittorrent

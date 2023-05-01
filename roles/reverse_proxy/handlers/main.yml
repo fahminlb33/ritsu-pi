@@ -1,6 +1,0 @@
----
-- name: restart_nginx
-  community.docker.docker_container:
-    name: "nginx"
-    restart: true
-  become: false

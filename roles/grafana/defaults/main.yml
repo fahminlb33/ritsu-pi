@@ -11,24 +11,23 @@
 # Yes you can run Grafana without prometheus. But you will not be able to display
 # any metrics. If you want a standalone Grafana instance, you can set the
 # `standaonle` option to true.
-grafana:
-  # docker image to run
-  image: grafana/grafana:8.2.6
+ritsu:
+  components:
+    grafana:
+      # docker image to run
+      image: grafana/grafana:8.2.6
 
-  # external access
-  port: 3000
+      # external access
+      port: 8001
 
-  # if reverse-proxy is enabled, you can access this from a domain
-  # http://grafana.{{global_domain}}
-  standalone: false
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: grafana
 
-  # login info
-  password: 'admin'
-  allow_signup: false
+      # login info
+      password: admin
+      allow_signup: false
 
-  # provisioning
-  provisioning:
-    # dashboards
-    dashboards:
-      - kind: import    # import (from Grafana Cloud) or file (from templates)
-        id: 13679       # mikrotik exporter dashboard ID
+      # dashboard to provision from Grafana Cloud
+      dashboard_provisioning:
+        - id: 1860        # node exporter full
+        - id: 13679       # mikrotik exporter

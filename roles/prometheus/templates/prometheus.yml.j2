@@ -1,27 +1,55 @@
+# {{ ansible_managed }}
+
 # Global prometheus config
 global:
-  scrape_interval: 1m
-  evaluation_interval: 1m
-  scrape_timeout: 10s
+  scrape_timeout: 25s       # must be less than scrape_interval
+  scrape_interval: 30s
 
-# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
-rule_files:
-  # - "first_rules.yml"
-  # - "second_rules.yml"
-
+# scrape data from exporters
 scrape_configs:
-  - job_name: "prometheus"
-    static_configs:
-      - targets: ["localhost:9090"]
-
-{% if node_exporter.enable %}
-  - job_name: "node_exporter"
-    static_configs:
-      - targets: ["{{ ansible_facts.default_ipv4.address }}:{{ node_exporter.port }}"]
-{% endif %}
-
-{% if cadvisor.enable %}
-  - job_name: "cadvisor"
+{% if ritsu.components.cadvisor.enabled %}
+  - job_name: cadvisor
     static_configs:
       - targets: ["cadvisor:8080"]
+{% endif %}
+
+{% if ritsu.components.exporter_blackbox.enabled %}
+  - job_name: exporter_blackbox
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets: {{ ritsu.components.exporter_blackbox.ping_hosts | to_yaml }}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: exporter_blackbox:9115
+{% endif %}
+
+{% if ritsu.components.exporter_mikrotik.enabled %}
+  - job_name: exporter_mikrotik
+    static_configs:
+      - targets: ["exporter_mikrotik:49090"]
+{% endif %}
+
+{% if ritsu.components.exporter_node.enabled %}
+  - job_name: exporter_node
+    static_configs:
+      - targets: ["{{ ansible_facts.default_ipv4.address }}:{{ ritsu.components.exporter_node.port }}"]
+{% endif %}
+
+{% if ritsu.components.exporter_speedtest.enabled %}
+  - job_name: exporter_speedtest
+    scrape_interval: "{{ ritsu.components.exporter_speedtest.scrape_interval }}"
+    static_configs:
+      - targets: ["exporter_speedtest:9798"]
+{% endif %}
+
+{% if ritsu.components.exporter_sensor_suhu_server.enabled %}
+  - job_name: exporter_sensor_suhu_server
+    static_configs:
+      - targets: ["exporter_sensor_suhu_server:9000"]
 {% endif %}

@@ -3,20 +3,18 @@
 # qBittorrent
 # The best bittorrent client.
 # You can access the download queue from the web interface.
-#
-# Depends on:
-# - dashboard (prometheus, grafana)
-#   If prometheus and grafana is enabled, pi-hole metrics will be collected to
-#   prometheus server and a Grafana dashboard will be provisioned.
-qbittorrent:
-  # "present" to make sure it is installed
-  # "latest" to update
-  state: present
+ritsu:
+  components:
+    qbittorrent:
+      # image
+      image: lscr.io/linuxserver/qbittorrent:latest
 
-  # config dir
-  config_dir: "{{ config_dir }}/qbittorrent"
+      # web UI
+      port: 8006
 
-  # external and port-forwarding access
-  ports:
-    webui: 8080
-    torrent: 6881
+      # download directory
+      download_dir: "/media/primary/downloads"
+
+      # extra arguments
+      tz: "Asia/Jakarta"
+

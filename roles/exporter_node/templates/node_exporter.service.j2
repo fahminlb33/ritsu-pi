@@ -1,3 +1,5 @@
+# {{ ansible_managed }}
+
 [Unit]
 Description=Node Exporter
 Wants=network-online.target
@@ -7,7 +9,7 @@ After=network-online.target
 User=node-exporter
 Group=node-exporter
 Type=simple
-ExecStart=/usr/local/bin/node_exporter --web.listen-address=0.0.0.0:{{ exporter_node.port }}
+ExecStart={{ ritsu.components.exporter_node.install_path }} --web.listen-address=0.0.0.0:{{ ritsu.components.exporter_node.port }}
 
 [Install]
 WantedBy=multi-user.target

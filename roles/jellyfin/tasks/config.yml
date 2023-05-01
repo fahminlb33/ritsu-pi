@@ -1,0 +1,17 @@
+---
+- name: Create config directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0775
+  loop:
+    - "{{ ritsu.config_dir }}/jellyfin/config"
+    - "{{ ritsu.config_dir }}/jellyfin/cache"
+
+- name: Create media directory
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: 0775
+  loop:
+    - "{{ ritsu.components.jellyfin.media_dir }}"

@@ -1,6 +1,0 @@
----
-- name: restart_exporter_blackbox
-  community.docker.docker_container:
-    name: "exporter_blackbox"
-    restart: true
-  become: false

@@ -1,0 +1,23 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name: "{{ ritsu.components.exporter_blackbox.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: exporter_blackbox
+    image: "{{ ritsu.components.exporter_blackbox.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    command:
+      - '--config.file=/config/blackbox.yml'
+    exposed_ports:
+      - 9115:9115
+    published_ports:
+      - "{{ ritsu.components.exporter_blackbox.port }}:9115"
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    volumes:
+      - "{{ ritsu.config_dir }}/exporter_blackbox/blackbox.yml:/config/blackbox.yml:ro"

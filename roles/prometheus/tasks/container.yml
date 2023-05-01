@@ -1,0 +1,27 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name: "{{ ritsu.components.prometheus.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: prometheus
+    image: "{{ ritsu.components.prometheus.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    user: root
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=90d'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+    published_ports:
+      - "{{ ritsu.components.prometheus.port }}:9090"
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    volumes:
+      - "{{ ritsu.config_dir }}/prometheus/etc:/etc/prometheus/"
+      - "{{ ritsu.config_dir }}/prometheus/data:/prometheus/"

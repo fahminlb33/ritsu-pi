@@ -1,0 +1,22 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name:
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: jellyfin
+    image: "{{ ritsu.components.jellyfin.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    volumes:
+      - "{{ ritsu.config_dir }}/jellyfin/config:/config"
+      - "{{ ritsu.config_dir }}/jellyfin/cache:/cache"
+    mounts:
+      - source: "{{ ritsu.components.jellyfin.media_dir }}"
+        target: "/media"
+        type: bind

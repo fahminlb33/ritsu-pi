@@ -1,17 +1,15 @@
 ---
 - name: Create config and data directory
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: "{{ ritsu.config_dir }}/prometheus/{{ item }}"
     state: directory
-    mode: 0755
+    mode: 0777
   loop:
-    - "{{ prometheus.data_dir }}/prometheus"
+    - etc
+    - data
 
 - name: Generate config files
   ansible.builtin.template:
-    src: templates/{{ item.src }}
-    dest: "{{ config_dir }}/prometheus/{{ item.dest }}"
-    mode: 0755
-  loop:
-    - src: prometheus.yml.j2
-      dest: prometheus.yml
+    src: templates/prometheus.yml.j2
+    dest: "{{ ritsu.config_dir }}/prometheus/etc/prometheus.yml"
+    mode: 0775

@@ -10,17 +10,18 @@
 # - grafana
 #   If grafana is enabled, a dashboard will be provisioned.
 # - reverse_proxy
-#   If reverse-proxy is not enabled, then the domain will not be accessible
+#   If reverse proxy is not enabled, the domain will not be accessible
 #
 # Note:
 # cAdvisor will collect data from all docker containers.
-cadvisor:
-  # image to run in Docker
-  image: ghcr.io/zcube/cadvisor-docker/cadvisor:v0.45.0
+ritsu:
+  components:
+    cadvisor:
+      # image to run in Docker
+      image: gcr.io/cadvisor/cadvisor:v0.47.0
 
-  # to access the cAdvisor from the network
-  port: 9101
+      # to access the cAdvisor from the network
+      port: 8101
 
-  # if you're using reverse-proxy, you can use this domain to access cAdvisor
-  # http://cadvisor.{{global_domain}}
-  domain: cadvisor
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: cadvisor

@@ -10,24 +10,15 @@
     manager: auto
   when: ansible_facts.userspace_bits == '32'
 
+- name: Create configuration directories
+  ansible.builtin.import_tasks: directories.yml
+
 - name: Upgrade libseccomp2 to latest version (32-bit Debian)
   ansible.builtin.import_tasks: debian-libseccomp-update.yml
   when:
     - ansible_facts.os_family == "Debian"
     - ansible_facts.userspace_bits == '32'
     - ansible_facts.packages['libseccomp2'][0]['version'] is version('2.4.4', '<')  # noqa 204
-  become: true
 
-- name: Create config directory
-  ansible.builtin.file:
-    path: "{{ config_dir }}"
-    state: directory
-    mode: 0777
-  become: false
-
-- name: Create data directory
-  ansible.builtin.file:
-    path: "{{ data_dir }}"
-    state: directory
-    mode: 0777
-  become: false
+- name: Install packages
+  ansible.builtin.import_tasks: packages.yml

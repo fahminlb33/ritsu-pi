@@ -1,26 +1,6 @@
 ---
-- name: Pull exporter_blackbox image from Docker Hub
-  community.docker.docker_image:
-    name: "{{ exporter_blackbox.image }}"
-    source: pull
-
 - name: Create configuration
-  ansible.builtin.template:
-    src: templates/config.yml.j2
-    dest: "{{ exporter_blackbox.config_file }}"
-    mode: 0755
+  ansible.builtin.import_tasks: config.yml
 
-- name: Start and connect container to main network
-  community.docker.docker_container:
-    name: exporter_blackbox
-    image: "{{ exporter_blackbox.image }}"
-    state: started
-    restart_policy: always
-    command:
-      - '--config.file=/config/blackbox.yml'
-    exposed_ports:
-      - "{{ exporter_blackbox.port }}:9115"
-    networks:
-      - name: mainnet
-    volumes:
-      - "{{ exporter_blackbox.config_file }}:/config/blackbox.yml:ro"
+- name: Create and start container
+  ansible.builtin.import_tasks: container.yml

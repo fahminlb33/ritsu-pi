@@ -1,0 +1,11 @@
+---
+# ------------------------------------------------------------------------------
+# Portainer
+ritsu:
+  components:
+    portainer:
+      # docker image to run
+      image: portainer/portainer-ce:latest
+
+      # metrics port
+      port: 8004

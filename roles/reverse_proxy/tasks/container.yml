@@ -1,0 +1,21 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name: "{{ ritsu.components.reverse_proxy.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: nginx
+    image: "{{ ritsu.components.reverse_proxy.image }}"
+    restart: true
+    restart_policy: always
+    published_ports:
+      - 80:80
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    volumes:
+      - "{{ ritsu.config_dir }}/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro"
+      - "{{ ritsu.config_dir }}/nginx/proxy.conf:/etc/nginx/includes/proxy.conf:ro"
+      - "{{ ritsu.config_dir }}/nginx/index.html:/usr/share/nginx/html/index.html:ro"

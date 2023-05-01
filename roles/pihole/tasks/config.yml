@@ -1,0 +1,24 @@
+---
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ ritsu.config_dir }}/pihole/{{ item }}"
+    state: directory
+    mode: 0775
+  loop:
+    - etc
+    - dnsmasq.d
+
+- name: Validate DNSCrypt config
+  ansible.builtin.assert:
+    that:
+      - ritsu.components.dnscrypt.enabled == true
+    fail_msg: "Before using DNSCrypt with Pi-Hole, DNSCrypt must be enabled"
+    success_msg: "Using Pi-Hole with DNSCrypt integration"
+  when: ritsu.components.pihole.dnscrypt == true
+
+- name: Create environment variable
+  ansible.builtin.template:
+    src: templates/env.j2
+    dest: "{{ ritsu.config_dir }}/pihole/pihole.env"
+    mode: 0775
+  register: restart_pihole

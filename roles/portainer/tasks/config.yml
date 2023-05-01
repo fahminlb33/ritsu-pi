@@ -1,0 +1,6 @@
+---
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ ritsu.config_dir }}/portainer"
+    state: directory
+    mode: 0775

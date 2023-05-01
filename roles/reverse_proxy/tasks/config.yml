@@ -3,15 +3,15 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0755
+    mode: 0775
   loop:
-    - "{{ reverse_proxy.config_dir }}"
+    - "{{ ritsu.config_dir }}/nginx"
 
 - name: Generate config files
   ansible.builtin.template:
     src: templates/{{ item.src }}
-    dest: "{{ reverse_proxy.config_dir }}/{{ item.dest }}"
-    mode: 0755
+    dest: "{{ ritsu.config_dir }}/nginx/{{ item.dest }}"
+    mode: 0775
   loop:
     - src: nginx.conf.j2
       dest: nginx.conf

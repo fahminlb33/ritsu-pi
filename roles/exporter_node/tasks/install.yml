@@ -1,0 +1,44 @@
+---
+- name: Download and unzip node exporter
+  ansible.builtin.unarchive:
+    src: >-
+      https://github.com/prometheus/node_exporter/releases/download/
+      {#- -#}
+      v{{ ritsu.components.exporter_node.version }}/
+      {#- -#}
+      node_exporter-{{ ritsu.components.exporter_node.version }}.{{ ritsu.components.exporter_node.arch }}.tar.gz
+    dest: /tmp/
+    remote_src: true
+    validate_certs: false
+
+- name: Move node exporter binary to the final destination
+  ansible.builtin.copy:
+    src: "/tmp/node_exporter-{{ ritsu.components.exporter_node.version }}.{{ ritsu.components.exporter_node.arch }}/node_exporter"
+    dest: "{{ ritsu.components.exporter_node.install_path }}"
+    owner: node-exporter
+    group: node-exporter
+    mode: 0775
+    remote_src: true
+  become: true
+
+- name: Clean temporary files
+  ansible.builtin.file:
+    path: /tmp/node_exporter-{{ ritsu.components.exporter_node.version }}.{{ ritsu.components.exporter_node.arch }}/
+    state: absent
+
+- name: Install node exporter as service
+  ansible.builtin.template:
+    src: templates/node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: 0775
+  become: true
+  notify: restart_exporter_node
+
+- name: Make sure node exporter is started
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: started
+    enabled: true
+  become: true

@@ -10,21 +10,22 @@
 # - dashboard (prometheus, grafana)
 #   If prometheus and grafana is enabled, pi-hole metrics will be collected to
 #   prometheus server and a Grafana dashboard will be provisioned.
-pihole:
-  # image to run
-  image: pihole/pihole:latest
+#
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+ritsu:
+  components:
+    pihole:
+      # image to run
+      image: pihole/pihole:latest
 
-  # config
-  config_dir: "{{ config_dir }}/pihole"
+      # external access
+      port: 8003
+      hostname: pihole
 
-  # external access
-  port: 3129
-  hostname: pihole
+      # system config
+      timezone: Asia/Jakarta
+      password: kucing-oren
 
-  # system config
-  timezone: Asia/Jakarta
-  password: kucing-oren
-
-  # use dnscrypt with pi-hole
-  # dnscrypt must be enabled first
-  dnscrypt: true
+      # use dnscrypt with pi-hole
+      # dnscrypt must be enabled first
+      dnscrypt: true

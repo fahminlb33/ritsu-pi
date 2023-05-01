@@ -1,0 +1,6 @@
+---
+- name: Create new user
+  ansible.builtin.file:
+    path: "{{ ritsu.config_dir }}"
+    state: directory
+    mode: 0775

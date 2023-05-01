@@ -1,0 +1,25 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name: "{{ ritsu.components.grafana.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: grafana
+    image: "{{ ritsu.components.grafana.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ ritsu.components.grafana.port }}:3000"
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    env:
+      GF_SECURITY_ADMIN_PASSWORD: "{{ ritsu.components.grafana.password }}"
+      GF_USERS_ALLOW_SIGN_UP: "{{ ritsu.components.grafana.allow_signup | string | lower }}"
+      GF_INSTALL_PLUGINS: flant-statusmap-panel,ae3e-plotly-panel
+    volumes:
+      - "{{ ritsu.config_dir }}/grafana/data:/var/lib/grafana"
+      - "{{ ritsu.config_dir }}/grafana/provisioning/:/etc/grafana/provisioning/"
+      - "{{ ritsu.config_dir }}/grafana/import_dashboards:/var/lib/grafana/dashboards"

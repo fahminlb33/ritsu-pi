@@ -4,10 +4,7 @@
   pre_tasks:
     - name: Load configuration
       ansible.builtin.include_vars:
-        file: config.example.yml
-    - name: Debugggg
-      debug:
-        var: vars
+        file: config.yml
 
   roles:
     # common
@@ -19,49 +16,52 @@
     # networking
     - role: dnscrypt
       tags: [dnscrypt]
-      when: ritsu_components.dnscrypt == true
+      when: ritsu.components.dnscrypt.enabled == true
     - role: pihole
       tags: [pihole]
-      when: ritsu_components.pihole == true
+      when: ritsu.components.pihole.enabled == true
     - role: reverse_proxy
       tags: [nginx]
-      when: ritsu_components.reverse_proxy == true
+      when: ritsu.components.reverse_proxy.enabled == true
 
     # monitoring
     - role: prometheus
       tags: [prometheus]
-      when: ritsu_components.prometheus == true
+      when: ritsu.components.prometheus.enabled == true
     - role: grafana
       tags: [grafana]
-      when: ritsu_components.grafana == true
+      when: ritsu.components.grafana.enabled == true
     - role: cadvisor
       tags: [cadvisor]
-      when: ritsu_components.cadvisor == true
+      when: ritsu.components.cadvisor.enabled == true
     - role: exporter_node
       tags: [exporter_node]
-      when: ritsu_components.exporter_node == true
+      when: ritsu.components.exporter_node.enabled == true
     - role: exporter_blackbox
       tags: [exporter_blackbox]
-      when: ritsu_components.exporter_blackbox == true
+      when: ritsu.components.exporter_blackbox.enabled == true
     - role: exporter_mikrotik
       tags: [mikrotik]
-      when: ritsu_components.exporter_mikrotik == true
+      when: ritsu.components.exporter_mikrotik.enabled == true
     - role: exporter_speedtest
       tags: [exporter_speedtest]
-      when: ritsu_components.exporter_speedtest == true
+      when: ritsu.components.exporter_speedtest.enabled == true
+    - role: exporter_sensor_suhu_server
+      tags: [exporter_sensor_suhu_server]
+      when: ritsu.components.exporter_sensor_suhu_server.enabled == true
 
     # downloaders
     - role: jdownloader
       tags: [jdownloader]
-      when: ritsu_components.jdownloader == true
+      when: ritsu.components.jdownloader.enabled == true
     - role: qbittorrent
       tags: [qbittorrent]
-      when: ritsu_components.qbittorrent == true
+      when: ritsu.components.qbittorrent.enabled == true
 
     # media server
     - role: samba
       tags: [samba]
-      when: ritsu_components.samba == true
+      when: ritsu.components.samba.enabled == true
     - role: jellyfin
       tags: [jellyfin]
-      when: ritsu_components.jellyfin == true
+      when: ritsu.components.jellyfin.enabled == true

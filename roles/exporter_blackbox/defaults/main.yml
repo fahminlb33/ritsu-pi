@@ -15,17 +15,19 @@
 # This template only comes with minimal HTTP 2xx check. If you want to add more
 # checks, edit the template in the templates/config.yml.j2
 # Doc: https://github.com/prometheus/blackbox_exporter/blob/master/CONFIGURATION.md
-exporter_blackbox:
-  # docker image to run
-  image: prom/blackbox-exporter:latest
+ritsu:
+  components:
+    exporter_blackbox:
+      # docker image to run
+      image: prom/blackbox-exporter:latest
 
-  # config file
-  config_file: "{{ config_dir }}/exporter_blackbox.yml"
+      # access port
+      port: 8102
 
-  # access port
-  port: 9115
+      # hosts to ping
+      ping_hosts:
+        - https://www.google.com/
+        - https://github.com/
 
-  # hosts to ping
-  ping_hosts:
-    - http://www.google.com/;google.com
-    - https://github.com/;github.com
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: blackbox

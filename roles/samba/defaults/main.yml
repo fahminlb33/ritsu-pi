@@ -5,4 +5,17 @@
 #
 # Note:
 # This will not be installed in Docker, but directly in your pi.
-samba:
+ritsu:
+  components:
+    samba:
+      user:
+        username: foo
+        password: bar
+
+      mount_points:
+        - name: ramiel_primary
+          path: /media/primary
+          writeable: true
+          create_mask: 0777
+          directory_mask: 0777
+          public: false

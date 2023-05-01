@@ -1,12 +1,14 @@
-{% if global_domain and ritsu_components.pihole %}
+# {{ ansible_managed }}
+
+{% if ritsu.components.cadvisor.subdomain %}
 server {
   listen 80;
   listen [::]:80;
-  server_name {{ pihole.hostname }}.{{ global_domain }};
+  server_name {{ ritsu.components.cadvisor.subdomain }}.{{ ritsu.components.reverse_proxy.root_domain }};
 
   location / {
     include /etc/nginx/includes/proxy.conf;
-    proxy_pass http://pihole:{{ pihole.port }};
+    proxy_pass http://cadvisor:{{ ritsu.components.cadvisor.port }};
   }
 }
 {% endif %}
@@ -15,7 +17,7 @@ server {
 server {
   listen 80;
   listen [::]:80;
-  server_name {{ global_domain }};
+  server_name {{ ritsu.components.reverse_proxy.root_domain }};
 
   location / {
     root   /usr/share/nginx/html;

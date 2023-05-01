@@ -1,0 +1,25 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    name: "{{ ritsu.components.qbittorrent.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    state: started
+    name: qbittorrent
+    image: "{{ ritsu.components.qbittorrent.image }}"
+    restart: true
+    restart_policy: unless-stopped
+    env:
+      - TZ="{{ ritsu.components.qbittorrent.tz }}"
+      - WEBUI_PORT=8080
+    published_ports:
+      - "{{ ritsu.components.qbittorrent.port }}:8080"
+      - 6881:6881
+      - 6881:6881/udp
+    networks:
+      - name: "{{ ritsu.network.name }}"
+    volumes:
+      - "{{ ritsu.config_dir }}/qbittorrent/config:/config"
+      - "{{ ritsu.config_dir }}/qbittorrent/data:/downloads"

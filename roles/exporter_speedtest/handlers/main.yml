@@ -1,6 +1,0 @@
----
-- name: restart_exporter_speedtest
-  community.docker.docker_container:
-    name: exporter_speedtest
-    restart: true
-  become: false
