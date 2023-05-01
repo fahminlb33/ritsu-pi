@@ -16,7 +16,7 @@
 # cAdvisor will collect data from all docker containers.
 ritsu:
   components:
-    cadvisor:
+    exporter_cadvisor:
       # image to run in Docker
       image: gcr.io/cadvisor/cadvisor:v0.47.0
 

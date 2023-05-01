@@ -1,21 +1,21 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
-    name: "{{ ritsu.components.cadvisor.image }}"
+    name: "{{ ritsu.components.exporter_cadvisor.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
     state: started
-    name: cadvisor
-    image: "{{ ritsu.components.cadvisor.image }}"
+    name: exporter_cadvisor
+    image: "{{ ritsu.components.exporter_cadvisor.image }}"
     restart: true
     restart_policy: unless-stopped
     privileged: true
     exposed_ports:
       - 8080:8080
     published_ports:
-      - "{{ ritsu.components.cadvisor.port }}:8080"
+      - "{{ ritsu.components.exporter_cadvisor.port }}:8080"
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:

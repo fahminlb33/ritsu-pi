@@ -31,23 +31,23 @@
     - role: grafana
       tags: [grafana]
       when: ritsu.components.grafana.enabled == true
-    - role: cadvisor
-      tags: [cadvisor]
-      when: ritsu.components.cadvisor.enabled == true
+    - role: exporter_cadvisor
+      tags: [exporter, cadvisor]
+      when: ritsu.components.exporter_cadvisor.enabled == true
     - role: exporter_node
-      tags: [exporter_node]
+      tags: [exporter, node_exporter]
       when: ritsu.components.exporter_node.enabled == true
     - role: exporter_blackbox
-      tags: [exporter_blackbox]
+      tags: [exporter, blackbox]
       when: ritsu.components.exporter_blackbox.enabled == true
     - role: exporter_mikrotik
-      tags: [mikrotik]
+      tags: [exporter, mikrotik]
       when: ritsu.components.exporter_mikrotik.enabled == true
     - role: exporter_speedtest
-      tags: [exporter_speedtest]
+      tags: [exporter, speedtest]
       when: ritsu.components.exporter_speedtest.enabled == true
     - role: exporter_sensor_suhu_server
-      tags: [exporter_sensor_suhu_server]
+      tags: [exporter, sensor_suhu_server]
       when: ritsu.components.exporter_sensor_suhu_server.enabled == true
 
     # downloaders
