@@ -31,6 +31,9 @@
     - role: grafana
       tags: [grafana]
       when: ritsu.components.grafana.enabled == true
+    - role: portainer
+      tags: [portainer]
+      when: ritsu.components.portainer.enabled == true
     - role: exporter_cadvisor
       tags: [exporter, cadvisor]
       when: ritsu.components.exporter_cadvisor.enabled == true

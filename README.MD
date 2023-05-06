@@ -12,17 +12,21 @@ To allow an easy deployment and maintenance, *almost* all of the apps included i
 
 ritsu-pi packed quite a bunch of apps for your pi server. Docker is mandatory and everything else is optional and can be configured via `config.yml`.
 
-- [x] Docker :strawberry:
-- [ ] Prometheus :whale:
-- [x] Node Exporter :strawberry:
-- [ ] Blackbox Exporter :whale:
-- [x] cAdvisor :whale:
-- [ ] Grafana :whale:
-- [ ] DNSCrypt :whale:
-- [ ] Pi-Hole :whale:
-- [x] JDownloader :whale:
-- [x] qBittorrent :strawberry:
-- [x] Ookla SpeedTest :whale:
+- [x] Docker
+- [x] Prometheus
+- [x] Grafana
+- [x] Portainer
+- [x] Node Exporter
+- [x] Blackbox Exporter
+- [x] cAdvisor Exporter
+- [x] SpeedTest Exporter
+- [x] Suhu Server Exporter :interrobang:
+- [ ] DNSCrypt
+- [ ] Pi-Hole
+- [ ] JDownloader
+- [ ] qBittorrent
+- [ ] Jellyfin
+- [ ] Samba Server
 
 Note: unchecked items means I want to implement them and I already have a plan but I haven't got the time to write and test the playbook yet.
 
@@ -30,7 +34,6 @@ Note: unchecked items means I want to implement them and I already have a plan b
 
 I'm also planning to include other apps especially for home entertainment:tv:
 
-- [ ] Kodi
 - [ ] Radarr
 - [ ] Sonarr
 - [ ] Lidarr

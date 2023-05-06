@@ -5,7 +5,11 @@ ritsu:
   components:
     portainer:
       # docker image to run
-      image: portainer/portainer-ce:latest
+      image: portainer/portainer-ce:2.18.2
 
       # metrics port
       port: 8004
+
+      # SSL key and certificate
+      ssl_key:
+      ssl_cert:

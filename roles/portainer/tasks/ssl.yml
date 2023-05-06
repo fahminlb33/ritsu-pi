@@ -1,0 +1,43 @@
+---
+- name: Check if private key exists
+  ansible.builtin.stat:
+    path: "{{ ritsu.components.portainer.ssl_key }}"
+  register: portainer_ssl_key_exists
+
+- name: Check if certificate exists
+  ansible.builtin.stat:
+    path: "{{ ritsu.components.portainer.ssl_cert }}"
+  register: portainer_ssl_cert_exists
+
+# --- copy key and cert
+- name: Copy private key
+  ansible.builtin.copy:
+    src: "{{ ritsu.components.portainer.ssl_key }}"
+    dest: "{{ ritsu.config_dir }}/portainer/ssl/ritsu.key"
+    mode: 0600
+  when: portainer_ssl_key_exists.stat.exists
+
+- name: Copy certificate
+  ansible.builtin.copy:
+    src: "{{ ritsu.components.portainer.ssl_cert }}"
+    dest: "{{ ritsu.config_dir }}/portainer/ssl/ritsu.crt"
+  when: portainer_ssl_cert_exists.stat.exists
+
+# ---- create key and cert
+- name: Create private key (RSA, 4096 bits)
+  community.crypto.openssl_privatekey:
+    path: "{{ ritsu.config_dir }}/portainer/ssl/ritsu.key"
+    type: RSA
+    size: 4096
+    mode: 0600
+  when: not portainer_ssl_key_exists.stat.exists
+
+- name: Create self-signed certificate
+  community.crypto.x509_certificate:
+    path: "{{ ritsu.config_dir }}/portainer/ssl/ritsu.crt"
+    privatekey_path: "{{ ritsu.config_dir }}/portainer/ssl/ritsu.key"
+    provider: selfsigned
+    mode: 0600
+    entrust_not_after: "+3650d"
+  when: not portainer_ssl_cert_exists.stat.exists
+
