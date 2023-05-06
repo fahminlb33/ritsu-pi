@@ -16,12 +16,14 @@
     dest: "{{ ritsu.config_dir }}/portainer/ssl/ritsu.key"
     mode: 0600
   when: portainer_ssl_key_provided.stat.exists
+  notify: restart_portainer
 
 - name: Copy certificate
   ansible.builtin.copy:
     src: "{{ ritsu.components.portainer.ssl_cert }}"
     dest: "{{ ritsu.config_dir }}/portainer/ssl/ritsu.crt"
   when: portainer_ssl_cert_provided.stat.exists
+  notify: restart_portainer
 
 # ---- create key and cert
 - name: Check if private key is exists
@@ -41,6 +43,7 @@
     size: 4096
     mode: 0600
   when: not portainer_ssl_key_exists.stat.exists
+  notify: restart_portainer
 
 - name: Create self-signed certificate
   community.crypto.x509_certificate:
@@ -50,4 +53,5 @@
     mode: 0600
     entrust_not_after: "+3650d"
   when: not portainer_ssl_cert_exists.stat.exists
+  notify: restart_portainer
 
