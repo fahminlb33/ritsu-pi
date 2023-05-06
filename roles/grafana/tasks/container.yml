@@ -9,7 +9,6 @@
     state: started
     name: grafana
     image: "{{ ritsu.components.grafana.image }}"
-    restart: true
     restart_policy: unless-stopped
     published_ports:
       - "{{ ritsu.components.grafana.port }}:3000"

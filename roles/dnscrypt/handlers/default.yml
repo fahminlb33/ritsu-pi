@@ -1,0 +1,6 @@
+- name: restart_dnscrypt
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: dnscrypt
+    image: "{{ ritsu.components.dnscrypt.image }}"

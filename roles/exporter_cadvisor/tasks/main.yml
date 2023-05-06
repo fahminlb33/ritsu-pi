@@ -9,7 +9,6 @@
     state: started
     name: exporter_cadvisor
     image: "{{ ritsu.components.exporter_cadvisor.image }}"
-    restart: true
     restart_policy: unless-stopped
     privileged: true
     exposed_ports:

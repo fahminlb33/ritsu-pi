@@ -9,7 +9,6 @@
     state: started
     name: exporter_speedtest
     image: "{{ ritsu.components.exporter_speedtest.image }}"
-    restart: true
     restart_policy: unless-stopped
     exposed_ports:
       - 9798:9798

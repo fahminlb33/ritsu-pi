@@ -9,10 +9,9 @@
     state: started
     name: exporter_blackbox
     image: "{{ ritsu.components.exporter_blackbox.image }}"
-    restart: true
     restart_policy: unless-stopped
     command:
-      - '--config.file=/config/blackbox.yml'
+      - --config.file=/config/blackbox.yml
     exposed_ports:
       - 9115:9115
     published_ports:

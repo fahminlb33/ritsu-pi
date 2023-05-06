@@ -11,3 +11,4 @@
     src: templates/config.yml.j2
     dest: "{{ config_output.path }}/blackbox.yml"
     mode: 0775
+  notify: restart_exporter_blackbox

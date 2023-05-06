@@ -9,7 +9,6 @@
     state: started
     name: exporter_sensor_suhu_server
     image: "{{ ritsu.components.exporter_sensor_suhu_server.image }}"
-    restart: true
     restart_policy: unless-stopped
     exposed_ports:
       - 9000:9000

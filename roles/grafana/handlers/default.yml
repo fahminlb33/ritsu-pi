@@ -1,0 +1,6 @@
+- name: restart_grafana
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: grafana
+    image: "{{ ritsu.components.grafana.image }}"

@@ -1,0 +1,6 @@
+- name: restart_exporter_blackbox
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: exporter_blackbox
+    image: "{{ ritsu.components.exporter_blackbox.image }}"

@@ -9,7 +9,6 @@
     state: started
     name: exporter_mikrotik
     image: "{{ ritsu.components.exporter_mikrotik.image }}"
-    restart: true
     restart_policy: unless-stopped
     exposed_ports:
       - 49090:49090

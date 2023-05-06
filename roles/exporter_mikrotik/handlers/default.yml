@@ -1,0 +1,6 @@
+- name: restart_exporter_mikrotik
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: exporter_mikrotik
+    image: "{{ ritsu.components.exporter_mikrotik.image }}"
