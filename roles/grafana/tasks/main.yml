@@ -1,11 +1,4 @@
 ---
-- name: Stop Grafana container
-  ansible.builtin.docker_container:
-    name: grafana
-    image: "{{ ritsu.components.grafana.image }}"
-    state: stopped
-    timeout: 60
-
 - name: Create configuration
   ansible.builtin.import_tasks: config.yml
 
