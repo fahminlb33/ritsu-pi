@@ -187,7 +187,8 @@
                 "value": 3
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -250,7 +251,8 @@
                 "value": 3
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -412,7 +414,8 @@
                 "value": 3
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -475,7 +478,8 @@
                 "value": 3
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -538,7 +542,8 @@
                 "value": 3
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -601,7 +606,8 @@
                 "value": 3
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -622,7 +628,10 @@
           "values": false
         },
         "showThresholdLabels": false,
-        "showThresholdMarkers": true
+        "showThresholdMarkers": true,
+        "text": {
+          "titleSize": 1
+        }
       },
       "pluginVersion": "9.5.1",
       "targets": [
@@ -694,7 +703,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -787,7 +797,8 @@
                 "value": 80
               }
             ]
-          }
+          },
+          "unit": "s"
         },
         "overrides": []
       },
@@ -842,13 +853,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-2d",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "",
   "title": "Internet Uptime",
   "uid": "d746d4ec-e260-4587-8d5f-4042a636a7a0",
-  "version": 3,
+  "version": 2,
   "weekStart": ""
 }
