@@ -1,16 +1,7 @@
 ---
 # ------------------------------------------------------------------------------
 # Grafana
-# Used to display metrics in a web interface.
-#
-# Depends on:
-# - prometheus
-#   Uses prometheus as data source.
-#
-# Note:
-# Yes you can run Grafana without prometheus. But you will not be able to display
-# any metrics. If you want a standalone Grafana instance, you can set the
-# `standaonle` option to true.
+# Visualization tool.
 ritsu:
   components:
     grafana:
@@ -28,6 +19,5 @@ ritsu:
       allow_signup: false
 
       # dashboard to provision from Grafana Cloud
-      dashboard_provisioning:
-        - id: 1860        # node exporter full
-        - id: 13679       # mikrotik exporter
+      # dashboard_provisioning:
+        # - id: 1860        # dashboard ID here

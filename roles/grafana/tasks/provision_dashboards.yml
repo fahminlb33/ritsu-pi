@@ -1,0 +1,42 @@
+---
+- name: Clear import_dashboard directory
+  ansible.builtin.file:
+    path: "{{ ritsu.config_dir }}/grafana/import_dashboards/*"
+    state: absent
+    force: yes
+
+- name: Generate data source provisioning config
+  ansible.builtin.template:
+    src: templates/{{ item.src }}
+    dest: "{{ ritsu.config_dir }}/grafana/provisioning/{{ item.dest }}"
+    mode: 0777
+  loop:
+    - src: provision_dashboard.yml.j2
+      dest: dashboards/default.yml
+
+- name: Download Grafana dashboard if specified in the configuration
+  ansible.builtin.shell: "curl -s https://grafana.com/api/dashboards/{{ item.id }}.json | jq '.json' >> {{ ritsu.config_dir }}/grafana/import_dashboards/{{ item.id }}.json"
+  loop: "{{ ritsu.components.grafana.dashboard_provisioning | default([]) }}"
+  when: ritsu.components.grafana.dashboard_provisioning is str
+
+- name: Copy Ritsu-Pi dashboards
+  ansible.builtin.copy:
+    src: "templates/dashboards/{{ item.name }}"
+    dest: "{{ ritsu.config_dir }}/grafana/import_dashboards/{{ item.name }}"
+    mode: 0777
+  when: item.copy
+  loop:
+    - name: docker_cadvisor.json
+      copy: "{{ ritsu.components.exporter_cadvisor.enabled }}"
+    - name: internet_uptime_blackbox.json
+      copy: "{{ ritsu.components.exporter_blackbox.enabled }}"
+    - name: mikrotik_mktxp.json
+      copy: "{{ ritsu.components.exporter_mikrotik.enabled }}"
+    - name: node_exporter_full.json
+      copy: "{{ ritsu.components.exporter_node.enabled }}"
+    - name: node_exporter_summary.json
+      copy: "{{ ritsu.components.exporter_node.enabled }}"
+    - name: sensor_suhu_server.json
+      copy: "{{ ritsu.components.exporter_sensor_suhu_server.enabled }}"
+    - name: speedtest.json
+      copy: "{{ ritsu.components.exporter_speedtest.enabled }}"

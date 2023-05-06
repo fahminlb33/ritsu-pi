@@ -1,0 +1,10 @@
+---
+- name: Generate data source provisioning config
+  ansible.builtin.template:
+    src: templates/{{ item.src }}
+    dest: "{{ ritsu.config_dir }}/grafana/provisioning/{{ item.dest }}"
+    mode: 0777
+  loop:
+    - src: provision_datasource.yml.j2
+      dest: datasources/default.yml
+  when: ritsu.components.prometheus.enabled
