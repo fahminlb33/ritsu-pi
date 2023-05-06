@@ -7,10 +7,10 @@ global:
 
 # scrape data from exporters
 scrape_configs:
-{% if ritsu.components.cadvisor.enabled %}
-  - job_name: cadvisor
+{% if ritsu.components.exporter_cadvisor.enabled %}
+  - job_name: exporter_cadvisor
     static_configs:
-      - targets: ["cadvisor:8080"]
+      - targets: ["exporter_cadvisor:8080"]
 {% endif %}
 
 {% if ritsu.components.exporter_blackbox.enabled %}
@@ -44,6 +44,7 @@ scrape_configs:
 {% if ritsu.components.exporter_speedtest.enabled %}
   - job_name: exporter_speedtest
     scrape_interval: "{{ ritsu.components.exporter_speedtest.scrape_interval }}"
+    scrape_timeout: 15m
     static_configs:
       - targets: ["exporter_speedtest:9798"]
 {% endif %}
