@@ -9,7 +9,6 @@
     state: started
     name: prometheus
     image: "{{ ritsu.components.prometheus.image }}"
-    restart: true
     restart_policy: unless-stopped
     user: root
     command:

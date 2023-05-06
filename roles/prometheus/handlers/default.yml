@@ -1,0 +1,6 @@
+- name: restart_prometheus
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: prometheus
+    image: "{{ ritsu.components.prometheus.image }}"
