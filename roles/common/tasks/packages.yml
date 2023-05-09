@@ -2,8 +2,8 @@
 - name: Install cURL, jq
   ansible.builtin.apt:
     name: "{{ item }}"
-    state: present
+    state: latest
   become: true
   loop:
-    - curl>=7.81.0
-    - jq>=1.6
+    - curl
+    - jq
