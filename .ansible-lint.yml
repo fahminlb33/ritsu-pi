@@ -1,4 +1,4 @@
-
+---
 profile: safety
 
 use_default_rules: true
@@ -10,6 +10,12 @@ enable_list:
   - name[casing]
   - name[missing]
   - name[play]
+
+skip_list:
+  - yaml[octal-values]
+
+warn_list:
+  - package-latest
 
 exclude_paths:
   - .github
