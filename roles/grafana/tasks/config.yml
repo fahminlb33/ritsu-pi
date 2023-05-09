@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0777
+    mode: "0777"
   loop:
     - "{{ ritsu.config_dir }}/grafana/data"
     - "{{ ritsu.config_dir }}/grafana/import_dashboards"

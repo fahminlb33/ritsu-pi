@@ -1,7 +1,7 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
-    name:
+    name: "{{ ritsu.components.jellyfin.image }}"
     source: pull
 
 - name: Start and connect container to network
@@ -9,8 +9,9 @@
     state: started
     name: jellyfin
     image: "{{ ritsu.components.jellyfin.image }}"
-    restart: true
     restart_policy: unless-stopped
+    published_ports:
+      - "{{ ritsu.components.jellyfin.port }}:8096"
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:

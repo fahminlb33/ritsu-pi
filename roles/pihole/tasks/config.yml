@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ ritsu.config_dir }}/pihole/{{ item }}"
     state: directory
-    mode: 0775
+    mode: "0775"
   loop:
     - etc
     - dnsmasq.d
@@ -20,5 +20,5 @@
   ansible.builtin.template:
     src: templates/env.j2
     dest: "{{ ritsu.config_dir }}/pihole/pihole.env"
-    mode: 0775
+    mode: "0775"
   register: restart_pihole

@@ -3,12 +3,12 @@
   ansible.builtin.file:
     path: "{{ ritsu.config_dir }}/dnscrypt"
     state: directory
-    mode: 0775
+    mode: "0775"
   register: config_output
 
 - name: Create configuration
   ansible.builtin.template:
     src: templates/dnscrypt.toml.j2
     dest: "{{ config_output.path }}/dnscrypt-proxy.toml"
-    mode: 0775
+    mode: "0775"
   notify: restart_dnscrypt

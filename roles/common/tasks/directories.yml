@@ -3,4 +3,4 @@
   ansible.builtin.file:
     path: "{{ ritsu.config_dir }}"
     state: directory
-    mode: 0775
+    mode: "0775"

@@ -17,7 +17,7 @@
     dest: "{{ ritsu.components.exporter_node.install_path }}"
     owner: node-exporter
     group: node-exporter
-    mode: 0775
+    mode: "0775"
     remote_src: true
   become: true
 
@@ -32,7 +32,7 @@
     dest: /etc/systemd/system/node_exporter.service
     owner: root
     group: root
-    mode: 0775
+    mode: "0775"
   become: true
   notify: restart_exporter_node
 

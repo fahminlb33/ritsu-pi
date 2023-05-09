@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0775
+    mode: "0775"
   loop:
     - "{{ ritsu.config_dir }}/portainer/data"
     - "{{ ritsu.config_dir }}/portainer/ssl"

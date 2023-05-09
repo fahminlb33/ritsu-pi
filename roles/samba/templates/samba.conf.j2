@@ -177,11 +177,11 @@
    read only = yes
 
 # File creation mask is set to 0700 for security reasons. If you want to
-# create files with group=rw permissions, set next parameter to 0775.
+# create files with group=rw permissions, set next parameter to "0775".
    create mask = 0700
 
 # Directory creation mask is set to 0700 for security reasons. If you want to
-# create dirs. with group=rw permissions, set next parameter to 0775.
+# create dirs. with group=rw permissions, set next parameter to "0775".
    directory mask = 0700
 
 # By default, \\server\username shares can be connected to by anyone
@@ -241,7 +241,7 @@
 [{% item.name %}]
   path = {{ item.path }}
   writeable = {{ 'yes' if files else 'no' }}
-  create mask = 0777
-  directory mask = 0777
+  create mask = "0777"
+  directory mask = "0777"
   public = no
 {% endfor %}

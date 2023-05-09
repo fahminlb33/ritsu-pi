@@ -1,17 +1,20 @@
 ---
 - name: Create config directories
   ansible.builtin.file:
-    path: "{{ item.path }}"
+    path: "{{ item }}"
     state: directory
-    mode: 0775
+    mode: "0775"
   loop:
     - "{{ ritsu.config_dir }}/jellyfin/config"
     - "{{ ritsu.config_dir }}/jellyfin/cache"
 
-- name: Create media directory
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: directory
-    mode: 0775
-  loop:
-    - "{{ ritsu.components.jellyfin.media_dir }}"
+- name: Check if media directory is exists
+  ansible.builtin.stat:
+    path: "{{ ritsu.components.jellyfin.media_dir }}"
+  register: jellyfin_media_dir_exists
+
+- name: Assert media directory exists
+  ansible.builtin.assert:
+    that:
+      - jellyfin_media_dir_exists.stat.exists
+      - jellyfin_media_dir_exists.stat.isdir

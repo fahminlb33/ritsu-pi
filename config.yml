@@ -1,0 +1,199 @@
+---
+# Global config for Ritsu-Pi.
+# To see the list of available components and it's configurations, see the "roles" directory
+ritsu:
+  # Location where configuration files be stored.
+  # Note: Avoid the use of relative path!
+  config_dir: '/media/primary/ritsu-pi2'
+
+  # docker network
+  network:
+    name: mainnet
+    driver: bridge
+
+  # Feature toggle
+  components:
+    # ---- prometheus exporters
+    exporter_cadvisor:
+      enabled: true
+      image: gcr.io/cadvisor/cadvisor:v0.47.0
+      port: 8101
+      subdomain: cadvisor
+
+    exporter_blackbox:
+      enabled: true
+      image: prom/blackbox-exporter:v0.23.0
+      port: 8102
+      ping_hosts:
+        - https://www.google.com/
+        - https://github.com/
+      subdomain: blackbox
+
+    exporter_mikrotik:
+      enabled: true
+      image: ghcr.io/akpw/mktxp:stable-20230320065317
+      port: 8103
+      router_hostname: 10.20.20.1
+      router_api_port: 8728
+      router_username: mktxp
+      router_password: gLRr2XXoTV89
+
+    exporter_node:
+      enabled: true
+      # exporter version and architecture
+      version: 1.5.0
+      arch: linux-armv7
+      install_path: /usr/local/bin/node_exporter
+
+      # metrics access
+      port: 8104
+
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: node-exporter
+
+    exporter_speedtest:
+      enabled: true
+      # docker image to run
+      image: miguelndecarvalho/speedtest-exporter:v3.5.3
+
+      # metrics port
+      port: 8105
+      scrape_interval: 1h
+
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: speedtest
+
+    exporter_sensor_suhu_server:
+      enabled: true
+      # docker image to run
+      image: fahminlb33/sensor-suhu-server:v1.0.1
+
+      # metrics port
+      port: 8106
+
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: suhu-server
+
+    # ----- networking
+    dnscrypt:
+      enabled: true
+      image: klutchell/dnscrypt-proxy:v2.1.4
+      dns_port: 5053
+      dns_upstream: ["cloudflare", "google"]
+
+    # ----- tools with web UI
+    grafana:
+      enabled: true
+
+      # docker image to run
+      image: grafana/grafana:9.5.1
+
+      # external access
+      port: 8001
+
+      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
+      subdomain: grafana
+
+      # login info
+      password: admin
+      allow_signup: false
+
+      # dashboard to provision from Grafana Cloud
+      # dashboard_provisioning:
+        # - id: 1860        # node exporter full (node exporter)
+        # - id: 9894        # node exporter summary (node exporter)
+        # - id: 13679       # mikrotik exporter (mktxp)
+        # - id: 193         # docker monitoring (cAdvisor)
+
+    jellyfin:
+      enabled: true
+      port: 8002
+      image: jellyfin/jellyfin:10.8.10
+      media_dir: "/media/primary/movies"
+
+    pihole:
+      enabled: false
+      # image to run
+      image: pihole/pihole:2023.03.1
+
+      # external access
+      port: 8003
+      hostname: pihole
+
+      # system config
+      timezone: Asia/Jakarta
+      password: kucing-oren
+
+      # use dnscrypt with pi-hole
+      # dnscrypt must be enabled first
+      dnscrypt: true
+
+    portainer:
+      enabled: true
+      # docker image to run
+      image: portainer/portainer-ce:2.18.2
+
+      # metrics port
+      port: 8004
+
+      # SSL key and certificate
+      ssl_key:
+      ssl_cert:
+
+    prometheus:
+      enabled: true
+      image: prom/prometheus:v2.43.0
+      port: 8005
+
+    qbittorrent:
+      enabled: false
+      # image
+      image: lscr.io/linuxserver/qbittorrent:4.5.2
+
+      # web UI
+      port: 8006
+
+      # download directory
+      download_dir: "/media/primary/downloads"
+
+      # extra arguments
+      tz: "Asia/Jakarta"
+
+    jdownloader:
+      enabled: false
+      image: jlesage/jdownloader-2:v23.04.1
+      download_dir: "/media/primary/downloads"
+      port: 8007
+      device: RAMIEL-PI
+      email: "fahminlb33@gmail.com"
+      password: "meong"
+
+    # ----- reverse proxy
+    reverse_proxy:
+      enabled: false
+      # image to run
+      image: nginx:1.24.0-alpine
+
+      # port to expose
+      root_domain: ramiel.local
+      subdomains:
+        # - subdomain: qbittorrent
+        #   port: 8006
+        #   container_name: qbittorrent
+
+    # ----- file server
+    samba:
+      enabled: false
+      # user to access the network share
+      user:
+        username: ramiel
+        password: meong
+
+      # directory to share to samba
+      mount_points:
+        - name: ramiel_primary
+          path: /media/primary
+          writeable: true
+          create_mask: "0777"
+          directory_mask: "0777"
+          public: false

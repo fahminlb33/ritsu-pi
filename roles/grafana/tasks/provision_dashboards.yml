@@ -9,14 +9,22 @@
   ansible.builtin.template:
     src: templates/{{ item.src }}
     dest: "{{ ritsu.config_dir }}/grafana/provisioning/{{ item.dest }}"
-    mode: 0777
+    mode: "0777"
   notify: restart_grafana
   loop:
     - src: provision_dashboard.yml.j2
       dest: dashboards/default.yml
 
-- name: Download Grafana dashboard if specified in the configuration
-  ansible.builtin.shell: "curl -s https://grafana.com/api/dashboards/{{ item.id }}.json | jq '.json' >> {{ ritsu.config_dir }}/grafana/import_dashboards/{{ item.id }}.json"
+- name: Download Grafana dashboard JSON from Grafana Cloud
+  ansible.builtin.get_url:
+    url: "https://grafana.com/api/dashboards/{{ item.id }}/revisions/{{ item.revision }}/download"
+    dest: "/tmp/{{ item.id }}.json"
+    mode: "0777"
+  when: ritsu.components.grafana.dashboard_provisioning is str
+  loop: "{{ ritsu.components.grafana.dashboard_provisioning | default([]) }}"
+
+- name: Extract dashboard definition from Grafana Cloud JSON
+  ansible.builtin.shell: "cat /tmp/{{ item.id }}.json | jq '.json' >> {{ ritsu.config_dir }}/grafana/import_dashboards/{{ item.id }}.json"
   notify: restart_grafana
   when: ritsu.components.grafana.dashboard_provisioning is str
   loop: "{{ ritsu.components.grafana.dashboard_provisioning | default([]) }}"
@@ -25,7 +33,7 @@
   ansible.builtin.copy:
     src: "templates/dashboards/{{ item.name }}"
     dest: "{{ ritsu.config_dir }}/grafana/import_dashboards/{{ item.name }}"
-    mode: 0777
+    mode: "0777"
   notify: restart_grafana
   when: item.copy
   loop:

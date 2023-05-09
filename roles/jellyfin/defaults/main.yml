@@ -6,7 +6,7 @@ ritsu:
   components:
     jellyfin:
       # docker image to run
-      image: jellyfin/jellyfin:latest
+      image: jellyfin/jellyfin:10.8.10
 
       # persistent dir
       media_dir: "/media/primary/movies"

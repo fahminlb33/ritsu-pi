@@ -1,61 +1,78 @@
 ---
-# Location where configuration files will be stored.
-# Note: Vaoid the use of relative path!
-config_dir: '/media/primary/ritsu-pi-config'
-data_dir: '/media/primary/ritsu-pi-data'
+# Global config for Ritsu-Pi.
+# To see the list of available components and it's configurations, see the "roles" directory
+ritsu:
+  # Location where configuration files be stored.
+  # Note: Avoid the use of relative path!
+  config_dir: '/media/primary/ritsu-pi/config'
 
-# Global home domain (when you're using pi-hole)
-global_domain: ramiel.local
+  # Feature toggle
+  components:
+    # monitoring tools
+    cadvisor:
+      enabled: true
 
-# Feature toggle
-ritsu_components:
-  # networking tools
-  dnscrypt: true
-  pihole: true
-  reverse_proxy: true
+    prometheus:
+      enabled: true
 
-  # monitoring tools
-  prometheus: false
-  grafana: false
-  cadvisor: false
-  exporter_node: false
-  exporter_blackbox: false
-  exporter_mikrotik: false
-  exporter_speedtest: false
+    grafana:
+      enabled: true
 
-  # downloaders
-  jdownloader: false
-  qbittorrent: false
+    exporter_node:
+      enabled: true
 
-  # media server
-  samba: false
-  jellyfin: false
+    exporter_blackbox:
+      enabled: true
 
-# MyJDownloader
-myjdownloader:
-  device: RAMIEL-PI
-  email: "fahminlb33@gmail.com"
-  password: "meong"
+    # MKTXP Mikrotik Exporter
+    exporter_mikrotik:
+      enabled: true
+      router_hostname: 10.20.20.1
+      router_api_port: 8728
+      router_username: admin
+      router_password: admin
 
-# MKTXP Mikrotik Exporter
-mktxp:
-  router_hostname: 10.20.20.1
-  router_api_port: 8728
-  router_username: admin
-  router_password: admin
+    exporter_speedtest:
+      enabled: true
 
-# Samba Network Share
-samba:
-  # user to access the network share
-  user:
-    username: ramiel
-    password: meong
+    # ----- networking tools
+    dnscrypt:
+      enabled: true
 
-  # directory to share to samba
-  mount_points:
-    - name: ramiel_primary
-      path: /media/primary
-      writeable: true
-      create_mask: 0777
-      directory_mask: 0777
-      public: false
+    pihole:
+      enabled: true
+
+    reverse_proxy:
+      enabled: true
+      domain: ramiel.local
+
+    # ----- downloaders
+    jdownloader:
+      enabled: true
+
+      device: RAMIEL-PI
+      email: "fahminlb33@gmail.com"
+      password: "meong"
+
+    qbittorrent:
+      enabled: true
+
+    # ----- media server
+    samba:
+      enabled: true
+      # user to access the network share
+      user:
+        username: ramiel
+        password: meong
+
+      # directory to share to samba
+      mount_points:
+        - name: ramiel_primary
+          path: /media/primary
+          writeable: true
+          create_mask: "0777"
+          directory_mask: "0777"
+          public: false
+
+    jellyfin:
+      enabled: true

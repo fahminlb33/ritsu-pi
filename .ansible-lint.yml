@@ -1,9 +1,16 @@
----
-rules:
-  indentation:
-    level: error
-    spaces: 2
-    indent-sequences: consistent
 
-ignore: |
-  .github
+profile: safety
+
+use_default_rules: true
+enable_list:
+  - args
+  - empty-string-compare
+  - no-log-password
+  - no-same-owner
+  - name[casing]
+  - name[missing]
+  - name[play]
+
+exclude_paths:
+  - .github
+  - .vscode

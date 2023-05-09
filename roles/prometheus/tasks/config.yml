@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ ritsu.config_dir }}/prometheus/{{ item }}"
     state: directory
-    mode: 0777
+    mode: "0777"
   loop:
     - etc
     - data
@@ -12,5 +12,5 @@
   ansible.builtin.template:
     src: templates/prometheus.yml.j2
     dest: "{{ ritsu.config_dir }}/prometheus/etc/prometheus.yml"
-    mode: 0775
+    mode: "0775"
   notify: restart_prometheus

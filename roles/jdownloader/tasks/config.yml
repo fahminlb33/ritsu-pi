@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    mode: 0775
+    mode: "0775"
   loop:
     - "{{ ritsu.config_dir }}/jdownloader"
 
@@ -11,7 +11,7 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
-    mode: 0775
+    mode: "0775"
   loop:
     - "{{ ritsu.components.jdownloader.download_dir }}"
 
