@@ -1,19 +1,19 @@
 ---
-- name: Check if Docker is already present.
+- name: Check if Docker is already present
   ansible.builtin.command: which docker
   failed_when: false
   changed_when: false
   check_mode: false
   register: docker_command_result
 
-- name: Download Docker install convenience script.
+- name: Download Docker install script
   ansible.builtin.get_url:
     url: https://get.docker.com/
     dest: /tmp/get-docker.sh
     mode: "0775"
   when: docker_command_result.rc == 1
 
-- name: Run Docker install convenience script.
+- name: Run Docker install script
   ansible.builtin.command: /tmp/get-docker.sh
   register: docker_install_output
   environment:
@@ -28,7 +28,7 @@
     enabled: true
   become: true
 
-- name: Ensure dependencies are installed (Debian).
+- name: Ensure dependencies are installed (Debian)
   ansible.builtin.apt:
     name:
       - libffi-dev
@@ -41,14 +41,14 @@
   when: ansible_facts.os_family == "Debian"
   become: true
 
-- name: Install Docker Compose using Pip.
+- name: Install Docker Compose using pip
   ansible.builtin.pip:
     name: docker-compose
     state: present
     executable: pip3
   become: true
 
-- name: Ensure {{ ansible_user }} user is added to the docker group.
+- name: Ensure current user is added to the docker group
   ansible.builtin.user:
     name: "{{ ansible_user }}"
     groups: docker

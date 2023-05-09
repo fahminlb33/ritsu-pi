@@ -18,6 +18,6 @@
       - name: "{{ ritsu.network.name }}"
     mounts:
       - type: tmpfs
-        target: "/data"
+        target: /data
         tmpfs_size: 50M
         read_only: false

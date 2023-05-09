@@ -1,4 +1,5 @@
-- name: restart_prometheus
+---
+- name: Restart Prometheus
   community.docker.docker_container:
     state: started
     restart: true

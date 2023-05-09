@@ -9,8 +9,7 @@
     state: started
     name: nginx
     image: "{{ ritsu.components.reverse_proxy.image }}"
-    restart: true
-    restart_policy: always
+    restart_policy: unless-stopped
     published_ports:
       - 80:80
     networks:

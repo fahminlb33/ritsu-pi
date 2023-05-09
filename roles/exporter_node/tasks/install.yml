@@ -3,9 +3,7 @@
   ansible.builtin.unarchive:
     src: >-
       https://github.com/prometheus/node_exporter/releases/download/
-      {#- -#}
       v{{ ritsu.components.exporter_node.version }}/
-      {#- -#}
       node_exporter-{{ ritsu.components.exporter_node.version }}.{{ ritsu.components.exporter_node.arch }}.tar.gz
     dest: /tmp/
     remote_src: true
@@ -34,7 +32,7 @@
     group: root
     mode: "0775"
   become: true
-  notify: restart_exporter_node
+  notify: Restart Node Exporter
 
 - name: Make sure node exporter is started
   ansible.builtin.systemd:

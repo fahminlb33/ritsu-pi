@@ -9,7 +9,7 @@ ritsu:
       image: jellyfin/jellyfin:10.8.10
 
       # persistent dir
-      media_dir: "/media/primary/movies"
+      media_dir: /media/primary/movies
 
       # external access
       port: 8002

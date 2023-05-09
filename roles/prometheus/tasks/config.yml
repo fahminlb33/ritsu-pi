@@ -13,4 +13,4 @@
     src: templates/prometheus.yml.j2
     dest: "{{ ritsu.config_dir }}/prometheus/etc/prometheus.yml"
     mode: "0775"
-  notify: restart_prometheus
+  notify: Restart Prometheus

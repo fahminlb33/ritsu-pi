@@ -1,0 +1,7 @@
+---
+- name: Restart Pi-Hole
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: pihole
+    image: "{{ ritsu.components.pihole.image }}"

@@ -11,7 +11,7 @@
     src: templates/{{ item.src }}
     dest: "{{ config_output.path }}/{{ item.dest }}"
     mode: "0775"
-  notify: restart_exporter_mikrotik
+  notify: Restart Mikrotik MKTXP Exporter
   loop:
     - src: _mktxp.conf.j2
       dest: _mktxp.conf

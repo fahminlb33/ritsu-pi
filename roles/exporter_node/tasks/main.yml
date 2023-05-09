@@ -3,17 +3,17 @@
   ansible.builtin.assert:
     fail_msg: Prometheus must be enabled
     that:
-      - "{{ ritsu.components.prometheus.enabled }} == True"
+      - "{{ ritsu.components.prometheus.enabled }}"
 
 - name: Check if node exporter service is already installed
   ansible.builtin.stat:
-    path: "/etc/systemd/system/node_exporter.service"
+    path: /etc/systemd/system/node_exporter.service
   register: node_exporter_present
 
 - name: Create user and group for node exporter
   ansible.builtin.import_tasks: user.yml
-  when: node_exporter_present.stat.exists == False
+  when: not node_exporter_present.stat.exists
 
 - name: Download and install node exporter
   ansible.builtin.import_tasks: install.yml
-  when: node_exporter_present.stat.exists == False
+  when: not node_exporter_present.stat.exists

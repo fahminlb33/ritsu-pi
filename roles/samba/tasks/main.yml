@@ -24,4 +24,4 @@
   register: samba_create_users
   changed_when: "'Added user' in samba_create_users.stdout"
   no_log: true
-  notify: restart_samba
+  notify: Restart Samba Server

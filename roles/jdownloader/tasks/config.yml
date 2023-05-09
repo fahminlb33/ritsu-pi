@@ -14,4 +14,3 @@
     mode: "0775"
   loop:
     - "{{ ritsu.components.jdownloader.download_dir }}"
-

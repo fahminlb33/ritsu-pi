@@ -13,7 +13,7 @@ ritsu:
       port: 8006
 
       # download directory
-      download_dir: "/media/primary/downloads"
+      download_dir: /media/primary/downloads
 
       # extra arguments
-      tz: "Asia/Jakarta"
+      tz: Asia/Jakarta

@@ -12,7 +12,6 @@
       tags: [common]
     - role: docker
       tags: [common, docker]
-
     # networking
     - role: dnscrypt
       tags: [dnscrypt]

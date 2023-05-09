@@ -1,4 +1,5 @@
-- name: restart_exporter_mikrotik
+---
+- name: Restart Mikrotik MKTXP Exporter
   community.docker.docker_container:
     state: started
     restart: true

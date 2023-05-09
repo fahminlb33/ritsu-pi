@@ -11,4 +11,4 @@
     src: templates/dnscrypt.toml.j2
     dest: "{{ config_output.path }}/dnscrypt-proxy.toml"
     mode: "0775"
-  notify: restart_dnscrypt
+  notify: Restart DNSCrypt

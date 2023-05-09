@@ -12,7 +12,7 @@ ritsu:
       image: jlesage/jdownloader-2:v23.04.1
 
       # persistent dir
-      download_dir: "/media/primary/downloads"
+      download_dir: /media/primary/downloads
 
       # external access
       port: 8007

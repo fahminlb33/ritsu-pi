@@ -1,4 +1,5 @@
-- name: restart_dnscrypt
+---
+- name: Restart DNSCrypt
   community.docker.docker_container:
     state: started
     restart: true

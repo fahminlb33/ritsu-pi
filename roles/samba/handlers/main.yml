@@ -1,5 +1,5 @@
 ---
-- name: restart_samba
+- name: Restart Samba Server
   ansible.builtin.systemd:
     name: smbd
     state: restarted

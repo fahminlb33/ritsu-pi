@@ -15,4 +15,4 @@ ritsu:
 
       # configure DNScrypt servers
       dns_port: 5053
-      dns_upstream: ["cloudflare", "google"]
+      dns_upstream: [cloudflare, google]

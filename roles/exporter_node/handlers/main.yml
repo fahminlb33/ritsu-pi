@@ -1,5 +1,5 @@
 ---
-- name: restart_exporter_node
+- name: Restart Node Exporter
   ansible.builtin.systemd:
     name: exporter_node
     state: restarted

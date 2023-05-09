@@ -19,5 +19,5 @@
       - "{{ ritsu.config_dir }}/jellyfin/cache:/cache"
     mounts:
       - source: "{{ ritsu.components.jellyfin.media_dir }}"
-        target: "/media"
+        target: /media
         type: bind
