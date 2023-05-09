@@ -17,11 +17,6 @@ skip_list:
 warn_list:
   - package-latest
 
-mock_modules:
-  - community.general
-  - community.crypto
-  - community.docker
-
 exclude_paths:
   - .github
   - .vscode

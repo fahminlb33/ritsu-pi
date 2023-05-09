@@ -10,16 +10,19 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Check out the codebase.
+      - name: Check out the codebase
         uses: actions/checkout@v2
 
-      - name: Set up Python 3.
+      - name: Set up Python 3
         uses: actions/setup-python@v2
         with:
           python-version: '3.x'
 
-      - name: Install test dependencies.
+      - name: Install test dependencies
         run: pip3 install ansible-core ansible-lint
 
-      - name: Lint code.
+      - name: Install Ansible Galaxy roles
+        run: ansible-galaxy collection install -r requirements.yml
+
+      - name: Lint code
         run: ansible-lint -c .ansible-lint.yml

@@ -1,6 +1,6 @@
 # ritsu-pi
 
-:construction: THIS PROJECT IS STILL WORK IN PROGRESS. :construction: IT MAY NOT WORK CORRECTLY FOR THE TIME BEING. :construction:
+:construction: THIS PROJECT IS STILL WORK IN PROGRESS. :construction:
 
 ritsu-pi is a collectioin of Ansible playbook to build your own Raspberry Pi cluster with various monitoring and apps. You can build a home media server, download servers, seedbox, or even create a kubernetes cluster (in the future, I hope!).
 
@@ -38,39 +38,25 @@ I'm also planning to include other apps especially for home entertainment:tv:
 - [ ] Sonarr
 - [ ] Lidarr
 - [ ] Bazarr
-- [ ] Jacket/Prowlarr
+- [ ] Jackett/Prowlarr
 
 ## :tea: Setup
 
 Everything is automated using Ansible, so rest easy:smile:
 
 1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html). If you're on Linux (especially Debian-based) you can install it via Pip `pip3 install ansible`
-2. Install Ansible plugins `ansible-galaxy collection install -r ansible-requirements.yml`
-3. Clone this repository `git clone https://github.com/fahminlb33/ritsu-pi.git`
+2. `ansible-galaxy collection install -r requirements.yml`
+3. `git clone https://github.com/fahminlb33/ritsu-pi.git`
 4. Copy the `config.yml.example` to `config.yml` and pick what app you want to install
-5. Copy the `inventory.yml.example` to `inventory.yml` and add your Pi hosts
-6. Run the playbook with `ansible-playbook -i inventory.yml main.yml`
+5. Edit the `inventory.yml` and add your Pi hosts
+6. `ansible-playbook -i inventory.yml site.yml` to install Ritsu-Pi
 
 ### :put_litter_in_its_place: Uninstall Guide
 
-Because ritsu-pi is mostly installed on Docker, you can use Docker commands to delete all the containers, images, and volumes installed by ritsu-pi.
+:construction: Uninstall guide is still work in progress :construction:
 
-```sh
-# stop the containers
-docker stop grafana prometheus
-
-# remove the containers
-docker rm grafana prometheus
-
-# delete volume used by the container
-# the volume name is container name + '_data' suffix
-docker volume rm grafana_data prometheus_data
-
-# delete images from config.yml
-docker image rm grafana/grafana:latest
-```
-
-Some tools are installed to your Pi host because it can't be containerized or it requires special permissions or access that is not optimal to be run inside containers. You have to delete those apps manually.
+The current playbook does not include the ability to uninstall Ritsu-Pi, you have to stop and delete the container manually.
+This feature will be included in the next release when all the roles are working properly.
 
 ### :question: Why is it named "ritsu?"
 
