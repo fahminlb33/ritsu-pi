@@ -9,13 +9,11 @@
     state: started
     name: dnscrypt
     image: "{{ ritsu.components.dnscrypt.image }}"
+    hostname: dnscrypt
     restart_policy: unless-stopped
-    exposed_ports:
-      - "{{ ritsu.components.dnscrypt.dns_port }}:53/udp"
-      - "{{ ritsu.components.dnscrypt.dns_port }}:53/tcp"
     published_ports:
-      - "{{ ritsu.components.dnscrypt.dns_port }}:53/udp"
-      - "{{ ritsu.components.dnscrypt.dns_port }}:53/tcp"
+      - "{{ ritsu.components.dnscrypt.dns_port }}:5053/udp"
+      - "{{ ritsu.components.dnscrypt.dns_port }}:5053/tcp"
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:

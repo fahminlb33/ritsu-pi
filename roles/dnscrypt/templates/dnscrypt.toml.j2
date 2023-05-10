@@ -37,8 +37,8 @@ server_names = {{ ritsu.components.dnscrypt.dns_upstream | to_yaml }}
 ## Example with both IPv4 and IPv6:
 ## listen_addresses = ['127.0.0.1:53', '[::1]:53']
 
-listen_addresses = ['0.0.0.0:53']
-listen_addresses = ['[::]:53']
+listen_addresses = ['0.0.0.0:5053']
+listen_addresses = ['[::]:5053']
 
 
 ## Maximum number of simultaneous client connections to accept
@@ -240,7 +240,7 @@ cert_refresh_delay = 240
 ## not be sent there. If you're using DNSCrypt or Anonymized DNS and your
 ## lists are up to date, these resolvers will not even be used.
 
-bootstrap_resolvers = ['9.9.9.9:53', '8.8.8.8:53']
+bootstrap_resolvers = ['1.1.1.1:53', '9.9.9.9:53', '8.8.8.8:53']
 
 
 ## Always use the bootstrap resolver before the system DNS settings.

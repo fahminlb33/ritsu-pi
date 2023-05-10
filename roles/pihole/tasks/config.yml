@@ -8,7 +8,7 @@
     - etc
     - dnsmasq.d
 
-- name: Validate DNSCrypt config
+- name: Assert DNSCrypt is enabled if Pi-Hole is using it
   ansible.builtin.assert:
     that:
       - ritsu.components.dnscrypt.enabled
@@ -16,9 +16,8 @@
     success_msg: Using Pi-Hole with DNSCrypt integration
   when: ritsu.components.pihole.dnscrypt
 
-- name: Create environment variable
-  ansible.builtin.template:
-    src: templates/env.j2
-    dest: "{{ ritsu.config_dir }}/pihole/pihole.env"
-    mode: "0775"
-  notify: Restart Pi-Hole
+- name: Get dnscrypt IP address
+  community.docker.docker_container_info:
+    name: dnscrypt
+  register: pihole_dnscrypt_info
+  when: ritsu.components.pihole.dnscrypt

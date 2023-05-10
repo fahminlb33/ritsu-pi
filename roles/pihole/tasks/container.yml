@@ -13,16 +13,27 @@
     capabilities:
       - NET_ADMIN
     dns_servers:
-      - 127.0.0.1
+      - "{{ dnscrypt_ip if dnscrypt_enabled else default(omit) }}"
       - 1.1.1.1
       - 1.0.0.1
     published_ports:
       - 53:53/tcp
       - 53:53/udp
       - "{{ ritsu.components.pihole.port }}:80/tcp"
-    env_file: "{{ ritsu.config_dir }}/pihole/pihole.env"
+    env:
+      TZ: "{{ ritsu.timezone }}"
+      WEBPASSWORD: "{{ ritsu.components.pihole.password }}"
+      WEB_PORT: "80"
+      # FTLCONF_LOCAL_IPV4: "{{ ansible_default_ipv4.address }}"
+      PIHOLE_DNS_: "{{ dnscrypt_server if dnscrypt_enabled else default(omit) }}"
+      PIHOLE_UID: "1000"
+      PIHOLE_GID: "1000"
     networks:
-      - name: mainnet
+      - name: "{{ ritsu.network.name }}"
     volumes:
       - "{{ ritsu.config_dir }}/pihole/etc/:/etc/pihole/"
       - "{{ ritsu.config_dir }}/pihole/dnsmasq.d/:/etc/dnsmasq.d/"
+  vars:
+    dnscrypt_enabled: "{{ ritsu.components.pihole.dnscrypt }}"
+    dnscrypt_server: "{{ pihole_dnscrypt_info.container.NetworkSettings.Networks.mainnet.IPAddress | default('') }}#5053"
+    dnscrypt_ip: "{{ pihole_dnscrypt_info.container.NetworkSettings.Networks.mainnet.IPAddress | default('') }}"

@@ -20,10 +20,8 @@ ritsu:
 
       # external access
       port: 8003
-      hostname: pihole
 
-      # system config
-      timezone: Asia/Jakarta
+      # user
       password: kucing-oren
 
       # use dnscrypt with pi-hole
