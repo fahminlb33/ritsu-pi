@@ -7,13 +7,10 @@ ritsu:
   components:
     qbittorrent:
       # image
-      image: lscr.io/linuxserver/qbittorrent:latest
+      image: lscr.io/linuxserver/qbittorrent:4.5.2
 
       # web UI
       port: 8006
 
       # download directory
       download_dir: /media/primary/downloads
-
-      # extra arguments
-      tz: Asia/Jakarta

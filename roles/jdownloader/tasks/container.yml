@@ -1,7 +1,7 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
-    name:
+    name: "{{ ritsu.components.jdownloader.image }}"
     source: pull
 
 - name: Start and connect container to network
@@ -9,7 +9,6 @@
     state: started
     name: jdownloader
     image: "{{ ritsu.components.jdownloader.image }}"
-    restart: true
     restart_policy: unless-stopped
     published_ports:
       - "{{ ritsu.components.jdownloader.port }}:5800"

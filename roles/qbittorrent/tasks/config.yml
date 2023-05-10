@@ -1,16 +1,19 @@
 ---
-- name: Create config and data directory
+- name: Create config directory
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
     mode: "0775"
   loop:
-    - "{{ ritsu.config_dir }}/qbittorrent/config"
+    - "{{ ritsu.config_dir }}/qbittorrent"
 
-- name: Create download directory
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: directory
-    mode: "0775"
-  loop:
-    - "{{ ritsu.components.qbittorrent.download_dir }}"
+- name: Check if download directory is exists
+  ansible.builtin.stat:
+    path: "{{ ritsu.components.qbittorrent.download_dir }}"
+  register: qbittorrent_dir_exists
+
+- name: Assert download directory exists
+  ansible.builtin.assert:
+    that:
+      - qbittorrent_dir_exists.stat.exists
+      - qbittorrent_dir_exists.stat.isdir

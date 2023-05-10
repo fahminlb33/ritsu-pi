@@ -12,6 +12,18 @@
       tags: [common]
     - role: docker
       tags: [common, docker]
+
+    # media server
+    - role: jellyfin
+      tags: [media, jellyfin]
+      when: ritsu.components.jellyfin.enabled == true
+    - role: plex
+      tags: [media, plex]
+      when: ritsu.components.plex.enabled == true
+    - role: samba
+      tags: [media, file, samba]
+      when: ritsu.components.samba.enabled == true
+
     # networking
     - role: dnscrypt
       tags: [dnscrypt]
@@ -59,11 +71,3 @@
     - role: qbittorrent
       tags: [qbittorrent]
       when: ritsu.components.qbittorrent.enabled == true
-
-    # media server
-    - role: samba
-      tags: [samba]
-      when: ritsu.components.samba.enabled == true
-    - role: jellyfin
-      tags: [jellyfin]
-      when: ritsu.components.jellyfin.enabled == true

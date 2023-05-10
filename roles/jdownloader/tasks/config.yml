@@ -1,16 +1,19 @@
 ---
-- name: Create JDownloader directories
+- name: Create config directory
   ansible.builtin.file:
-    path: "{{ item.path }}"
+    path: "{{ item }}"
     state: directory
     mode: "0775"
   loop:
     - "{{ ritsu.config_dir }}/jdownloader"
 
-- name: Create download directory
-  ansible.builtin.file:
-    path: "{{ item.path }}"
-    state: directory
-    mode: "0775"
-  loop:
-    - "{{ ritsu.components.jdownloader.download_dir }}"
+- name: Check if download directory is exists
+  ansible.builtin.stat:
+    path: "{{ ritsu.components.jdownloader.download_dir }}"
+  register: jdownloader_dir_exists
+
+- name: Assert download directory exists
+  ansible.builtin.assert:
+    that:
+      - jdownloader_dir_exists.stat.exists
+      - jdownloader_dir_exists.stat.isdir

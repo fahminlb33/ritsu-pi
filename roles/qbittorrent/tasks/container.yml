@@ -9,17 +9,16 @@
     state: started
     name: qbittorrent
     image: "{{ ritsu.components.qbittorrent.image }}"
-    restart: true
     restart_policy: unless-stopped
     env:
-      - TZ="{{ ritsu.components.qbittorrent.tz }}"
-      - WEBUI_PORT=8080
+      TZ: "{{ ritsu.timezone }}"
+      WEBUI_PORT: "{{ ritsu.components.qbittorrent.port }}"
     published_ports:
-      - "{{ ritsu.components.qbittorrent.port }}:8080"
+      - "{{ ritsu.components.qbittorrent.port }}:{{ ritsu.components.qbittorrent.port }}"
       - 6881:6881
       - 6881:6881/udp
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:
-      - "{{ ritsu.config_dir }}/qbittorrent/config:/config"
-      - "{{ ritsu.config_dir }}/qbittorrent/data:/downloads"
+      - "{{ ritsu.config_dir }}/qbittorrent:/config"
+      - "{{ ritsu.components.qbittorrent.download_dir }}:/downloads"

@@ -21,12 +21,13 @@ ritsu-pi packed quite a bunch of apps for your pi server. Docker is mandatory an
 - [x] cAdvisor Exporter
 - [x] SpeedTest Exporter
 - [x] Suhu Server Exporter :interrobang:
+- [x] JDownloader
+- [x] qBittorrent
+- [x] Jellyfin
+- [x] Plex Media Server
+- [ ] Samba Server
 - [ ] DNSCrypt
 - [ ] Pi-Hole
-- [ ] JDownloader
-- [ ] qBittorrent
-- [ ] Jellyfin
-- [ ] Samba Server
 
 Note: unchecked items means I want to implement them and I already have a plan but I haven't got the time to write and test the playbook yet.
 
