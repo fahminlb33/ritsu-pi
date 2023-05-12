@@ -20,6 +20,8 @@
       - name: "{{ ritsu.network.name }}"
     volumes:
       - "{{ ritsu.config_dir }}/plex:/config"
+    devices:
+      - /dev/dri:/dev/dri
     mounts:
       - source: "{{ ritsu.components.plex.media_dir }}"
         target: /movies

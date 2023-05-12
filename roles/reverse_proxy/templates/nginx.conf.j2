@@ -1,26 +1,30 @@
-# {{ ansible_managed }}
+user  nginx;
+worker_processes  auto;
 
-{% if ritsu.components.cadvisor.subdomain %}
-server {
-  listen 80;
-  listen [::]:80;
-  server_name {{ ritsu.components.cadvisor.subdomain }}.{{ ritsu.components.reverse_proxy.root_domain }};
+error_log  /var/log/nginx/error.log notice;
+pid        /var/run/nginx.pid;
 
-  location / {
-    include /etc/nginx/includes/proxy.conf;
-    proxy_pass http://cadvisor:{{ ritsu.components.cadvisor.port }};
-  }
+events {
+    worker_connections  1024;
 }
-{% endif %}
 
-# Default route
-server {
-  listen 80;
-  listen [::]:80;
-  server_name {{ ritsu.components.reverse_proxy.root_domain }};
 
-  location / {
-    root   /usr/share/nginx/html;
-    index  index.html;
-  }
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/sites-enabled/*.conf;
 }

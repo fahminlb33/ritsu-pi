@@ -1,0 +1,84 @@
+---
+- name: Create Root CA private key
+  community.crypto.openssl_privatekey:
+    path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.key"
+    type: RSA
+    size: 2048
+    mode: "0600"
+  notify: Restart Nginx
+
+- name: Create CSR for Root CA certificate
+  community.crypto.openssl_csr:
+    path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.csr"
+    privatekey_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.key"
+    common_name: "Ritsu Pi CA"
+    organization_name: "Kodesiana"
+    country_name: "ID"
+    use_common_name_for_san: false
+    basic_constraints:
+      - 'CA:TRUE'
+    basic_constraints_critical: true
+    key_usage:
+      - keyCertSign
+    key_usage_critical: true
+    mode: "0600"
+  notify: Restart Nginx
+
+- name: Create Root CA certificate
+  community.crypto.x509_certificate:
+    path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.crt"
+    csr_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.csr"
+    privatekey_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.key"
+    provider: selfsigned
+    mode: "0600"
+  notify: Restart Nginx
+
+- name: Create root domain private key
+  community.crypto.openssl_privatekey:
+    path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu.key"
+    type: RSA
+    size: 2048
+    mode: "0600"
+  notify: Restart Nginx
+
+- name: Create CSR for wildcard root domain
+  community.crypto.openssl_csr:
+    path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu.csr"
+    privatekey_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu.key"
+    common_name: "*.{{ ritsu.components.reverse_proxy.root_domain }}"
+    country_name: "ID"
+    basic_constraints:
+      - 'CA:FALSE'
+    key_usage:
+      - digitalSignature
+      - nonRepudiation
+      - keyEncipherment
+      - dataEncipherment
+    subject_alt_name:
+      - "DNS:{{ ritsu.components.reverse_proxy.root_domain }}"
+      - "DNS:*.{{ ritsu.components.reverse_proxy.root_domain }}"
+    mode: "0600"
+  notify: Restart Nginx
+
+- name: Create root domain certificate
+  community.crypto.x509_certificate:
+    path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu.crt"
+    csr_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu.csr"
+    privatekey_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu.key"
+    provider: ownca
+    ownca_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.crt"
+    ownca_privatekey_path: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.key"
+    ownca_not_after: "+8250d"
+    ownca_not_before: "-1d"
+    mode: "0600"
+  notify: Restart Nginx
+
+- name: Copy SSL to root config dir
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}"
+    mode: "0600"
+    remote_src: true
+  loop:
+    - src: "{{ ritsu.config_dir }}/nginx/ssl/ritsu_root_ca.crt"
+      dest: "{{ ritsu.config_dir }}/ritsu_root_ca.crt"

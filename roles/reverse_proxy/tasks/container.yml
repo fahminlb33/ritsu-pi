@@ -12,9 +12,12 @@
     restart_policy: unless-stopped
     published_ports:
       - 80:80
+      - 443:443
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:
-      - "{{ ritsu.config_dir }}/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro"
+      - "{{ ritsu.config_dir }}/nginx/ssl:/etc/nginx/ssl/certs:ro"
+      - "{{ ritsu.config_dir }}/nginx/sites:/etc/nginx/sites-enabled:ro"
+      - "{{ ritsu.config_dir }}/nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
       - "{{ ritsu.config_dir }}/nginx/proxy.conf:/etc/nginx/includes/proxy.conf:ro"
       - "{{ ritsu.config_dir }}/nginx/index.html:/usr/share/nginx/html/index.html:ro"

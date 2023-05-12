@@ -9,13 +9,12 @@
     state: started
     name: portainer
     image: "{{ ritsu.components.portainer.image }}"
+    command: --bind :9000 --http-enabled
     restart_policy: unless-stopped
-    command: --sslcert /certs/ritsu.crt --sslkey /certs/ritsu.key
     published_ports:
-      - "{{ ritsu.components.portainer.port }}:9443"
+      - "{{ ritsu.components.portainer.port }}:9000"
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - "{{ ritsu.config_dir }}/portainer/data:/data"
-      - "{{ ritsu.config_dir }}/portainer/ssl:/certs"

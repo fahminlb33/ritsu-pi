@@ -18,6 +18,3 @@ ritsu:
       # claim token
       claim_token: ""
 
-      # Intel Quicksync
-      # this will mount /dev/dri
-      quicksync: false
