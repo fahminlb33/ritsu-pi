@@ -9,7 +9,3 @@ ritsu:
 
       # metrics port
       port: 8004
-
-      # SSL key and certificate
-      ssl_key:
-      ssl_cert:

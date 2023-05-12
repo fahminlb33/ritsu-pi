@@ -16,7 +16,7 @@ The published port follows these convention:
 | Grafana               | 3000                       | 8001               |
 | Jellyfin              | 80                         | 80   -> 8002       |
 | Pi-Hole               | 80 (Web), 53 (UDP)         | 80   -> 8003, 53   |
-| Portainer             | 9443 (Web), 8000 (API)     | 9443 -> 8004       |
+| Portainer             | 9000 (Web), 8000 (API)     | 9000 -> 8004       |
 | Prometheus            | 9090                       | 8005               |
 | qBittorrent           | 8080 (Web), 6881 (TCP/UDP) | 8080 -> 8006, 6881 |
 | JDownloader 2         | 3129 (API), 5800           | 3129 -> 8007       |
