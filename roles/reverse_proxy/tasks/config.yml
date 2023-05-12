@@ -1,8 +1,9 @@
 ---
-- name: Set config variables
+- name: List all virtual hosts
   ansible.builtin.set_fact:
     root_domain: "{{ ritsu.components.reverse_proxy.root_domain }}"
     virtual_hosts:
+      # TODO: add more virtual hosts here
       - subdomain: cadvisor
         upstream: exporter_cadvisor:8080
         enabled: "{{ ritsu.components.exporter_cadvisor.enabled | default(false) }}"
