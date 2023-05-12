@@ -5,8 +5,8 @@
     name: "{{ ritsu.network.name }}"
     driver: "{{ ritsu.network.driver }}"
     ipam_config:
-      - subnet: "{ ritsu.network.subnet }}"
-        gateway: "{ ritsu.network.gateway }}"
+      - subnet: "{{ ritsu.network.subnet }}"
+        gateway: "{{ ritsu.network.gateway }}"
 
 - name: Reset connection so docker group is picked up.
   ansible.builtin.meta: reset_connection
