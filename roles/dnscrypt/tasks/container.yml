@@ -9,12 +9,12 @@
     state: started
     name: dnscrypt
     image: "{{ ritsu.components.dnscrypt.image }}"
-    hostname: dnscrypt
     restart_policy: unless-stopped
     published_ports:
       - "{{ ritsu.components.dnscrypt.dns_port }}:5053/udp"
       - "{{ ritsu.components.dnscrypt.dns_port }}:5053/tcp"
     networks:
       - name: "{{ ritsu.network.name }}"
+        ipv4_address: "{{ ritsu.components.dnscrypt.static_ip }}"
     volumes:
       - "{{ ritsu.config_dir }}/dnscrypt/dnscrypt-proxy.toml:/dnscrypt-proxy.toml:ro"
