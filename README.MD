@@ -1,5 +1,8 @@
 # ritsu-pi
 
+> Ritsu-Pi almost reached it's first version! (1) One more component to implement (Samba), (2) fix idempotence in the playbook, and (3) better documentation before first release!
+> That's still a lot I think :smile:
+
 ritsu-pi is a collectioin of Ansible playbook to build your own Raspberry Pi cluster with various monitoring and apps. You can build a home media server, download servers, seedbox, or even create a kubernetes cluster (in the future, I hope!).
 
 To allow an easy deployment and maintenance, *almost* all of the apps included in ritsu-pi is running on top of Docker. With this approach you can easily update and customize your setup. But this also comes with a down side, you will need a recent version of Raspberry Pi because it is power hungry and I personally use Pi 4 Model B. You can use older version but you might experience some performance degradation.
