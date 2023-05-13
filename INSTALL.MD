@@ -11,8 +11,10 @@ This happens when I installed all Ritsu-Pi components. It turns out the `dhcpcd`
 Steps:
 
 1. `sudo vim /etc/dhcpcd.conf`
-2. Add this line at the end of the file: `denyinterfaces veth*`
-3. Save and `sudo systemctl restart dhcpcd.service`
+2. Add this line at the TOP of the file: `denyinterfaces veth*`
+3. Save the config file
+4. `sudo systemctl daemon-reload`
+5. `sudo systemctl restart dhcpcd.service`
 
 Source: https://github.com/raspberrypi/linux/issues/4092#issuecomment-774512217
 
