@@ -29,7 +29,7 @@ ritsu-pi packed quite a bunch of apps for your pi server. Docker is mandatory an
 - [x] Reverse proxy (nginx)
 - [x] Jellyfin
 - [x] Plex Media Server
-- [ ] Samba Server
+- [x] Samba Server
 
 See [INSTALL.MD](./INSTALL.MD) for step by step installation guide.
 

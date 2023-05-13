@@ -1,27 +1,42 @@
 ---
-- name: Ensure dependencies are installed (Debian).
+- name: Ensure dependencies are installed
   ansible.builtin.apt:
     name:
       - samba
-      - samba-common-bin
+      - samba-common
     state: present
+    update_cache: false
+  become: true
 
-- name: Make sure samba is started.
+- name: Make sure samba is started
   ansible.builtin.systemd:
     name: smbd
     state: started
     enabled: true
   become: true
 
-- name: Ensure samba user is installed.
+- name: Create samba config
+  ansible.builtin.template:
+    src: samba.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: 0644
+  become: true
+  notify: Restart Samba
+
+- name: Ensure samba user is installed
   ansible.builtin.shell: >
-    set -e -o pipefail
-    && (pdbedit --user={{ samba.user.username }} 2>&1 > /dev/null)
-    || (samba.user '{{ item.password }}'; echo '{{ samba.user.password }}')
-    | smbpasswd -s -a {{ samba.user.username }}
+    set -o nounset -o pipefail -o errexit &&
+    (pdbedit --user={{ username }} 2>&1 > /dev/null) \
+    || (echo {{ password }}; echo {{ password }}) \
+    | smbpasswd -s -a {{ username }}
   args:
     executable: /bin/bash
+  become: true
+  vars:
+    username: "{{ ritsu.components.samba.user.username }}"
+    password: "{{ ritsu.components.samba.user.password }}"
+  no_log: true
   register: samba_create_users
   changed_when: "'Added user' in samba_create_users.stdout"
-  no_log: true
-  notify: Restart Samba Server
