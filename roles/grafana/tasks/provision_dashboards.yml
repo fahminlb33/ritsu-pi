@@ -16,19 +16,12 @@
       dest: dashboards/default.yml
 
 - name: Download Grafana dashboard JSON from Grafana Cloud
-  ansible.builtin.get_url:
-    url: https://grafana.com/api/dashboards/{{ item.id }}/revisions/{{ item.revision }}/download
-    dest: /tmp/{{ item.id }}.json
-    mode: "0777"
-  when: ritsu.components.grafana.dashboard_provisioning is str
-  loop: "{{ ritsu.components.grafana.dashboard_provisioning | default([]) }}"
-
-- name: Extract dashboard definition from Grafana Cloud JSON
-  ansible.builtin.shell: |
-    set -o pipefail
-    cat /tmp/{{ item.id }}.json | jq '.json' >> {{ ritsu.config_dir }}/grafana/import_dashboards/{{ item.id }}.json
-  notify: Restart Grafana
-  when: ritsu.components.grafana.dashboard_provisioning is str
+  ansible.builtin.command: |
+    curl -nc -s -f -o {{ ritsu.config_dir }}/grafana/import_dashboards/{{ item }}.json \
+      https://grafana.com/api/dashboards/{{ item }}/revisions/{{ revision }}/download
+  vars:
+    revision: "{{ lookup('ansible.builtin.url', 'https://grafana.com/api/dashboards/{{ item }}') | regex_search('\"revision\": ([0-9]+)', '\\1') | first }}"
+  changed_when: true
   loop: "{{ ritsu.components.grafana.dashboard_provisioning | default([]) }}"
 
 - name: Copy Ritsu-Pi dashboards
