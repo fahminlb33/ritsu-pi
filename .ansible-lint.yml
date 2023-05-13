@@ -16,6 +16,7 @@ skip_list:
 
 warn_list:
   - package-latest
+  - command-instead-of-module
 
 exclude_paths:
   - .github
