@@ -1,7 +1,0 @@
----
-- name: Restart Nginx
-  community.docker.docker_container:
-    state: started
-    restart: true
-    name: nginx
-    image: "{{ ritsu.components.reverse_proxy.image }}"

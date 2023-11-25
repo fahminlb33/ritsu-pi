@@ -5,7 +5,7 @@
     dest: "{{ ritsu.config_dir }}/grafana/provisioning/{{ item.dest }}"
     mode: "0777"
   notify: Restart Grafana
-  when: ritsu.components.prometheus.enabled
+  when: ritsu.components.prometheus.state == 'present'
   loop:
     - src: provision_datasource.yml.j2
       dest: datasources/default.yml

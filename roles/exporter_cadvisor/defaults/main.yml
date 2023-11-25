@@ -1,27 +1,9 @@
 ---
-# ------------------------------------------------------------------------------
 # cAdvisor
-# Analyzes resource usage and performance characteristics of running containers.
-#
-# Depends on:
-# - prometheus
-#   Uses prometheus to collect metrics.
-#   If prometheus is disabled, the play will fail.
-# - grafana
-#   If grafana is enabled, a dashboard will be provisioned.
-# - reverse_proxy
-#   If reverse proxy is not enabled, the domain will not be accessible
-#
-# Note:
-# cAdvisor will collect data from all docker containers.
 ritsu:
   components:
     exporter_cadvisor:
-      # image to run in Docker
-      image: gcr.io/cadvisor/cadvisor:v0.47.0
+      image: gcr.io/cadvisor/cadvisor:v0.47.2
 
-      # to access the cAdvisor from the network
+      # web UI access
       port: 8101
-
-      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
-      subdomain: cadvisor

@@ -1,8 +1,4 @@
 ---
-- name: Gather package facts
-  ansible.builtin.package_facts:
-    manager: auto
-
 - name: Ensure apt cache is up to date
   ansible.builtin.apt:
     update_cache: true

@@ -1,27 +1,25 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
+    state: "{{ ritsu.components.jdownloader.state }}"
     name: "{{ ritsu.components.jdownloader.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
-    state: started
-    name: jdownloader
+    state: "{{ 'started' if (ritsu.components.jdownloader.state == 'present') else 'absent' }}"
     image: "{{ ritsu.components.jdownloader.image }}"
+    name: jdownloader
     restart_policy: unless-stopped
     published_ports:
-      - "{{ ritsu.components.jdownloader.port }}:5800"
       - 3129:3129
+      - "{{ ritsu.components.jdownloader.port }}:5800"
     networks:
       - name: "{{ ritsu.network.name }}"
     env:
-      MYJDOWNLOADER_EMAIL: "{{ ritsu.components.jdownloader.email }}"
-      MYJDOWNLOADER_PASSWORD: "{{ ritsu.components.jdownloader.password }}"
-      MYJDOWNLOADER_DEVICE_NAME: "{{ ritsu.components.jdownloader.device }}"
+      MYJDOWNLOADER_EMAIL: "{{ ritsu.components.jdownloader.myjdownloader.email }}"
+      MYJDOWNLOADER_PASSWORD: "{{ ritsu.components.jdownloader.myjdownloader.password }}"
+      MYJDOWNLOADER_DEVICE_NAME: "{{ ritsu.components.jdownloader.myjdownloader.device }}"
     volumes:
-      - "{{ ritsu.config_dir }}/jdownloader:/config"
-    mounts:
-      - source: "{{ ritsu.components.jdownloader.download_dir }}"
-        target: /output
-        type: bind
+      - "{{ ritsu.config_dir }}/jdownloader:/config:rw"
+      - "{{ ritsu.components.jdownloader.download_dir }}:/output:rw"

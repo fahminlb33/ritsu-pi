@@ -9,9 +9,3 @@
     - "{{ ritsu.config_dir }}/grafana/import_dashboards"
     - "{{ ritsu.config_dir }}/grafana/provisioning/dashboards"
     - "{{ ritsu.config_dir }}/grafana/provisioning/datasources"
-
-- name: Provision data sources
-  ansible.builtin.import_tasks: provision_datasource.yml
-
-- name: Provision dashboards
-  ansible.builtin.import_tasks: provision_dashboards.yml

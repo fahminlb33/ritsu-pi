@@ -3,7 +3,7 @@
   ansible.builtin.assert:
     fail_msg: Prometheus must be enabled
     that:
-      - "{{ ritsu.components.prometheus.enabled }}"
+      - "{{ ritsu.components.prometheus.state == 'present' }}"
 
 - name: Check if node exporter service is already installed
   ansible.builtin.stat:

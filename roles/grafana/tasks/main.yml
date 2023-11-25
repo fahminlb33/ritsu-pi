@@ -2,5 +2,11 @@
 - name: Create configuration
   ansible.builtin.import_tasks: config.yml
 
+- name: Provision data sources
+  ansible.builtin.import_tasks: provision_datasource.yml
+
+- name: Provision dashboards
+  ansible.builtin.import_tasks: provision_dashboards.yml
+
 - name: Create and start container
   ansible.builtin.import_tasks: container.yml

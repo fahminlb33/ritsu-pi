@@ -1,14 +1,15 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
+    state: "{{ ritsu.components.exporter_mikrotik.state }}"
     name: "{{ ritsu.components.exporter_mikrotik.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
-    state: started
-    name: exporter_mikrotik
+    state: "{{ 'started' if (ritsu.components.exporter_mikrotik.state == 'present') else 'absent' }}"
     image: "{{ ritsu.components.exporter_mikrotik.image }}"
+    name: exporter_mikrotik
     restart_policy: unless-stopped
     exposed_ports:
       - 49090:49090
@@ -17,4 +18,4 @@
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:
-      - "{{ ritsu.config_dir }}/exporter_mikrotik:/home/mktxp/mktxp"
+      - "{{ ritsu.config_dir }}/exporter_mikrotik:/home/mktxp/mktxp:rw"

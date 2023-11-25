@@ -1,14 +1,6 @@
 ---
-# ------------------------------------------------------------------------------
 # Ookla SpeedTest
 # Periodically run speed test to measure network performance.
-#
-# Depends on:
-# - prometheus
-#   Uses prometheus to collect metrics.
-#   If prometheus is disabled, the play will fail.
-# - grafana
-#   If grafana is enabled, a dashboard will be provisioned.
 #
 # Note:
 # Configure the sample_interval to limit the number of checks interval because
@@ -16,12 +8,11 @@
 ritsu:
   components:
     exporter_speedtest:
-      # docker image to run
-      image: miguelndecarvalho/speedtest-exporter:latest
+      image: miguelndecarvalho/speedtest-exporter:v3.5.4
 
-      # metrics port
+      # web UI access
       port: 8105
-      scrape_interval: 1h
 
-      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
-      subdomain: speedtest
+      # prometheus scrape interval
+      # only applied when prometheus component is enabled
+      scrape_interval: 1h

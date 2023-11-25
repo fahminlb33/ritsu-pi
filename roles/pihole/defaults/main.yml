@@ -1,29 +1,18 @@
 ---
-# ------------------------------------------------------------------------------
 # Pi-hole
 # Block ads and trackers with optional DNSCrypt integration.
-#
-# Depends on:
-# - dnscrypt
-#   When DNSCrypt is enabled, the DNS server will be set to the DNSCrypt server
-#   and all of the upstream server will be disabled in the Pi-hole config.
-# - dashboard (prometheus, grafana)
-#   If prometheus and grafana is enabled, pi-hole metrics will be collected to
-#   prometheus server and a Grafana dashboard will be provisioned.
 #
 # More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
 ritsu:
   components:
     pihole:
-      # image to run
-      image: pihole/pihole:latest
+      state: present
+      image: pihole/pihole:2023.11.0
 
-      # external access
+      # web UI access
       port: 8003
+      password: foobar123
 
-      # user
-      password: kucing-oren
-
-      # use dnscrypt with pi-hole
-      # dnscrypt must be enabled first
-      dnscrypt: true
+      # enable DNSCrypt integration
+      # this config can only be enabled for first time installation
+      dnscrypt: false

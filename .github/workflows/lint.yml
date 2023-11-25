@@ -25,4 +25,4 @@ jobs:
         run: ansible-galaxy collection install -r requirements.yml
 
       - name: Lint code
-        run: ansible-lint -c .ansible-lint.yml
+        run: ansible-lint --offline -c .ansible-lint.yml

@@ -7,5 +7,6 @@
     "qbittorrent",
     "ritsu",
     "tsdb"
-  ]
+  ],
+  "ansible.python.interpreterPath": "/home/fahmi/.mambaforge/envs/ritsupi/bin/python"
 }

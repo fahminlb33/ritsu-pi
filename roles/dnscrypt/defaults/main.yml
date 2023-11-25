@@ -1,7 +1,5 @@
 ---
-# ------------------------------------------------------------------------------
 # DNSCrypt
-# DNSCrypt server to secure your DNS queries.
 #
 # Note:
 # This tool works best with pi-hole enabled too. You'll need to configure your
@@ -10,11 +8,13 @@
 ritsu:
   components:
     dnscrypt:
-      # image to run in Docker
-      image: klutchell/dnscrypt-proxy:latest
+      image: klutchell/dnscrypt-proxy:v2.1.5
 
-      # configure DNScrypt servers
-      dns_port: 5053
-      dns_upstream:
+      # internal docker network config
+      bind_ip: "172.18.1.100"
+      bind_dns_port: 54
+
+      # upstream DNS servers
+      upstream_dns:
         - cloudflare
         - google

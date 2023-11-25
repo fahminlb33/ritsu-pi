@@ -1,9 +1,9 @@
 ---
-# ------------------------------------------------------------------------------
 # Prometheus
-# Used to collect metrics from the system and acts as time series database.
 ritsu:
   components:
     prometheus:
-      image: prom/prometheus:v2.39.1
+      image: prom/prometheus:v2.48.0
+
+      # web UI access
       port: 8005

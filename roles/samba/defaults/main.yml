@@ -1,5 +1,4 @@
 ---
-# ------------------------------------------------------------------------------
 # Samba Share
 # Share your files mounted as a network drive.
 #
@@ -8,12 +7,14 @@
 ritsu:
   components:
     samba:
+      # SMB user
       user:
         username: foo
         password: bar
 
+      # directories to share
       mount_points:
-        - name: ramiel_primary
+        - name: pi_share
           path: /media/primary
           writeable: true
           create_mask: "0777"

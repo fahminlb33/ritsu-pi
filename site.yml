@@ -16,58 +16,35 @@
     # media server
     - role: jellyfin
       tags: [media, jellyfin]
-      when: ritsu.components.jellyfin.enabled == true
-    - role: plex
-      tags: [media, plex]
-      when: ritsu.components.plex.enabled == true
     - role: samba
       tags: [media, file, samba]
-      when: ritsu.components.samba.enabled == true
 
     # networking
     - role: dnscrypt
       tags: [dnscrypt]
-      when: ritsu.components.dnscrypt.enabled == true
     - role: pihole
       tags: [pihole]
-      when: ritsu.components.pihole.enabled == true
-    - role: reverse_proxy
-      tags: [nginx]
-      when: ritsu.components.reverse_proxy.enabled == true
-
-    # monitoring
-    - role: prometheus
-      tags: [prometheus]
-      when: ritsu.components.prometheus.enabled == true
-    - role: grafana
-      tags: [grafana]
-      when: ritsu.components.grafana.enabled == true
-    - role: portainer
-      tags: [portainer]
-      when: ritsu.components.portainer.enabled == true
-    - role: exporter_cadvisor
-      tags: [exporter, cadvisor]
-      when: ritsu.components.exporter_cadvisor.enabled == true
-    - role: exporter_node
-      tags: [exporter, node_exporter]
-      when: ritsu.components.exporter_node.enabled == true
-    - role: exporter_blackbox
-      tags: [exporter, blackbox]
-      when: ritsu.components.exporter_blackbox.enabled == true
-    - role: exporter_mikrotik
-      tags: [exporter, mikrotik]
-      when: ritsu.components.exporter_mikrotik.enabled == true
-    - role: exporter_speedtest
-      tags: [exporter, speedtest]
-      when: ritsu.components.exporter_speedtest.enabled == true
-    - role: exporter_sensor_suhu_server
-      tags: [exporter, sensor_suhu_server]
-      when: ritsu.components.exporter_sensor_suhu_server.enabled == true
 
     # downloaders
     - role: jdownloader
       tags: [jdownloader]
-      when: ritsu.components.jdownloader.enabled == true
     - role: qbittorrent
       tags: [qbittorrent]
-      when: ritsu.components.qbittorrent.enabled == true
+
+    # monitoring
+    - role: prometheus
+      tags: [prometheus]
+    - role: grafana
+      tags: [grafana]
+    - role: portainer
+      tags: [portainer]
+    - role: exporter_cadvisor
+      tags: [exporter, cadvisor]
+    - role: exporter_node
+      tags: [exporter, node_exporter]
+    - role: exporter_blackbox
+      tags: [exporter, blackbox]
+    - role: exporter_mikrotik
+      tags: [exporter, mikrotik]
+    - role: exporter_speedtest
+      tags: [exporter, speedtest]

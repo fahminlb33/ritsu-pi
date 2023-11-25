@@ -1,15 +1,12 @@
 ---
-# ------------------------------------------------------------------------------
 # Jellyfin
-# Media server!!
 ritsu:
   components:
     jellyfin:
-      # docker image to run
-      image: jellyfin/jellyfin:10.8.10
+      image: jellyfin/jellyfin:10.8.12
 
-      # persistent dir
-      media_dir: /media/primary/movies
-
-      # external access
+      # web UI access
       port: 8002
+
+      # media directory containing movies, music, etc.
+      media_dir: /media/primary/media

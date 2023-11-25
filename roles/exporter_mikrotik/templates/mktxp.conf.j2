@@ -3,11 +3,11 @@
 [Ritsu-Pi]
     enabled = True         # turns metrics collection for this RouterOS device on / off
 
-    hostname = {{ ritsu.components.exporter_mikrotik.router_hostname }}    # RouterOS IP address
-    port     = {{ ritsu.components.exporter_mikrotik.router_api_port }}    # RouterOS IP Port
+    hostname = {{ ritsu.components.exporter_mikrotik.router.host }}    # RouterOS IP address
+    port     = {{ ritsu.components.exporter_mikrotik.router.port }}    # RouterOS IP Port
 
-    username = {{ ritsu.components.exporter_mikrotik.router_username }}    # RouterOS user, needs to have 'read' and 'api' permissions
-    password = {{ ritsu.components.exporter_mikrotik.router_password }}
+    username = {{ ritsu.components.exporter_mikrotik.user.username }}    # RouterOS user, needs to have 'read' and 'api' permissions
+    password = {{ ritsu.components.exporter_mikrotik.user.password }}
 
     use_ssl                 = False  # enables connection via API-SSL servis
     no_ssl_certificate      = False  # enables API_SSL connect without router SSL certificate

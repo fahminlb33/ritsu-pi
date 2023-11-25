@@ -1,14 +1,15 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
+    state: "{{ ritsu.components.exporter_blackbox.state }}"
     name: "{{ ritsu.components.exporter_blackbox.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
-    state: started
-    name: exporter_blackbox
+    state: "{{ 'started' if (ritsu.components.exporter_blackbox.state == 'present') else 'absent' }}"
     image: "{{ ritsu.components.exporter_blackbox.image }}"
+    name: exporter_blackbox
     restart_policy: unless-stopped
     command:
       - --config.file=/config/blackbox.yml

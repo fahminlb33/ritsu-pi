@@ -1,14 +1,15 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
+    state: "{{ ritsu.components.grafana.state }}"
     name: "{{ ritsu.components.grafana.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
-    state: started
-    name: grafana
+    state: "{{ 'started' if (ritsu.components.grafana.state == 'present') else 'absent' }}"
     image: "{{ ritsu.components.grafana.image }}"
+    name: grafana
     restart_policy: unless-stopped
     published_ports:
       - "{{ ritsu.components.grafana.port }}:3000"

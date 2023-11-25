@@ -9,20 +9,11 @@
   ansible.builtin.template:
     src: templates/{{ item.src }}
     dest: "{{ ritsu.config_dir }}/grafana/provisioning/{{ item.dest }}"
-    mode: "0777"
+    mode: "0775"
   notify: Restart Grafana
   loop:
     - src: provision_dashboard.yml.j2
       dest: dashboards/default.yml
-
-- name: Download Grafana dashboard JSON from Grafana Cloud
-  ansible.builtin.command: |
-    curl -nc -s -f -o {{ ritsu.config_dir }}/grafana/import_dashboards/{{ item }}.json \
-      https://grafana.com/api/dashboards/{{ item }}/revisions/{{ revision }}/download
-  vars:
-    revision: "{{ lookup('ansible.builtin.url', 'https://grafana.com/api/dashboards/{{ item }}') | regex_search('\"revision\": ([0-9]+)', '\\1') | first }}"
-  changed_when: true
-  loop: "{{ ritsu.components.grafana.dashboard_provisioning | default([]) }}"
 
 - name: Copy Ritsu-Pi dashboards
   ansible.builtin.copy:
@@ -33,16 +24,14 @@
   when: item.copy
   loop:
     - name: docker_cadvisor.json
-      copy: "{{ ritsu.components.exporter_cadvisor.enabled }}"
+      copy: "{{ ritsu.components.exporter_cadvisor.state == 'present' }}"
     - name: internet_uptime_blackbox.json
-      copy: "{{ ritsu.components.exporter_blackbox.enabled }}"
+      copy: "{{ ritsu.components.exporter_blackbox.state == 'present' }}"
     - name: mikrotik_mktxp.json
-      copy: "{{ ritsu.components.exporter_mikrotik.enabled }}"
+      copy: "{{ ritsu.components.exporter_mikrotik.state == 'present' }}"
     - name: node_exporter_full.json
-      copy: "{{ ritsu.components.exporter_node.enabled }}"
+      copy: "{{ ritsu.components.exporter_node.state == 'present' }}"
     - name: node_exporter_summary.json
-      copy: "{{ ritsu.components.exporter_node.enabled }}"
-    - name: sensor_suhu_server.json
-      copy: "{{ ritsu.components.exporter_sensor_suhu_server.enabled }}"
+      copy: "{{ ritsu.components.exporter_node.state == 'present' }}"
     - name: speedtest.json
-      copy: "{{ ritsu.components.exporter_speedtest.enabled }}"
+      copy: "{{ ritsu.components.exporter_speedtest.state == 'present' }}"

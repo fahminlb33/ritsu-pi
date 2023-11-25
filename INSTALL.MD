@@ -39,13 +39,10 @@ Everything is automated using Ansible, so rest easy:smile:
 1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 2. `ansible-galaxy collection install -r requirements.yml`
 3. `git clone https://github.com/fahminlb33/ritsu-pi.git`
-4. Copy the `config.yml.example` to `config.yml` and pick what app you want to install
+4. Copy the `config.yml.example` to `config.yml` and pick what app you want to install. Set `state` to `present` to enable it
 5. Edit the `inventory.yml` and add your Pi hosts
 6. `ansible-playbook -i inventory.yml site.yml` to install Ritsu-Pi
 
 ## Uninstall Guide
 
-:construction: Uninstall guide is still work in progress :construction:
-
-The current playbook does not include the ability to uninstall Ritsu-Pi, you have to stop and delete the container manually.
-This feature will be included in the next release when all the roles are working properly.
+Usually you can just stop and delete the containers from Docker. But you can set the `state` to `absent` to uninstall it.

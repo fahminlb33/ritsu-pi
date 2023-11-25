@@ -1,20 +1,22 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
+    state: "{{ ritsu.components.prometheus.state }}"
     name: "{{ ritsu.components.prometheus.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
-    state: started
-    name: prometheus
+    state: "{{ 'started' if (ritsu.components.prometheus.state == 'present') else 'absent' }}"
     image: "{{ ritsu.components.prometheus.image }}"
+    name: prometheus
     restart_policy: unless-stopped
-    user: root
+    user: root # sometimes prometheus can't write to data directory
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
-      - --storage.tsdb.retention.time=90d
+      - --storage.tsdb.retention.size=100GB
+      - --storage.tsdb.retention.time=180d
       - --web.console.libraries=/usr/share/prometheus/console_libraries
       - --web.console.templates=/usr/share/prometheus/consoles
     published_ports:
@@ -22,5 +24,5 @@
     networks:
       - name: "{{ ritsu.network.name }}"
     volumes:
-      - "{{ ritsu.config_dir }}/prometheus/etc:/etc/prometheus/"
-      - "{{ ritsu.config_dir }}/prometheus/data:/prometheus/"
+      - "{{ ritsu.config_dir }}/prometheus/etc:/etc/prometheus/:rw"
+      - "{{ ritsu.config_dir }}/prometheus/data:/prometheus/:rw"

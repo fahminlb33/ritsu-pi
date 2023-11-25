@@ -1,14 +1,15 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
+    state: "{{ ritsu.components.pihole.state }}"
     name: "{{ ritsu.components.pihole.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
-    state: started
-    name: pihole
+    state: "{{ 'started' if (ritsu.components.pihole.state == 'present') else 'absent' }}"
     image: "{{ ritsu.components.pihole.image }}"
+    name: pihole
     restart_policy: unless-stopped
     capabilities:
       - NET_ADMIN
@@ -24,7 +25,6 @@
       TZ: "{{ ritsu.timezone }}"
       WEBPASSWORD: "{{ ritsu.components.pihole.password }}"
       WEB_PORT: "80"
-      # FTLCONF_LOCAL_IPV4: "{{ ansible_default_ipv4.address }}"
       PIHOLE_DNS_: "{{ dnscrypt_server if dnscrypt_enabled else default(omit) }}"
       PIHOLE_UID: "1000"
       PIHOLE_GID: "1000"

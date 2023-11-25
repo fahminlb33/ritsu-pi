@@ -8,16 +8,17 @@
 ritsu:
   components:
     jdownloader:
-      # docker image to run
-      image: jlesage/jdownloader-2:v23.04.1
+      state: present
+      image: jlesage/jdownloader-2:v23.11.2
 
-      # persistent dir
-      download_dir: /media/primary/downloads
-
-      # external access
+      # web UI access
       port: 8007
 
-      # myjdownloader account
-      device: RAMIEL-PI
-      email: foo@gmail.com
-      password: bar
+      # download directory
+      download_dir: /media/primary/downloads
+
+      # MyJDownloader
+      myjdownloader:
+        device: RAMIEL-PI
+        email: fahminlb33@gmail.com
+        password: 8BJmYg7m%z7g

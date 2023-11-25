@@ -7,13 +7,13 @@ global:
 
 # scrape data from exporters
 scrape_configs:
-{% if ritsu.components.exporter_cadvisor.enabled %}
+{% if ritsu.components.exporter_cadvisor.state == 'present' %}
   - job_name: exporter_cadvisor
     static_configs:
       - targets: ["exporter_cadvisor:8080"]
 {% endif %}
 
-{% if ritsu.components.exporter_blackbox.enabled %}
+{% if ritsu.components.exporter_blackbox.state == 'present' %}
   - job_name: exporter_blackbox
     metrics_path: /probe
     params:
@@ -29,28 +29,22 @@ scrape_configs:
         replacement: exporter_blackbox:9115
 {% endif %}
 
-{% if ritsu.components.exporter_mikrotik.enabled %}
+{% if ritsu.components.exporter_mikrotik.state == 'present' %}
   - job_name: exporter_mikrotik
     static_configs:
       - targets: ["exporter_mikrotik:49090"]
 {% endif %}
 
-{% if ritsu.components.exporter_node.enabled %}
+{% if ritsu.components.exporter_node.state == 'present' %}
   - job_name: exporter_node
     static_configs:
       - targets: ["{{ ansible_facts.default_ipv4.address }}:{{ ritsu.components.exporter_node.port }}"]
 {% endif %}
 
-{% if ritsu.components.exporter_speedtest.enabled %}
+{% if ritsu.components.exporter_speedtest.state == 'present' %}
   - job_name: exporter_speedtest
     scrape_interval: "{{ ritsu.components.exporter_speedtest.scrape_interval }}"
     scrape_timeout: 15m
     static_configs:
       - targets: ["exporter_speedtest:9798"]
-{% endif %}
-
-{% if ritsu.components.exporter_sensor_suhu_server.enabled %}
-  - job_name: exporter_sensor_suhu_server
-    static_configs:
-      - targets: ["exporter_sensor_suhu_server:9000"]
 {% endif %}

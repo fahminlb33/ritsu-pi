@@ -1,15 +1,5 @@
 ---
-# ------------------------------------------------------------------------------
 # Prometheus Blackbox Exporter
-# The blackbox exporter allows blackbox probing of endpoints over HTTP, HTTPS,
-# DNS, TCP, ICMP and gRPC.
-#
-# Depends on:
-# - prometheus
-#   Uses prometheus to collect metrics.
-#   If prometheus is disabled, the play will fail.
-# - grafana
-#   If grafana is enabled, a dashboard will be provisioned.
 #
 # Note:
 # This template only comes with minimal HTTP 2xx check. If you want to add more
@@ -18,16 +8,12 @@
 ritsu:
   components:
     exporter_blackbox:
-      # docker image to run
-      image: prom/blackbox-exporter:latest
+      image: prom/blackbox-exporter:v0.23.0
 
-      # access port
+      # web UI access
       port: 8102
 
       # hosts to ping
       ping_hosts:
         - https://www.google.com/
         - https://github.com/
-
-      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
-      subdomain: blackbox

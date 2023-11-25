@@ -1,14 +1,15 @@
 ---
 - name: Pull image from registry
   community.docker.docker_image:
+    state: "{{ ritsu.components.portainer.state }}"
     name: "{{ ritsu.components.portainer.image }}"
     source: pull
 
 - name: Start and connect container to network
   community.docker.docker_container:
-    state: started
-    name: portainer
+    state: "{{ 'started' if (ritsu.components.portainer.state == 'present') else 'absent' }}"
     image: "{{ ritsu.components.portainer.image }}"
+    name: portainer
     command: --bind :9000 --http-enabled
     restart_policy: unless-stopped
     published_ports:

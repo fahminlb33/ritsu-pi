@@ -3,69 +3,41 @@
 # To see the list of available components and it's configurations, see the "roles" directory
 ritsu:
   # Location where configuration files be stored.
-  # Note: Avoid the use of relative path!
-  config_dir: '/media/primary/ritsu-pi/config'
+  # Note: ALWAYS USE ABSOLUTE PATH
+  config_dir: /media/primary/ritsu-pi2
 
-  # Feature toggle
+  # Timezone
+  timezone: Asia/Jakarta
+
+  # Docker network
+  network:
+    name: mainnet
+    driver: bridge
+    subnet: "172.18.0.1/16"
+    gateway: "172.18.0.1"
+
+  # Components
   components:
-    # monitoring tools
-    cadvisor:
-      enabled: true
+    # --- Media Server
+    jellyfin:
+      state: present
+      image: jellyfin/jellyfin:10.8.12
 
-    prometheus:
-      enabled: true
+      # web UI access
+      port: 8002
 
-    grafana:
-      enabled: true
+      # media directory containing movies, music, etc.
+      media_dir: /media/primary/media
 
-    exporter_node:
-      enabled: true
-
-    exporter_blackbox:
-      enabled: true
-
-    # MKTXP Mikrotik Exporter
-    exporter_mikrotik:
-      enabled: true
-      router_hostname: 10.20.20.1
-      router_api_port: 8728
-      router_username: admin
-      router_password: admin
-
-    exporter_speedtest:
-      enabled: true
-
-    # ----- networking tools
-    dnscrypt:
-      enabled: true
-
-    pihole:
-      enabled: true
-
-    reverse_proxy:
-      enabled: true
-      domain: ramiel.local
-
-    # ----- downloaders
-    jdownloader:
-      enabled: true
-
-      device: RAMIEL-PI
-      email: "fahminlb33@gmail.com"
-      password: "meong"
-
-    qbittorrent:
-      enabled: true
-
-    # ----- media server
     samba:
-      enabled: true
-      # user to access the network share
+      state: present
+
+      # SMB user
       user:
         username: ramiel
         password: meong
 
-      # directory to share to samba
+      # directories to share
       mount_points:
         - name: ramiel_primary
           path: /media/primary
@@ -74,5 +46,138 @@ ritsu:
           directory_mask: "0777"
           public: false
 
-    jellyfin:
-      enabled: true
+    # ----- Networking Tools
+    dnscrypt:
+      state: present
+      image: klutchell/dnscrypt-proxy:v2.1.5
+
+      # internal docker network config
+      bind_ip: "172.18.1.100"
+      bind_dns_port: 54
+
+      # upstream DNS servers
+      upstream_dns:
+        - cloudflare
+        - google
+
+    pihole:
+      state: present
+      image: pihole/pihole:2023.11.0
+
+      # web UI access
+      port: 8003
+      password: foo@bar123
+
+      # enable DNSCrypt integration
+      # this config can only be enabled for first time installation
+      dnscrypt: true
+
+    # --- Downloaders
+    jdownloader:
+      state: present
+      image: jlesage/jdownloader-2:v23.11.2
+
+      # web UI access
+      port: 8007
+
+      # download directory
+      download_dir: /media/primary/downloads
+
+      # MyJDownloader
+      myjdownloader:
+        device: RAMIEL-PI
+        email: foo@bar.com
+        password: foo@Bar123
+
+    qbittorrent:
+      state: present
+      image: lscr.io/linuxserver/qbittorrent:4.6.1
+
+      # web UI access
+      port: 8006
+
+      # download directory
+      download_dir: /media/primary/downloads
+
+    # --- Monitoring Tools
+    prometheus:
+      state: present
+      image: prom/prometheus:v2.48.0
+
+      # web UI access
+      port: 8005
+
+    portainer:
+      state: present
+      image: portainer/portainer-ce:2.19.3
+
+      # web UI access
+      port: 8004
+
+    grafana:
+      state: present
+      image: grafana/grafana:10.2.2
+
+      # web UI access
+      port: 8001
+
+      # login info
+      password: admin
+      allow_signup: false
+
+    # --- Prometheus Exporters
+    exporter_cadvisor:
+      state: present
+      image: gcr.io/cadvisor/cadvisor:v0.47.2
+
+      # web UI access
+      port: 8101
+
+    exporter_blackbox:
+      state: present
+      image: prom/blackbox-exporter:v0.23.0
+
+      # web UI access
+      port: 8102
+
+      # hosts to ping
+      ping_hosts:
+        - https://www.google.com/
+        - https://github.com/
+
+    exporter_mikrotik:
+      state: present
+      image: ghcr.io/akpw/mktxp:stable-20230706091740
+
+      # web UI access
+      port: 8103
+
+      # Mikrotik router host
+      router:
+        host: 10.20.20.1
+        port: 8728
+
+      # Mikrotik user with API access
+      user:
+        username: mktxp
+        password: mktxp
+
+    exporter_node:
+      state: present
+      version: 1.7.0
+      arch: linux-armv7
+      install_path: /usr/local/bin/node_exporter
+
+      # web UI access
+      port: 8104
+
+    exporter_speedtest:
+      state: present
+      image: miguelndecarvalho/speedtest-exporter:v3.5.4
+
+      # web UI access
+      port: 8105
+
+      # prometheus scrape interval
+      # only applied when prometheus component is enabled
+      scrape_interval: 1h

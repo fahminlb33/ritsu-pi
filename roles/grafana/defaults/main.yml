@@ -1,23 +1,13 @@
 ---
-# ------------------------------------------------------------------------------
 # Grafana
-# Visualization tool.
 ritsu:
   components:
     grafana:
-      # docker image to run
-      image: grafana/grafana:8.2.6
+      image: grafana/grafana:10.2.2
 
-      # external access
+      # web UI access
       port: 8001
-
-      # when using reverse proxy, http://{{subdomain}}.{{global_domain}}
-      subdomain: grafana
 
       # login info
       password: admin
       allow_signup: false
-
-      # dashboard to provision from Grafana Cloud
-      # dashboard_provisioning:
-        # - id: 1860        # dashboard ID here

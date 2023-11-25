@@ -1,11 +1,9 @@
 ---
-# ------------------------------------------------------------------------------
 # Portainer
 ritsu:
   components:
     portainer:
-      # docker image to run
-      image: portainer/portainer-ce:2.18.2
+      image: portainer/portainer-ce:2.19.3
 
-      # metrics port
+      # web UI access
       port: 8004

@@ -1,7 +1,0 @@
----
-- name: Restart Portainer
-  community.docker.docker_container:
-    state: started
-    restart: true
-    name: portainer
-    image: "{{ ritsu.components.portainer.image }}"
