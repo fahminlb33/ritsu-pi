@@ -107,6 +107,11 @@ ritsu:
       # web UI access
       port: 8005
 
+      # retention
+      retention:
+        time: 30d
+        size: 10GB
+
     portainer:
       state: present
       image: portainer/portainer-ce:2.19.3
