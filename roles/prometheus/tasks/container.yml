@@ -15,8 +15,8 @@
     command:
       - --config.file=/etc/prometheus/prometheus.yml
       - --storage.tsdb.path=/prometheus
-      - --storage.tsdb.retention.size={{ ritsu.components.prometheus.retention.size }}}
-      - --storage.tsdb.retention.time={{ ritsu.components.prometheus.retention.time }}}
+      - --storage.tsdb.retention.size={{ ritsu.components.prometheus.retention.size }}
+      - --storage.tsdb.retention.time={{ ritsu.components.prometheus.retention.time }}
       - --web.console.libraries=/usr/share/prometheus/console_libraries
       - --web.console.templates=/usr/share/prometheus/consoles
     published_ports:
