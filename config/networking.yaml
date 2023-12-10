@@ -1,0 +1,46 @@
+---
+# Global config for Ritsu-Pi.
+# To see the list of available components and it's configurations, see the "roles" directory
+ritsu:
+  components:
+    samba:
+      state: present
+
+      # SMB user
+      user:
+        username: ramiel
+        password: meong
+
+      # directories to share
+      mount_points:
+        - name: ramiel_primary
+          path: /media/primary
+          writeable: true
+          create_mask: "0777"
+          directory_mask: "0777"
+          public: false
+
+    dnscrypt:
+      state: present
+      image: klutchell/dnscrypt-proxy:v2.1.5
+
+      # internal docker network config
+      bind_ip: "172.18.1.100"
+      bind_dns_port: 54
+
+      # upstream DNS servers
+      upstream_dns:
+        - cloudflare
+        - google
+
+    pihole:
+      state: present
+      image: pihole/pihole:2023.11.0
+
+      # web UI access
+      port: 8003
+      password: foo@bar123
+
+      # enable DNSCrypt integration
+      # this config can only be enabled for first time installation
+      dnscrypt: true

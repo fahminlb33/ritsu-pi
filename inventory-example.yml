@@ -1,0 +1,29 @@
+---
+# Global config for Ritsu-Pi.
+# To see the list of available components and it's configurations, see the "roles" directory
+ritsu:
+  # hosts to be managed by this playbook
+  hosts:
+    ramiel:
+      ansible_host: 10.20.20.102
+      ansible_user: ramiel
+
+  # Location where configuration files be stored.
+  # Note: ALWAYS USE ABSOLUTE PATH
+  config_dir: /media/primary/ritsu-pi2
+
+  # Timezone
+  timezone: Asia/Jakarta
+
+  # Docker network
+  network:
+    name: mainnet
+    driver: bridge
+    subnet: "172.18.0.1/16"
+    gateway: "172.18.0.1"
+
+  # Components
+  components:
+    network: true
+    media: true
+    monitoring: true

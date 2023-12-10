@@ -1,0 +1,43 @@
+---
+# Global config for Ritsu-Pi.
+# To see the list of available components and it's configurations, see the "roles" directory
+ritsu:
+  media:
+    enabled: true
+
+  components:
+    jellyfin:
+      state: present
+      image: jellyfin/jellyfin:10.8.12
+
+      # web UI access
+      port: 8002
+
+      # media directory containing movies, music, etc.
+      media_dir: /media/primary/media
+
+    jdownloader:
+      state: present
+      image: jlesage/jdownloader-2:v23.11.2
+
+      # web UI access
+      port: 8007
+
+      # download directory
+      download_dir: /media/primary/downloads
+
+      # MyJDownloader
+      myjdownloader:
+        device: RAMIEL-PI
+        email: foo@bar.com
+        password: foo@Bar123
+
+    qbittorrent:
+      state: present
+      image: lscr.io/linuxserver/qbittorrent:4.6.1
+
+      # web UI access
+      port: 8006
+
+      # download directory
+      download_dir: /media/primary/downloads

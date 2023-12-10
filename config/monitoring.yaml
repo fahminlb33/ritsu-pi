@@ -1,0 +1,91 @@
+---
+# Global config for Ritsu-Pi.
+# To see the list of available components and it's configurations, see the "roles" directory
+ritsu:
+  components:
+    prometheus:
+      state: present
+      image: prom/prometheus:v2.48.0
+
+      # web UI access
+      port: 8005
+
+      # retention
+      retention:
+        time: 30d
+        size: 10GB
+
+    portainer:
+      state: present
+      image: portainer/portainer-ce:2.19.3
+
+      # web UI access
+      port: 8004
+
+    grafana:
+      state: present
+      image: grafana/grafana:10.2.2
+
+      # web UI access
+      port: 8001
+
+      # login info
+      password: admin
+      allow_signup: false
+
+    # --- Prometheus Exporters
+    exporter_cadvisor:
+      state: present
+      image: gcr.io/cadvisor/cadvisor:v0.47.2
+
+      # web UI access
+      port: 8101
+
+    exporter_blackbox:
+      state: present
+      image: prom/blackbox-exporter:v0.23.0
+
+      # web UI access
+      port: 8102
+
+      # hosts to ping
+      ping_hosts:
+        - https://www.google.com/
+        - https://github.com/
+
+    exporter_mikrotik:
+      state: present
+      image: ghcr.io/akpw/mktxp:stable-20230706091740
+
+      # web UI access
+      port: 8103
+
+      # Mikrotik router host
+      router:
+        host: 10.20.20.1
+        port: 8728
+
+      # Mikrotik user with API access
+      user:
+        username: mktxp
+        password: mktxp
+
+    exporter_node:
+      state: present
+      version: 1.7.0
+      arch: linux-armv7
+      install_path: /usr/local/bin/node_exporter
+
+      # web UI access
+      port: 8104
+
+    exporter_speedtest:
+      state: present
+      image: miguelndecarvalho/speedtest-exporter:v3.5.4
+
+      # web UI access
+      port: 8105
+
+      # prometheus scrape interval
+      # only applied when prometheus component is enabled
+      scrape_interval: 1h

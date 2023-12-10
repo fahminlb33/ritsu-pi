@@ -4,7 +4,7 @@
 
 Before installing Ritsu-Pi with all of it's containers, I encountered several problems with running it after hitting a number of containers and virtual network interfaces. Follow this guide first to avoid this possible problems.
 
-### IP lease is lost when Pi is using DHCP
+### IP lease is lost when Pi is using DHCP | [Source](https://github.com/raspberrypi/linux/issues/4092#issuecomment-774512217)
 
 This happens when I installed all Ritsu-Pi components. It turns out the `dhcpcd` service can overflow and causes the `eth0` interface of your Pi to lose it's IP address. Note that this only becomes a problem if you're using DHCP to configure your Pi IP address. Apparently this is because Docker creates many virtual network adapter and it's messing up with `dhcpcd` service. To solve this, the easiest way is to ignore `veth*` interfaces, which are created by Docker.
 
@@ -16,11 +16,9 @@ Steps:
 4. `sudo systemctl daemon-reload`
 5. `sudo systemctl restart dhcpcd.service`
 
-Source: https://github.com/raspberrypi/linux/issues/4092#issuecomment-774512217
-
 ### No internet when using DNSCrypt + Pi-Hole after Pi reboot
 
-This is also a problem with DHCP. If your Pi is configured using DHCP, when you set your Pi IP address as DHCP server in your router, that means your Pi will also use it's own IP to resolve DNS queries. See the problem? In the end your Pi can't do any DNS resolution because it doesn't have a working upstream DNS resolver.
+This is also a problem with DHCP. If your Pi is configured using DHCP, when you set your Pi IP address as DNS server in DHCP in your router, that means your Pi will also use it's own IP to resolve DNS queries. See the problem? In the end your Pi can't do any DNS resolution because it doesn't have a working upstream DNS resolver.
 
 The solution again is to make your Pi DNS static by editing the `/etc/dhcpcd.conf`.
 
@@ -32,6 +30,17 @@ You can also change your `/etc/resolv.conf` but this settings usually gets overw
 
 So in the end, the DHCP service is the root of all the problems above. Make sure to configure your DHCP settings correctly or make your Pi network settings static.
 
+### External hard drive IO throughput is slow | [Source](https://smitchell.github.io/how-to-bind-to-the-right-usb-storage-driver)
+
+If you encountered a slow IO when reading/writing something to your external hard drive, you can try to change the default USB storage driver used by your Pi with a legacy driver. Before doing this, you can run a benchmark first to confirm that you have throughput problem, if you don't experience this slow down, you can just skip this step.
+
+1. `lsusb`
+2. Find your attached USB storage device and copy the VID/PID in the format `VID:PID`. For example my external HDD enclosure ID is 174c:1153
+3. Backup `/boot/cmdline.txt`!
+4. Edit `/boot/cmdline.txt`
+5. Add this to the very beginning of the text file `usb-storage.quirks=[VID/PID]:u`
+6. Reboot your Pi
+
 ## Install Guide
 
 Everything is automated using Ansible, so rest easy:smile:
@@ -39,9 +48,8 @@ Everything is automated using Ansible, so rest easy:smile:
 1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html)
 2. `ansible-galaxy collection install -r requirements.yml`
 3. `git clone https://github.com/fahminlb33/ritsu-pi.git`
-4. Copy the `config.yml.example` to `config.yml` and pick what app you want to install. Set `state` to `present` to enable it
-5. Edit the `inventory.yml` and add your Pi hosts
-6. `ansible-playbook -i inventory.yml site.yml` to install Ritsu-Pi
+4. Copy the `inventory-example.yml` to `inventory.yml` and pick what app you want to install. Set `state` to `present` to enable it
+5. `ansible-playbook -i inventory.yml playbook/site.yml` to install Ritsu-Pi
 
 ## Uninstall Guide
 
