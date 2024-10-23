@@ -276,3 +276,14 @@
 
         # web UI access
         mlflow_port: 8009
+
+    - role: seq
+      tags: [monitoring, seq]
+      vars:
+        seq_state: present
+
+        # docker image
+        seq_image: datalust/seq:2024.3
+
+        # web UI
+        seq_port: 8008

@@ -1,0 +1,37 @@
+---
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/seq"
+    state: directory
+    mode: "0775"
+  register: seq_data_dir
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ seq_state }}"
+    name: "{{ seq_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: seq
+    image: "{{ seq_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - 5431:5431
+      - "{{ seq_port }}:80"
+    networks:
+      - name: "{{ docker_network.name }}"
+    env:
+      ACCEPT_EULA: "Y"
+      SEQ_API_CANONICALURI: "http://{{ flame_hostname }}:{{ seq_port }}"
+      SEQ_FIRSTRUN_ADMINPASSWORDHASH: "{{ seq_init_password }}"
+    volumes:
+      - "{{ seq_data_dir.path }}:/data:rw"
+    labels:
+      - flame.type=application
+      - flame.name=Seq
+      - flame.url=http://{{ flame_hostname }}:{{ seq_port }}
+      - flame.icon=custom
+    state: "{{ 'started' if (seq_state == 'present') else 'absent' }}"
