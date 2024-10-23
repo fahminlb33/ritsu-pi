@@ -1,0 +1,33 @@
+---
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/mlflow"
+    state: directory
+    mode: "0775"
+  register: mlflow_data_dir
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ mlflow_state }}"
+    name: "{{ mlflow_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: mlflow
+    image: "{{ mlflow_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    command: mlflow server --backend-store-uri sqlite:///mlflow.db --host 0.0.0.0
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ mlflow_port }}:5000"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "{{ mlflow_data_dir.path }}:/home/mlflow:rw"
+    labels:
+      - flame.type=application
+      - flame.name=MLflow
+      - flame.url=http://{{ flame_hostname }}:{{ mlflow_port }}
+      - flame.icon=custom
+    state: "{{ 'started' if (mlflow_state == 'present') else 'absent' }}"

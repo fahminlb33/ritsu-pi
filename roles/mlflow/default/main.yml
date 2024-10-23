@@ -1,0 +1,9 @@
+---
+# Mlflow Tracking Server
+mlflow_state: present
+
+# docker image
+mlflow_image: ghcr.io/mlflow/mlflow:v2.17.0
+
+# web UI
+mlflow_port: 8009
