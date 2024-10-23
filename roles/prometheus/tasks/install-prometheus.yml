@@ -41,4 +41,9 @@
     volumes:
       - "{{ config_dir }}/prometheus/etc:/etc/prometheus/:rw"
       - "{{ config_dir }}/prometheus/data:/prometheus/data/:rw"
+    labels:
+      - flame.type=application
+      - flame.name=Prometheus
+      - flame.url=http://{{ flame_hostname }}:{{ prometheus_port }}
+      - flame.icon=custom
     state: "{{ 'started' if (prometheus_state == 'present') else 'absent' }}"

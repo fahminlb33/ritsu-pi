@@ -45,4 +45,9 @@
     volumes:
       - "{{ config_dir }}/qbittorrent:/config:rw"
       - "{{ qbittorrent_download_dir }}:/downloads:rw"
+    labels:
+      - flame.type=application
+      - flame.name=qBittorrent
+      - flame.url=http://{{ flame_hostname }}:{{ qbittorrent_port }}
+      - flame.icon=custom
     state: "{{ 'started' if (qbittorrent_state == 'present') else 'absent' }}"

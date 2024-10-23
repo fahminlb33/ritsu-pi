@@ -40,4 +40,9 @@
       - "{{ config_dir }}/grafana/data:/var/lib/grafana"
       - "{{ config_dir }}/grafana/provisioning/:/etc/grafana/provisioning/"
       - "{{ config_dir }}/grafana/import_dashboards:/var/lib/grafana/dashboards"
+    labels:
+      - flame.type=application
+      - flame.name=Grafana
+      - flame.url=http://{{ flame_hostname }}:{{ grafana_port }}
+      - flame.icon=custom
     state: "{{ 'started' if (grafana_state == 'present') else 'absent' }}"
