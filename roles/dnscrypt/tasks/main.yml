@@ -32,5 +32,5 @@
       - name: "{{ docker_network.name }}"
         ipv4_address: "{{ dnscrypt_bind_ip }}"
     volumes:
-      - "{{ dnscrypt_config_dir }}/dnscrypt-proxy.toml:/dnscrypt-proxy.toml:ro"
+      - "{{ dnscrypt_config_dir.path }}/dnscrypt-proxy.toml:/dnscrypt-proxy.toml:ro"
     state: "{{ 'started' if (dnscrypt_state == 'present') else 'absent' }}"
