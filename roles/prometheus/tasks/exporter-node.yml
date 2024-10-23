@@ -1,0 +1,52 @@
+---
+- name: Create node exporter user
+  ansible.builtin.user:
+    name: node-exporter
+    append: true
+    shell: /usr/sbin/nologin
+    groups: "{{ prometheus_exporters.node.user_group }}"
+    system: true
+    create_home: false
+  become: true
+
+- name: Download and unzip node exporter
+  ansible.builtin.unarchive:
+    src: >-
+      https://github.com/prometheus/node_exporter/releases/download/
+      v{{ prometheus_exporters.node.version }}/
+      node_exporter-{{ prometheus_exporters.node.version }}.{{ prometheus_exporters.node.arch }}.tar.gz"
+    dest: /tmp/
+    remote_src: true
+    validate_certs: false
+
+- name: Move node exporter binary to the final destination
+  ansible.builtin.copy:
+    src: "/tmp/node_exporter-{{ prometheus_exporters.node.version }}.{{ prometheus_exporters.node.arch }}/node_exporter"
+    dest: "{{ prometheus_exporters.node.install_path }}"
+    owner: "{{ prometheus_exporters.node.user_group }}"
+    group: "{{ prometheus_exporters.node.user_group }}"
+    mode: "0775"
+    remote_src: true
+  become: true
+
+- name: Clean temporary files
+  ansible.builtin.file:
+    path: /tmp/node_exporter-{{ prometheus_exporters.node.version }}.{{ prometheus_exporters.node.arch }}/
+    state: absent
+
+- name: Install node exporter as service
+  ansible.builtin.template:
+    src: templates/node_exporter.service.j2
+    dest: /etc/systemd/system/node_exporter.service
+    owner: root
+    group: root
+    mode: "0775"
+  become: true
+  notify: Restart Node Exporter
+
+- name: Make sure node exporter is started
+  ansible.builtin.systemd:
+    name: node_exporter
+    state: started
+    enabled: true
+  become: true

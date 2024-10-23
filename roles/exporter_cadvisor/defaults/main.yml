@@ -1,9 +1,0 @@
----
-# cAdvisor
-ritsu:
-  components:
-    exporter_cadvisor:
-      image: gcr.io/cadvisor/cadvisor:v0.47.2
-
-      # web UI access
-      port: 8101

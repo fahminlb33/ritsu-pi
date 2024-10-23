@@ -1,12 +1,12 @@
 ---
 # Jellyfin
-ritsu:
-  components:
-    jellyfin:
-      image: jellyfin/jellyfin:10.8.12
+jellyfin_state: present
 
-      # web UI access
-      port: 8002
+# docker image
+jellyfin_image: jellyfin/jellyfin:10.8.12
 
-      # media directory containing movies, music, etc.
-      media_dir: /media/primary/media
+# web UI access
+jellyfin_port: 8002
+
+# media directory containing movies, music, etc.
+jellyfin_media_dir: /media/primary/media

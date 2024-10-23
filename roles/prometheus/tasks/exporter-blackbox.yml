@@ -1,0 +1,38 @@
+---
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/exporter_blackbox"
+    state: directory
+    mode: "0775"
+  register: exporter_blackbox_config_output
+
+- name: Create configuration
+  ansible.builtin.template:
+    src: templates/blackbox-config.yml.j2
+    dest: "{{ exporter_blackbox_config_output.path }}/blackbox.yml"
+    mode: "0775"
+  notify: Restart Blackbox Exporter
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ prometheus_exporters.blackbox.state }}"
+    name: "{{ prometheus_exporters.blackbox.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: exporter_blackbox
+    image: "{{ prometheus_exporters.blackbox.image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    command:
+      - --config.file=/config/blackbox.yml
+    exposed_ports:
+      - 9115:9115
+    published_ports:
+      - "{{ prometheus_exporters.blackbox.port }}:9115"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "{{ config_dir }}/exporter_blackbox/blackbox.yml:/config/blackbox.yml:ro"
+    state: "{{ 'started' if (prometheus_exporters.blackbox.state == 'present') else 'absent' }}"

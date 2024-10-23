@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+[Unit]
+Description=Node Exporter
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+User=node-exporter
+Group=node-exporter
+Type=simple
+ExecStart={{ prometheus_exporters.node.install_path }} --web.listen-address=0.0.0.0:{{ prometheus_exporters.node.port }}
+
+[Install]
+WantedBy=multi-user.target

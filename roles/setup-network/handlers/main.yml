@@ -1,0 +1,12 @@
+---
+- name: Restart dhcpcd
+  ansible.builtin.systemd:
+    name: dhcpcd
+    state: restarted
+    daemon_reload: true
+
+- name: Restart NetworkManager
+  community.general.nmcli:
+    conn_name: ethernet
+    state: up
+    conn_reload: true

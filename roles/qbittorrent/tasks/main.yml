@@ -1,6 +1,48 @@
 ---
-- name: Create configuration
-  ansible.builtin.import_tasks: config.yml
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/qbittorrent"
+    state: directory
+    mode: "0775"
 
-- name: Create and start container
-  ansible.builtin.import_tasks: container.yml
+- name: Check if download directory is exists
+  ansible.builtin.stat:
+    path: "{{ qbittorrent_download_dir }}"
+  register: qbittorrent_dir_exists
+
+- name: Assert download directory exists
+  ansible.builtin.assert:
+    that:
+      - qbittorrent_dir_exists.stat.exists
+      - qbittorrent_dir_exists.stat.isdir
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ qbittorrent_state }}"
+    name: "{{ qbittorrent_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: qbittorrent
+    image: "{{ qbittorrent_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    env:
+      TZ: "{{ timezone }}"
+      WEBUI_PORT: "{{ qbittorrent_port | string }}"
+    published_ports: >-
+      {{
+        ["6881:6881", "6881:6881/udp", "{{ qbittorrent_port }}:{{ qbittorrent_port }}"]
+        if not qbittorrent_gluetun else omit
+      }}
+    network_mode: "{{ docker_network.name if not qbittorrent_gluetun else 'container:gluetun' }}"
+    networks: >-
+      {{
+        [{"name": docker_network.name}]
+        if not qbittorrent_gluetun else omit
+      }}
+    volumes:
+      - "{{ config_dir }}/qbittorrent:/config:rw"
+      - "{{ qbittorrent_download_dir }}:/downloads:rw"
+    state: "{{ 'started' if (qbittorrent_state == 'present') else 'absent' }}"

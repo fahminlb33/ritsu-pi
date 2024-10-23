@@ -1,0 +1,39 @@
+---
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/exporter_mikrotik"
+    state: directory
+    mode: "0775"
+  register: exporter_mikrotik_config_output
+
+- name: Create configuration
+  ansible.builtin.template:
+    src: templates/{{ item.src }}
+    dest: "{{ exporter_mikrotik_config_output.path }}/{{ item.dest }}"
+    mode: "0775"
+  notify: Restart Mikrotik MKTXP Exporter
+  loop:
+    - src: _mktxp.conf.j2
+      dest: _mktxp.conf
+    - src: mktxp.conf.j2
+      dest: mktxp.conf
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ prometheus_exporters.mikrotik.state }}"
+    name: "{{ prometheus_exporters.mikrotik.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: exporter_mikrotik
+    image: "{{ prometheus_exporters.mikrotik.image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ prometheus_exporters.mikrotik.port }}:49090"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "{{ exporter_mikrotik_config_output.path }}:/home/mktxp/mktxp:rw"
+    state: "{{ 'started' if (prometheus_exporters.mikrotik.state == 'present') else 'absent' }}"

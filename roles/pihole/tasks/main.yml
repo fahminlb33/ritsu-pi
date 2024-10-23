@@ -1,6 +1,55 @@
 ---
-- name: Create configuration
-  ansible.builtin.import_tasks: config.yml
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/pihole/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - etc
+    - dnsmasq.d
 
-- name: Create and start container
-  ansible.builtin.import_tasks: container.yml
+- name: Get dnscrypt IP address
+  community.docker.docker_container_info:
+    name: dnscrypt
+  register: pihole_dnscrypt_container_info
+  when: pihole_dnscrypt
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ pihole_state }}"
+    name: "{{ pihole_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: pihole
+    image: "{{ pihole_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    capabilities:
+      - NET_ADMIN
+    dns_servers:
+      - "{{ dnscrypt_ip if dnscrypt_enabled else default(omit) }}"
+      - 1.1.1.1
+      - 1.0.0.1
+    published_ports:
+      - 53:53/tcp
+      - 53:53/udp
+      - "{{ pihole_port }}:80/tcp"
+    env:
+      TZ: "{{ timezone }}"
+      WEB_PORT: "80"
+      WEBPASSWORD: "{{ pihole_password }}"
+      PIHOLE_DNS_: "{{ dnscrypt_server if dnscrypt_enabled else default(omit) }}"
+      PIHOLE_UID: "{{ docker_user.uid }}"
+      PIHOLE_GID: "{{ docker_user.gid }}"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "{{ config_dir }}/pihole/etc/:/etc/pihole/"
+      - "{{ config_dir }}/pihole/dnsmasq.d/:/etc/dnsmasq.d/"
+    state: "{{ 'started' if (pihole_state == 'present') else 'absent' }}"
+  vars:
+    dnscrypt_enabled: "{{ pihole_dnscrypt }}"
+    dnscrypt_server: "{{ pihole_dnscrypt_container_info.container.NetworkSettings.Networks.mainnet.IPAddress | default('') }}#5053"
+    dnscrypt_ip: "{{ pihole_dnscrypt_container_info.container.NetworkSettings.Networks.mainnet.IPAddress | default('') }}"

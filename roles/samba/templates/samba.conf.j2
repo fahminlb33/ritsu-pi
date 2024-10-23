@@ -237,7 +237,7 @@
 ;   write list = root, @lpadmin
 
 # List all mount points
-{% for item in ritsu.components.samba.mount_points %}
+{% for item in samba_mount_points %}
 [{{ item.name }}]
   path = {{ item.path }}
   writeable = {{ 'yes' if item.writeable else 'no' }}

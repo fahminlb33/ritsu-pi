@@ -4,4 +4,4 @@
     state: started
     restart: true
     name: dnscrypt
-    image: "{{ ritsu.components.dnscrypt.image }}"
+    image: "{{ dnscrypt_image }}"

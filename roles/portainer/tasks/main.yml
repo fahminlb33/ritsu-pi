@@ -1,6 +1,30 @@
 ---
-- name: Create configuration
-  ansible.builtin.import_tasks: config.yml
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/portainer/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "data"
 
-- name: Create and start container
-  ansible.builtin.import_tasks: container.yml
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ portainer_state }}"
+    name: "{{ portainer_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: portainer
+    image: "{{ portainer_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    command: --bind :9000 --http-enabled
+    published_ports:
+      - "{{ portainer_port }}:9000"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "{{ config_dir }}/portainer/data:/data:rw"
+    state: "{{ 'started' if (portainer_state == 'present') else 'absent' }}"

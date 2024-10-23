@@ -1,6 +1,0 @@
----
-- name: Install Docker
-  ansible.builtin.import_tasks: docker.yml
-
-- name: Create docker network 'mainnet'
-  ansible.builtin.import_tasks: network.yml

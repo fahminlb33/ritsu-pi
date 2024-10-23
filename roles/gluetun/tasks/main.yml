@@ -1,0 +1,17 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ gluetun_state }}"
+    name: "{{ gluetun_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: gluetun
+    image: "{{ gluetun_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    published_ports: "{{ gluetun_published_ports }}"
+    networks:
+      - name: "{{ docker_network.name }}"
+    state: "{{ 'started' if (gluetun_state == 'present') else 'absent' }}"

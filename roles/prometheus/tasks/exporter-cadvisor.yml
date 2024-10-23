@@ -1,0 +1,27 @@
+---
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ prometheus_exporters.cadvisor.state }}"
+    name: "{{ prometheus_exporters.cadvisor.image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: exporter_cadvisor
+    image: "{{ prometheus_exporters.cadvisor.image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    privileged: true
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ prometheus_exporters.cadvisor.port }}:8080"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/run:/var/run:rw
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    state: "{{ 'started' if (prometheus_exporters.cadvisor.state == 'present') else 'absent' }}"

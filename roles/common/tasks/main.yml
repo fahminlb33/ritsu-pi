@@ -1,33 +1,20 @@
 ---
-- name: Ensure apt cache is up to date
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
-  become: true
-
 - name: Create configuration directories
   ansible.builtin.import_tasks: directories.yml
+  become: true
 
-- name: Install required system packages
-  ansible.builtin.apt:
-    name:
-      - apt-transport-https
-      - ca-certificates
-      - software-properties-common
-      - libffi-dev
-      - libssl-dev
-      - python3-dev
-      - python3-pip
-      - git
-      - rsync
-      - curl
-      - jq
-    state: latest
+- name: Install mandatory packages
+  ansible.builtin.import_tasks: install-packages.yml
   become: true
 
 - name: Upgrade libseccomp2 to latest version (32-bit Debian)
   ansible.builtin.import_tasks: debian-libseccomp-update.yml
+  become: true
   when:
     - ansible_facts.os_family == "Debian"
     - ansible_facts.userspace_bits == '32'
     - ansible_facts.packages['libseccomp2'][0]['version'] is version('2.4.4', '<') # noqa 204
+
+- name: Install Docker
+  ansible.builtin.import_tasks: install-docker.yml
+  become: true

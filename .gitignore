@@ -1,1 +1,3 @@
-config.yml
+# Ansible Vault Key
+secrets.yml
+secrets_pass

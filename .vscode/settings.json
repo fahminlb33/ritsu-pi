@@ -8,5 +8,5 @@
     "ritsu",
     "tsdb"
   ],
-  "ansible.python.interpreterPath": "/home/fahmi/.mambaforge/envs/ritsupi/bin/python"
+  "ansible.python.interpreterPath": "/home/fahmi/projects/ritsu-pi/.venv/bin/python"
 }

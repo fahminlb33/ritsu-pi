@@ -7,19 +7,19 @@ global:
 
 # scrape data from exporters
 scrape_configs:
-{% if ritsu.components.exporter_cadvisor.state == 'present' %}
-  - job_name: exporter_cadvisor
+{% if prometheus_exporters.node.enabled %}
+  - job_name: exporter_node
     static_configs:
-      - targets: ["exporter_cadvisor:8080"]
+      - targets: ["{{ ansible_facts.default_ipv4.address }}:{{ exporter_node.port }}"]
 {% endif %}
 
-{% if ritsu.components.exporter_blackbox.state == 'present' %}
+{% if prometheus_exporters.blackbox.enabled %}
   - job_name: exporter_blackbox
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
-      - targets: {{ ritsu.components.exporter_blackbox.ping_hosts | to_yaml }}
+      - targets: {{ prometheus_exporters.blackbox.ping_hosts | to_yaml }}
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -29,21 +29,21 @@ scrape_configs:
         replacement: exporter_blackbox:9115
 {% endif %}
 
-{% if ritsu.components.exporter_mikrotik.state == 'present' %}
+{% if prometheus_exporters.cadvisor.enabled %}
+  - job_name: exporter_cadvisor
+    static_configs:
+      - targets: ["exporter_cadvisor:8080"]
+{% endif %}
+
+{% if prometheus_exporters.mikrotik.enabled %}
   - job_name: exporter_mikrotik
     static_configs:
       - targets: ["exporter_mikrotik:49090"]
 {% endif %}
 
-{% if ritsu.components.exporter_node.state == 'present' %}
-  - job_name: exporter_node
-    static_configs:
-      - targets: ["{{ ansible_facts.default_ipv4.address }}:{{ ritsu.components.exporter_node.port }}"]
-{% endif %}
-
-{% if ritsu.components.exporter_speedtest.state == 'present' %}
+{% if prometheus_exporters.speedtest.enabled %}
   - job_name: exporter_speedtest
-    scrape_interval: "{{ ritsu.components.exporter_speedtest.scrape_interval }}"
+    scrape_interval: "{{ prometheus_exporters.speedtest.scrape_interval }}"
     scrape_timeout: 15m
     static_configs:
       - targets: ["exporter_speedtest:9798"]

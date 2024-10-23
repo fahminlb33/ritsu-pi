@@ -1,6 +1,36 @@
 ---
-- name: Create configuration
-  ansible.builtin.import_tasks: config.yml
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/dnscrypt"
+    state: directory
+    mode: "0775"
+  register: dnscrypt_config_dir
 
-- name: Create and start container
-  ansible.builtin.import_tasks: container.yml
+- name: Create configuration
+  ansible.builtin.template:
+    src: templates/dnscrypt-proxy.toml.j2
+    dest: "{{ dnscrypt_config_dir.path }}/dnscrypt-proxy.toml"
+    mode: "0775"
+  notify: Restart DNSCrypt
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ dnscrypt_state }}"
+    name: "{{ dnscrypt_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: dnscrypt
+    image: "{{ dnscrypt_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ dnscrypt_bind_dns_port }}:5053/udp"
+      - "{{ dnscrypt_bind_dns_port }}:5053/tcp"
+    networks:
+      - name: "{{ docker_network.name }}"
+        ipv4_address: "{{ dnscrypt_bind_ip }}"
+    volumes:
+      - "{{ dnscrypt_config_dir }}/dnscrypt-proxy.toml:/dnscrypt-proxy.toml:ro"
+    state: "{{ 'started' if (dnscrypt_state == 'present') else 'absent' }}"

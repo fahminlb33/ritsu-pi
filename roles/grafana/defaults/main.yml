@@ -1,13 +1,13 @@
 ---
 # Grafana
-ritsu:
-  components:
-    grafana:
-      image: grafana/grafana:10.2.2
+grafana_state: present
 
-      # web UI access
-      port: 8001
+# docker
+grafana_image: grafana/grafana:11.3.0
 
-      # login info
-      password: admin
-      allow_signup: false
+# web UI access
+grafana_port: 8001
+
+# login info
+grafana_password: admin
+grafana_allow_signup: false

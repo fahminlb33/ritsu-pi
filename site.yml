@@ -1,50 +1,252 @@
 ---
 - name: Ritsu-pi Project
   hosts: ritsu_pi
-  pre_tasks:
-    - name: Load configuration
-      ansible.builtin.include_vars:
-        file: config.yml
+  gather_facts: true
+  vars_files:
+    - secrets.yml
+  vars:
+    # Location where configuration files be stored.
+    # Note: ALWAYS USE ABSOLUTE PATH
+    config_dir: /media/primary/ritsu-pi2
+
+    # Timezone
+    timezone: Asia/Jakarta
+
+    # Docker
+    docker_user:
+      uid: "1000"
+      gid: "1000"
+
+    docker_network:
+      name: mainnet
+      driver: bridge
+      subnet: "172.18.0.1/16"
+      gateway: "172.18.0.1"
 
   roles:
-    # # common
+    # ===> common
     - role: common
       tags: [common]
-    - role: docker
-      tags: [common, docker]
+      vars:
+        common_config_static_ip: true
 
-    # media server
+    # ===> networking
+    - role: dnscrypt
+      tags: [networking, security, dnscrypt]
+      vars:
+        dnscrypt_state: present
+
+        # docker image
+        dnscrypt_image: klutchell/dnscrypt-proxy:v2.55.02.1.5
+
+        # internal docker network config
+        dnscrypt_bind_ip: "172.18.1.100"
+        dnscrypt_bind_dns_port: 54
+
+        # upstream DNS servers
+        dnscrypt_upstream_dns:
+          - cloudflare
+          - google
+
+    - role: pihole
+      tags: [networking, security, pihole]
+      vars:
+        pihole_state: present
+
+        # docker image
+        pihole_image: pihole/pihole:2024.07.0
+
+        # web UI access
+        pihole_port: 8003
+        # pihole_password: "{{ pihole_password }}" # defined in secrets.yml
+
+        # enable DNSCrypt integration
+        # this config can only be enabled for first time installation
+        pihole_dnscrypt: true
+
+    - role: gluetun
+      tags: [networking, security, gluetun]
+      vars:
+        gluetun_state: present
+
+        # docker image
+        gluetun_image: qmcgaw/gluetun:v3.39.1
+
+        # published port
+        gluetun_published_ports:
+          # qBittorrent
+          - 8006:8006
+          - 6881:6881
+          - 6881:6881/udp
+          # JDownloader 2
+          - 3129:3129
+
+    # ===> downloaders
+    - role: jdownloader
+      tags: [networking, file, jdownloader]
+      vars:
+        jdownloader_state: present
+
+        # Docker
+        jdownloader_image: antlafarge/jdownloader:latest
+
+        # download directory
+        jdownloader_download_dir: /media/primary/downloads
+
+        # use gluetun?
+        jdownloader_gluetun: true
+
+        # MyJDownloader
+        jdownloader_myjd:
+          device: RAMIEL-PI
+          email: "{{ jdownloader_myjd_email }}"       # defined in secrets.yml
+          password: "{{ jdownloader_myjd_password }}" # defined in secrets.yml
+
+    - role: qbittorrent
+      tags: [networking, file, qbittorrent]
+      vars:
+        qbittorrent_state: present
+        qbittorrent_image: lscr.io/linuxserver/qbittorrent:5.0.0
+
+        # web UI access
+        qbittorrent_port: 8006
+
+        # download directory
+        qbittorrent_download_dir: /media/primary/downloads
+
+        # use gluetun?
+        qbittorrent_gluetun: true
+
+    # ===> media server
     - role: jellyfin
       tags: [media, jellyfin]
+      vars:
+        jellyfin_state: present
+
+        # docker image
+        jellyfin_image: jellyfin/jellyfin:10.9.11
+
+        # web UI access
+        jellyfin_port: 8002
+
+        # media directory containing movies, music, etc.
+        jellyfin_media_dir: /media/primary/media
+
     - role: samba
       tags: [media, file, samba]
+      vars:
+        samba_state: present
 
-    # networking
-    - role: dnscrypt
-      tags: [dnscrypt]
-    - role: pihole
-      tags: [pihole]
+        # SMB user
+        samba_user:
+          username: "{{ samba_user_username }}" # defined in secrets.yml
+          password: "{{ samba_user_password }}" # defined in secrets.yml
 
-    # downloaders
-    - role: jdownloader
-      tags: [jdownloader]
-    - role: qbittorrent
-      tags: [qbittorrent]
+        # directories to share
+        samba_mount_points:
+          - name: ramiel_primary
+            path: /media/primary
+            writeable: true
+            create_mask: "0777"
+            directory_mask: "0777"
+            public: false
 
-    # monitoring
+    # ===> monitoring
     - role: prometheus
-      tags: [prometheus]
+      tags: [monitoring, prometheus]
+      vars:
+        prometheus_state: present
+        prometheus_image: prom/prometheus:v2.55.0
+
+        # web UI access
+        prometheus_port: 8005
+
+        # retention
+        prometheus_retention:
+          time: 2y
+          size: 100GB
+
+        # apps to be monitored
+        prometheus_exporters:
+          node:
+            enabled: false
+            version: 1.8.2
+            arch: linux-armv7
+            install_path: /usr/local/bin/node_exporter
+            port: 8102
+            user_owner: node-exporter
+            user_group: node-exporter
+
+          blackbox:
+            enabled: true
+            state: present
+            image: prom/blackbox-exporter:v0.25.0
+            port: 8102
+
+            ping_hosts:
+              - https://www.google.com
+              - https://www.github.com
+
+          cadvisor:
+            enabled: true
+            state: present
+            image: gcr.io/cadvisor/cadvisor:v0.50.0
+            port: 8101
+
+          mikrotik:
+            enabled: true
+            state: present
+            image: ghcr.io/akpw/mktxp:1.2.9
+            port: 8103
+
+            # Mikrotik router host
+            router:
+              host: 10.20.20.1
+              port: 8728
+
+            # Mikrotik user with API access
+            user:
+              username: "{{ mktxp_username }}" # defined in secrets.yml
+              password: "{{ mktxp_password }}" # defined in secrets.yml
+
+          speedtest:
+            enabled: true
+            state: present
+            image: miguelndecarvalho/speedtest-exporter:v3.5.4
+            port: 8105
+
+            # Configure the sample_interval to limit the number of checks interval because
+            # the speed test will consume a considerable amount of bandwidth.
+            scrape_interval: 1h
+
     - role: grafana
-      tags: [grafana]
+      tags: [monitoring, grafana]
+      vars:
+        grafana_state: present
+        grafana_image: grafana/grafana:11.3.0
+
+        # web UI access
+        grafana_port: 8001
+
+        # login info
+        # grafana_password: "{{ grafana_password }}" # defined in secrets.yml
+        grafana_allow_signup: false
+
+        # provisioning
+        grafana_provision_dashboard:
+          node: true
+          blackbox: true
+          cadvisor: true
+          mikrotik: true
+          speedtest: true
+
     - role: portainer
-      tags: [portainer]
-    - role: exporter_cadvisor
-      tags: [exporter, cadvisor]
-    - role: exporter_node
-      tags: [exporter, node_exporter]
-    - role: exporter_blackbox
-      tags: [exporter, blackbox]
-    - role: exporter_mikrotik
-      tags: [exporter, mikrotik]
-    - role: exporter_speedtest
-      tags: [exporter, speedtest]
+      tags: [monitoring, portainer]
+      vars:
+        portainer_state: present
+
+        # docker image
+        portainer_image: portainer/portainer-ce:2.21.4
+
+        # web UI access
+        portainer_port: 8004

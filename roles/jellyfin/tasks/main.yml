@@ -1,6 +1,42 @@
 ---
-- name: Create configuration
-  ansible.builtin.import_tasks: config.yml
+- name: Create config directories
+  ansible.builtin.file:
+    path: "{{ config_dir }}/jellyfin/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "config"
+    - "cache"
 
-- name: Create and start container
-  ansible.builtin.import_tasks: container.yml
+- name: Check if media directory is exists
+  ansible.builtin.stat:
+    path: "{{ jellyfin_media_dir }}"
+  register: jellyfin_media_dir_exists
+
+- name: Assert media directory exists
+  ansible.builtin.assert:
+    that:
+      - jellyfin_media_dir_exists.stat.exists
+      - jellyfin_media_dir_exists.stat.isdir
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ jellyfin_state }}"
+    name: "{{ jellyfin_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: jellyfin
+    image: "{{ jellyfin_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ jellyfin_port }}:8096"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "{{ jellyfin_media_dir }}:/media:rw"
+      - "{{ config_dir }}/jellyfin/config:/config:rw"
+      - "{{ config_dir }}/jellyfin/cache:/cache:rw"
+    state: "{{ 'started' if (jellyfin_state == 'present') else 'absent' }}"

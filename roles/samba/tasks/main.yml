@@ -2,9 +2,8 @@
 - name: Assert source mount points exist
   ansible.builtin.stat:
     path: "{{ item.path }}"
-  with_items: "{{ ritsu.components.samba.mount_points }}"
+  with_items: "{{ samba_mount_points }}"
   register: samba_mount_points_exist
-  when: ritsu.components.samba.state == 'present'
 
 - name: Assert source mount points are directories
   ansible.builtin.assert:
@@ -12,17 +11,15 @@
       - item.stat.exists
       - item.stat.isdir
   with_items: "{{ samba_mount_points_exist.results }}"
-  when: ritsu.components.samba.state == 'present'
 
 - name: Ensure dependencies are installed
   ansible.builtin.apt:
     name:
       - samba
       - samba-common
-    state: "{{ ritsu.components.samba.state }}"
+    state: "{{ samba_state }}"
     update_cache: false
   become: true
-  when: ritsu.components.samba.state == 'present'
 
 - name: Ensure samba user is installed
   ansible.builtin.shell: >
@@ -33,13 +30,13 @@
   args:
     executable: /bin/bash
   vars:
-    username: "{{ ritsu.components.samba.user.username }}"
-    password: "{{ ritsu.components.samba.user.password }}"
+    username: "{{ samba_user.username }}"
+    password: "{{ samba_user.password }}"
   become: true
   no_log: true
   register: samba_create_users
   changed_when: "'Added user' in samba_create_users.stdout"
-  when: ritsu.components.samba.state == 'present'
+  when: samba_state == 'present'
 
 - name: Create samba config
   ansible.builtin.template:
@@ -50,11 +47,4 @@
     mode: "0644"
   become: true
   notify: Restart Samba
-  when: ritsu.components.samba.state == 'present'
-
-- name: Delete samba config
-  ansible.builtin.file:
-    path: /etc/samba/smb.conf
-    state: absent
-  become: true
-  when: ritsu.components.samba.state == 'absent'
+  when: samba_state == 'present'

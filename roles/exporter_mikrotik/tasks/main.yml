@@ -1,6 +1,0 @@
----
-- name: Create configuration
-  ansible.builtin.import_tasks: config.yml
-
-- name: Create and start container
-  ansible.builtin.import_tasks: container.yml

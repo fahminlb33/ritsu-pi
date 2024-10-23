@@ -4,4 +4,4 @@
     state: started
     restart: true
     name: grafana
-    image: "{{ ritsu.components.grafana.image }}"
+    image: "{{ grafana_image }}"

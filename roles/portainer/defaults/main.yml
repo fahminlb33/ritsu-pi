@@ -1,9 +1,9 @@
 ---
 # Portainer
-ritsu:
-  components:
-    portainer:
-      image: portainer/portainer-ce:2.19.3
+portainer_state: present
 
-      # web UI access
-      port: 8004
+# docker image
+portainer_image: portainer/portainer-ce:2.21.4
+
+# web UI access
+portainer_port: 8004

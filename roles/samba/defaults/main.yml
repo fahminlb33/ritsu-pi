@@ -4,19 +4,17 @@
 #
 # Note:
 # This will not be installed in Docker, but directly in your pi.
-ritsu:
-  components:
-    samba:
-      # SMB user
-      user:
-        username: foo
-        password: bar
 
-      # directories to share
-      mount_points:
-        - name: pi_share
-          path: /media/primary
-          writeable: true
-          create_mask: "0777"
-          directory_mask: "0777"
-          public: false
+# SMB user
+samba_user:
+  username: foo
+  password: bar
+
+# directories to share
+samba_mount_points:
+  - name: pi_share
+    path: /media/primary
+    writeable: true
+    create_mask: "0777"
+    directory_mask: "0777"
+    public: false

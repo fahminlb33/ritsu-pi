@@ -1,4 +1,13 @@
 ---
+setup_network:
+  hosts:
+    ramiel:
+      ansible_host: 10.20.20.102
+      ansible_user: ramiel
+      setup_network_ip_address: 10.20.20.102/24
+      setup_network_gateway: 10.20.20.1
+      setup_network_dns_server: 1.1.1.1
+
 ritsu_pi:
   hosts:
     ramiel:

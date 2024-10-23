@@ -1,6 +1,53 @@
 ---
-- name: Create configuration
-  ansible.builtin.import_tasks: config.yml
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ config_dir }}/jdownloader/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "cfg"
+    - "logs"
 
-- name: Create and start container
-  ansible.builtin.import_tasks: container.yml
+- name: Check if download directory is exists
+  ansible.builtin.stat:
+    path: "{{ jdownloader_download_dir }}"
+  register: jdownloader_dir_exists
+
+- name: Assert download directory exists
+  ansible.builtin.assert:
+    that:
+      - jdownloader_dir_exists.stat.exists
+      - jdownloader_dir_exists.stat.isdir
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ jdownloader_state }}"
+    name: "{{ jdownloader_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: jdownloader
+    image: "{{ jdownloader_image }}"
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    published_ports: >-
+      {{
+        ["3129:3129"]
+        if not jdownloader_gluetun else omit
+      }}
+    network_mode: "{{ docker_network.name if not jdownloader_gluetun else 'container:gluetun' }}"
+    networks: >-
+      {{
+        [{"name": docker_network.name}]
+        if not jdownloader_gluetun else omit
+      }}
+    env:
+      JD_EMAIL: "{{ jdownloader_myjd.email }}"
+      JD_PASSWORD: "{{ jdownloader_myjd.password }}"
+      JD_DEVICENAME: "{{ jdownloader_myjd.device }}"
+    volumes:
+      - "{{ config_dir }}/jdownloader/cfg:/jdownloader/cfg:rw"
+      - "{{ config_dir }}/jdownloader/logs:/jdownloader/logs:rw"
+      - "{{ jdownloader_download_dir }}:/jdownloader/downloads:rw"
+    state: "{{ 'started' if (jdownloader_state == 'present') else 'absent' }}"

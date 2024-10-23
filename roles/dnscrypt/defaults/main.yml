@@ -5,16 +5,16 @@
 # This tool works best with pi-hole enabled too. You'll need to configure your
 # system's DNS to use the DNSCrypt server.
 # Edit the templates/dnscrypt.toml.j2 for more options.
-ritsu:
-  components:
-    dnscrypt:
-      image: klutchell/dnscrypt-proxy:v2.1.5
+dnscrypt_state: present
 
-      # internal docker network config
-      bind_ip: "172.18.1.100"
-      bind_dns_port: 54
+# docker image
+dnscrypt_image: klutchell/dnscrypt-proxy:v2.1.5
 
-      # upstream DNS servers
-      upstream_dns:
-        - cloudflare
-        - google
+# internal docker network config
+dnscrypt_bind_ip: "172.18.1.100"
+dnscrypt_bind_dns_port: 54
+
+# upstream DNS servers
+dnscrypt_upstream_dns:
+  - cloudflare
+  - google

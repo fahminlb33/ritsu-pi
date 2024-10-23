@@ -4,4 +4,26 @@
     state: started
     restart: true
     name: prometheus
-    image: "{{ ritsu.components.prometheus.image }}"
+    image: "{{ prometheus_image }}"
+
+- name: Restart Node Exporter
+  ansible.builtin.systemd:
+    name: exporter_node
+    state: restarted
+    daemon_reload: true
+    enabled: true
+  become: true
+
+- name: Restart Blackbox Exporter
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: exporter_blackbox
+    image: "{{ prometheus_exporters.blackbox.image }}"
+
+- name: Restart Mikrotik MKTXP Exporter
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: exporter_mikrotik
+    image: "{{ prometheus_exporters.mikrotik.image }}"
