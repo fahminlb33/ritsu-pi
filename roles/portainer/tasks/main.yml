@@ -28,8 +28,8 @@
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "{{ config_dir }}/portainer/data:/data:rw"
     labels:
-      - flame.type=application
-      - flame.name=Portainer
-      - flame.url=http://{{ flame_hostname }}:{{ portainer_port }}
-      - flame.icon=custom
+      flame.type: "application"
+      flame.name: "Portainer"
+      flame.url: "http://{{ flame_hostname }}:{{ portainer_port }}"
+      flame.icon: "custom"
     state: "{{ 'started' if (portainer_state == 'present') else 'absent' }}"

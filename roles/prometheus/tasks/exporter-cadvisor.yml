@@ -25,8 +25,8 @@
     devices:
       - /dev/kmsg
     labels:
-      - flame.type=application
-      - flame.name=cAdvisor
-      - flame.url=http://{{ flame_hostname }}:{{ prometheus_exporters.cadvisor.port }}
-      - flame.icon=custom
+      flame.type: "application"
+      flame.name: "cAdvisor"
+      flame.url: "http://{{ flame_hostname }}:{{ prometheus_exporters.cadvisor.port }}"
+      flame.icon: "custom"
     state: "{{ 'started' if (prometheus_exporters.cadvisor.state == 'present') else 'absent' }}"

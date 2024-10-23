@@ -49,10 +49,10 @@
       - "{{ config_dir }}/pihole/etc/:/etc/pihole/"
       - "{{ config_dir }}/pihole/dnsmasq.d/:/etc/dnsmasq.d/"
     labels:
-      - flame.type=application
-      - flame.name=Pi-Hole
-      - flame.url=http://{{ flame_hostname }}:{{ pihole_port }}
-      - flame.icon=custom
+      flame.type: "application"
+      flame.name: "Pi-Hole"
+      flame.url: "http://{{ flame_hostname }}:{{ pihole_port }}"
+      flame.icon: "custom"
     state: "{{ 'started' if (pihole_state == 'present') else 'absent' }}"
   vars:
     dnscrypt_enabled: "{{ pihole_dnscrypt }}"

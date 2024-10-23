@@ -40,8 +40,8 @@
       - "{{ config_dir }}/jellyfin/config:/config:rw"
       - "{{ config_dir }}/jellyfin/cache:/cache:rw"
     labels:
-      - flame.type=application
-      - flame.name=Jellyfin
-      - flame.url=http://{{ flame_hostname }}:{{ jellyfin_port }}
-      - flame.icon=custom
+      flame.type: "application"
+      flame.name: "Jellyfin"
+      flame.url: "http://{{ flame_hostname }}:{{ jellyfin_port }}"
+      flame.icon: "custom"
     state: "{{ 'started' if (jellyfin_state == 'present') else 'absent' }}"

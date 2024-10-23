@@ -30,8 +30,8 @@
     volumes:
       - "{{ seq_data_dir.path }}:/data:rw"
     labels:
-      - flame.type=application
-      - flame.name=Seq
-      - flame.url=http://{{ flame_hostname }}:{{ seq_port }}
-      - flame.icon=custom
+      flame.type: "application"
+      flame.name: "Seq"
+      flame.url: "http://{{ flame_hostname }}:{{ seq_port }}"
+      flame.icon: "custom"
     state: "{{ 'started' if (seq_state == 'present') else 'absent' }}"
