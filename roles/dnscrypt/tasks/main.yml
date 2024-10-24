@@ -23,6 +23,7 @@
   community.docker.docker_container:
     name: dnscrypt
     image: "{{ dnscrypt_image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     published_ports:
@@ -34,3 +35,13 @@
     volumes:
       - "{{ dnscrypt_config_dir.path }}/dnscrypt-proxy.toml:/dnscrypt-proxy.toml:ro"
     state: "{{ 'started' if (dnscrypt_state == 'present') else 'absent' }}"
+
+- name: Get dnscrypt IP address
+  community.docker.docker_container_info:
+    name: dnscrypt
+  register: dnscrypt_container_info
+
+- name: Assert that dnscrypt is running
+  ansible.builtin.assert:
+    that:
+      - dnscrypt_container_info.container.NetworkSettings.Networks.mainnet.IPAddress | length > 0

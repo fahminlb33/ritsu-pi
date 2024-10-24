@@ -30,7 +30,7 @@
 ##
 ## Remove the leading # first to enable this; lines starting with # are ignored.
 
-server_names = {{ dnscrypt_upstream_dns | to_yaml }}
+server_names = {{ dnscrypt_upstream_dns | to_json }}
 
 
 ## List of local addresses and ports to listen to. Can be IPv4 and/or IPv6.
