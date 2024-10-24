@@ -4,6 +4,7 @@
     path: "{{ config_dir }}/qbittorrent"
     state: directory
     mode: "0775"
+  register: qbittorrent_config_dir
 
 - name: Check if download directory is exists
   ansible.builtin.stat:
@@ -27,11 +28,14 @@
     name: qbittorrent
     image: "{{ qbittorrent_image }}"
     recreate: true
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    # user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     env:
       TZ: "{{ timezone }}"
+      PUID: "{{ docker_user.uid | string }}"
+      PGID: "{{ docker_user.gid | string }}"
       WEBUI_PORT: "{{ qbittorrent_port | string }}"
+      TORRENTING_PORT: "{{ qbittorrent_torrenting_port | string }}"
     published_ports: >-
       {{
         ["6881:6881", "6881:6881/udp", "{{ qbittorrent_port }}:{{ qbittorrent_port }}"]
@@ -44,7 +48,7 @@
         if not qbittorrent_gluetun else omit
       }}
     volumes:
-      - "{{ config_dir }}/qbittorrent:/config:rw"
+      - "{{ qbittorrent_config_dir.path }}:/config:rw"
       - "{{ qbittorrent_download_dir }}:/downloads:rw"
     labels:
       flame.type: "application"

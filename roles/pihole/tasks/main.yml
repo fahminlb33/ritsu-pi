@@ -25,7 +25,7 @@
     name: pihole
     image: "{{ pihole_image }}"
     recreate: true
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    # user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     capabilities:
       - NET_ADMIN
