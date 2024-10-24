@@ -8,3 +8,6 @@ gluetun_image: qmcgaw/gluetun:v3.39.1
 # exposed ports
 gluetun_published_ports:
   - 8080:8080
+
+# extra env
+gluetun_envs:
