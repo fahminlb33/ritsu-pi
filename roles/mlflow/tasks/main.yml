@@ -20,6 +20,7 @@
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     command: mlflow server --backend-store-uri sqlite:///mlflow.db --host 0.0.0.0
     restart_policy: unless-stopped
+    working_dir: /home/mlflow
     published_ports:
       - "{{ mlflow_port }}:5000"
     networks:
