@@ -29,6 +29,7 @@
   community.docker.docker_container:
     name: jellyfin
     image: "{{ jellyfin_image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     published_ports:

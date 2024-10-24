@@ -16,7 +16,8 @@
   community.docker.docker_container:
     name: seq
     image: "{{ seq_image }}"
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    recreate: true
+    # user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     published_ports:
       - 5431:5431

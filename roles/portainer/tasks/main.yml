@@ -17,7 +17,9 @@
   community.docker.docker_container:
     name: portainer
     image: "{{ portainer_image }}"
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    recreate: true
+    # user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    privileged: true
     restart_policy: unless-stopped
     command: --bind :9000 --http-enabled
     published_ports:

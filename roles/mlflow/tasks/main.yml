@@ -16,6 +16,7 @@
   community.docker.docker_container:
     name: mlflow
     image: "{{ mlflow_image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     command: mlflow server --backend-store-uri sqlite:///mlflow.db --host 0.0.0.0
     restart_policy: unless-stopped

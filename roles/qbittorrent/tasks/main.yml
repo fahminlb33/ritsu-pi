@@ -26,6 +26,7 @@
   community.docker.docker_container:
     name: qbittorrent
     image: "{{ qbittorrent_image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     env:
