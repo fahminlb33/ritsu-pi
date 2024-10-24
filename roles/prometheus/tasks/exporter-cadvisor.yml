@@ -9,6 +9,7 @@
   community.docker.docker_container:
     name: exporter_cadvisor
     image: "{{ prometheus_exporters.cadvisor.image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     privileged: true
     restart_policy: unless-stopped

@@ -1,4 +1,14 @@
 ---
+- name: Check node exporter is installed
+  ansible.builtin.command:
+    cmd: "node_exporter --version"
+  register: node_exporter_installed_version
+  changed_when: false
+
+- name: Setting node exporter version fact
+  ansible.builtin.set_fact:
+    node_exporter_update: "{{ '{{ prometheus_exporters.node.version }}' in '{{ node_exporter_installed_version.stdout }}' }}"
+
 - name: Create node exporter user
   ansible.builtin.user:
     name: node-exporter
@@ -8,16 +18,17 @@
     system: true
     create_home: false
   become: true
+  when: node_exporter_update
 
 - name: Download and unzip node exporter
   ansible.builtin.unarchive:
-    src: >-
-      https://github.com/prometheus/node_exporter/releases/download/
-      v{{ prometheus_exporters.node.version }}/
+    src: "https://github.com/prometheus/node_exporter/releases/download/\
+      v{{ prometheus_exporters.node.version }}/\
       node_exporter-{{ prometheus_exporters.node.version }}.{{ prometheus_exporters.node.arch }}.tar.gz"
     dest: /tmp/
     remote_src: true
     validate_certs: false
+  when: node_exporter_update
 
 - name: Move node exporter binary to the final destination
   ansible.builtin.copy:
@@ -28,6 +39,8 @@
     mode: "0775"
     remote_src: true
   become: true
+  notify: Restart Node Exporter
+  when: node_exporter_update
 
 - name: Clean temporary files
   ansible.builtin.file:
@@ -42,7 +55,6 @@
     group: root
     mode: "0775"
   become: true
-  notify: Restart Node Exporter
 
 - name: Make sure node exporter is started
   ansible.builtin.systemd:

@@ -23,6 +23,7 @@
   community.docker.docker_container:
     name: exporter_blackbox
     image: "{{ prometheus_exporters.blackbox.image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     command:

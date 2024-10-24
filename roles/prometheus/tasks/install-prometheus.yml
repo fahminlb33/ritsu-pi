@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ config_dir }}/prometheus/{{ item }}"
     state: directory
-    mode: "0777"
+    mode: "0775"
   loop:
     - etc
     - data
@@ -25,6 +25,7 @@
   community.docker.docker_container:
     name: prometheus
     image: "{{ prometheus_image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     command:

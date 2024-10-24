@@ -10,7 +10,7 @@ scrape_configs:
 {% if prometheus_exporters.node.enabled %}
   - job_name: exporter_node
     static_configs:
-      - targets: ["{{ ansible_facts.default_ipv4.address }}:{{ exporter_node.port }}"]
+      - targets: ["{{ ansible_facts.default_ipv4.address }}:{{ prometheus_exporters.node.port }}"]
 {% endif %}
 
 {% if prometheus_exporters.blackbox.enabled %}

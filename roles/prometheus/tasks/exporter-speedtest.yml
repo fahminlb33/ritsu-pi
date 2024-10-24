@@ -9,10 +9,13 @@
   community.docker.docker_container:
     name: exporter_speedtest
     image: "{{ prometheus_exporters.speedtest.image }}"
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    recreate: true
+    # user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     published_ports:
       - "{{ prometheus_exporters.speedtest.port }}:9798"
     networks:
       - name: "{{ docker_network.name }}"
+    healthcheck:
+      test: ["NONE"]
     state: "{{ 'started' if (prometheus_exporters.speedtest.state == 'present') else 'absent' }}"

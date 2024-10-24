@@ -11,6 +11,9 @@
     src: templates/{{ item.src }}
     dest: "{{ exporter_mikrotik_config_output.path }}/{{ item.dest }}"
     mode: "0775"
+    # mktxp user in Dockerfile
+    owner: 100
+    group: 101
   notify: Restart Mikrotik MKTXP Exporter
   loop:
     - src: _mktxp.conf.j2
@@ -28,12 +31,14 @@
   community.docker.docker_container:
     name: exporter_mikrotik
     image: "{{ prometheus_exporters.mikrotik.image }}"
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    command: "--cfg-dir /mktxp_config export"
+    recreate: true
+    # user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     published_ports:
       - "{{ prometheus_exporters.mikrotik.port }}:49090"
     networks:
       - name: "{{ docker_network.name }}"
     volumes:
-      - "{{ exporter_mikrotik_config_output.path }}:/home/mktxp/mktxp:rw"
+      - "{{ exporter_mikrotik_config_output.path }}:/mktxp_config:rw"
     state: "{{ 'started' if (prometheus_exporters.mikrotik.state == 'present') else 'absent' }}"
