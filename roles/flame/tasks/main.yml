@@ -24,7 +24,7 @@
     networks:
       - name: "{{ docker_network.name }}"
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
       - "{{ flame_config_dir.path }}:/app/data:rw"
     env:
       PASSWORD: "{{ flame_password }}"

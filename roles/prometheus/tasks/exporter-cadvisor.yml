@@ -10,7 +10,7 @@
     name: exporter_cadvisor
     image: "{{ prometheus_exporters.cadvisor.image }}"
     recreate: true
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    # user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     privileged: true
     restart_policy: unless-stopped
     published_ports:
@@ -20,7 +20,7 @@
     volumes:
       - /:/rootfs:ro
       - /sys:/sys:ro
-      - /var/run:/var/run:rw
+      - /var/run:/var/run:ro
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     devices:
