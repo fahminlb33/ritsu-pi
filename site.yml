@@ -235,6 +235,9 @@
             # the speed test will consume a considerable amount of bandwidth.
             scrape_interval: 1h
 
+          sensor_suhu:
+            enabled: true
+
     - role: grafana
       tags: [monitoring, grafana]
       vars:

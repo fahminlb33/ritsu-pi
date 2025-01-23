@@ -48,3 +48,9 @@ scrape_configs:
     static_configs:
       - targets: ["exporter_speedtest:9798"]
 {% endif %}
+
+{% if prometheus_exporters.sensor_suhu.enabled %}
+  - job_name: exporter_sensor_suhu
+    static_configs:
+      - targets: ["10.20.20.104"]
+{% endif %}
