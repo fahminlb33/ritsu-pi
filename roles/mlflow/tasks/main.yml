@@ -18,9 +18,12 @@
     image: "{{ mlflow_image }}"
     recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
-    command: mlflow server --backend-store-uri sqlite:///mlflow.db --host 0.0.0.0
+    command: mlflow server --host 0.0.0.0 --port 5000 --app-name basic-auth
     restart_policy: unless-stopped
     working_dir: /home/mlflow
+    env:
+      MLFLOW_BACKEND_STORE_URI: sqlite:///mlflow.db
+      MLFLOW_AUTH_CONFIG_PATH: /home/mlflow/auth/basic-auth.ini
     published_ports:
       - "{{ mlflow_port }}:5000"
     networks:
