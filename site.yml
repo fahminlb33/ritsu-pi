@@ -33,26 +33,42 @@
       vars:
         common_config_static_ip: true
 
-    # ===> dashboard
-    - role: flame
-      tags: [common, dashboard]
+    # ===> networking
+    - role: gluetun
+      tags: [networking, security, vpn, gluetun]
       vars:
-        flame_state: present
+        gluetun_state: present
 
         # docker image
-        flame_image: pawelmalak/flame:multiarch2.3.1
+        gluetun_image: qmcgaw/gluetun:v3.39.1
 
-        # default password
-        flame_password: "{{ flame_dashboard_password }}"
+        # published port
+        gluetun_published_ports:
+          # qBittorrent
+          - 8006:8006
+          - 6881:6881
+          - 6881:6881/udp
+          # JDownloader 2
+          - 3129:3129
 
-    # ===> networking
+        # extra env
+        gluetun_envs:
+          TZ: "{{ timezone }}"
+          SERVER_COUNTRIES: "Canada"
+          VPN_TYPE: "wireguard"
+          PORT_FORWARD_ONLY: "on"
+          VPN_PORT_FORWARDING: "on"
+          VPN_SERVICE_PROVIDER: "protonvpn"
+          VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+          WIREGUARD_PRIVATE_KEY: "{{ protonvpn_wireguard_private_key }}"
+
     - role: dnscrypt
       tags: [networking, security, dnscrypt]
       vars:
         dnscrypt_state: present
 
         # docker image
-        dnscrypt_image: klutchell/dnscrypt-proxy:v2.55.02.1.5
+        dnscrypt_image: klutchell/dnscrypt-proxy:latest
 
         # internal docker network config
         dnscrypt_bind_ip: "172.18.1.100"
@@ -78,23 +94,6 @@
         # enable DNSCrypt integration
         # this config can only be enabled for first time installation
         pihole_dnscrypt: true
-
-    - role: gluetun
-      tags: [networking, security, gluetun]
-      vars:
-        gluetun_state: present
-
-        # docker image
-        gluetun_image: qmcgaw/gluetun:v3.39.1
-
-        # published port
-        gluetun_published_ports:
-          # qBittorrent
-          - 8006:8006
-          - 6881:6881
-          - 6881:6881/udp
-          # JDownloader 2
-          - 3129:3129
 
     # ===> downloaders
     - role: jdownloader
@@ -125,8 +124,10 @@
 
         # web UI access
         qbittorrent_port: 8006
+        qbittorrent_torrenting_port: 6881
 
         # download directory
+        qbittorrent_media_dir: /media/primary/media
         qbittorrent_download_dir: /media/primary/downloads
 
         # use gluetun?
@@ -183,9 +184,15 @@
 
         # apps to be monitored
         prometheus_exporters:
+          cadvisor:
+            enabled: true
+            state: present
+            image: gcr.io/cadvisor/cadvisor:v0.50.0
+            port: 8101
+
           node:
-            enabled: false
-            version: 1.8.2
+            enabled: true
+            version: "1.8.2"
             arch: linux-armv7
             install_path: /usr/local/bin/node_exporter
             port: 8102
@@ -196,23 +203,17 @@
             enabled: true
             state: present
             image: prom/blackbox-exporter:v0.25.0
-            port: 8102
+            port: 8103
 
             ping_hosts:
               - https://www.google.com
               - https://www.github.com
 
-          cadvisor:
-            enabled: true
-            state: present
-            image: gcr.io/cadvisor/cadvisor:v0.50.0
-            port: 8101
-
           mikrotik:
             enabled: true
             state: present
             image: ghcr.io/akpw/mktxp:1.2.9
-            port: 8103
+            port: 8104
 
             # Mikrotik router host
             router:
@@ -287,3 +288,15 @@
 
         # web UI
         seq_port: 8008
+
+    # ===> dashboard
+    - role: flame
+      tags: [common, dashboard]
+      vars:
+        flame_state: present
+
+        # docker image
+        flame_image: pawelmalak/flame:multiarch2.3.1
+
+        # default password
+        flame_password: "{{ flame_dashboard_password }}"
