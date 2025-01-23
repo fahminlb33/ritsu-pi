@@ -44,6 +44,7 @@
         if not jdownloader_gluetun else omit
       }}
     env:
+      PORT: "3129"
       JD_EMAIL: "{{ jdownloader_myjd.email }}"
       JD_PASSWORD: "{{ jdownloader_myjd.password }}"
       JD_DEVICENAME: "{{ jdownloader_myjd.device }}"
