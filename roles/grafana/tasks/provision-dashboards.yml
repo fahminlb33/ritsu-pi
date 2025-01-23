@@ -19,7 +19,7 @@
   ansible.builtin.copy:
     src: templates/dashboards/{{ item.name }}
     dest: "{{ config_dir }}/grafana/import_dashboards/{{ item.name }}"
-    mode: "0777"
+    mode: "0775"
   notify: Restart Grafana
   when: item.copy
   loop:

@@ -3,7 +3,7 @@
   ansible.builtin.template:
     src: templates/{{ item.src }}
     dest: "{{ config_dir }}/grafana/provisioning/{{ item.dest }}"
-    mode: "0777"
+    mode: "0775"
   notify: Restart Grafana
   when: prometheus_state == 'present'
   loop:

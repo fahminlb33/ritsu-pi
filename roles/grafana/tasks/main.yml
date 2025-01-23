@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ config_dir }}/grafana/{{ item }}"
     state: directory
-    mode: "0777"
+    mode: "0775"
   loop:
     - "data"
     - "import_dashboards"
@@ -26,6 +26,7 @@
   community.docker.docker_container:
     name: grafana
     image: "{{ grafana_image }}"
+    recreate: true
     user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     published_ports:
