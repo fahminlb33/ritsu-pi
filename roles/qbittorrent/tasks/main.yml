@@ -50,6 +50,7 @@
     volumes:
       - "{{ qbittorrent_config_dir.path }}:/config:rw"
       - "{{ qbittorrent_download_dir }}:/downloads:rw"
+      - "{{ qbittorrent_media_dir }}:/media:rw"
     labels:
       flame.type: "application"
       flame.name: "qBittorrent"
