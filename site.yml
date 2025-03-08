@@ -172,14 +172,14 @@
       tags: [monitoring, prometheus]
       vars:
         prometheus_state: present
-        prometheus_image: prom/prometheus:v2.55.0
+        prometheus_image: prom/prometheus:v3.2.1
 
         # web UI access
         prometheus_port: 8005
 
         # retention
         prometheus_retention:
-          time: 2y
+          time: 5y
           size: 100GB
 
         # apps to be monitored
@@ -187,12 +187,12 @@
           cadvisor:
             enabled: true
             state: present
-            image: gcr.io/cadvisor/cadvisor:v0.50.0
+            image: gcr.io/cadvisor/cadvisor:v0.51.0
             port: 8101
 
           node:
             enabled: true
-            version: "1.8.2"
+            version: "1.9.0"
             arch: linux-armv7
             install_path: /usr/local/bin/node_exporter
             port: 8102
@@ -202,7 +202,7 @@
           blackbox:
             enabled: true
             state: present
-            image: prom/blackbox-exporter:v0.25.0
+            image: prom/blackbox-exporter:v0.26.0
             port: 8103
 
             ping_hosts:
@@ -212,7 +212,7 @@
           mikrotik:
             enabled: true
             state: present
-            image: ghcr.io/akpw/mktxp:1.2.9
+            image: ghcr.io/akpw/mktxp:1.2.10
             port: 8104
 
             # Mikrotik router host

@@ -20,6 +20,7 @@
       dest: _mktxp.conf
     - src: mktxp.conf.j2
       dest: mktxp.conf
+  become: true
 
 - name: Pull image from registry
   community.docker.docker_image:
