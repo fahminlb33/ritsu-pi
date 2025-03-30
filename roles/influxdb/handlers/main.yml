@@ -1,0 +1,7 @@
+---
+- name: Restart Telegraf
+  community.docker.docker_container:
+    state: started
+    restart: true
+    name: telegraf
+    image: "{{ influxdb_telegraf_image }}"

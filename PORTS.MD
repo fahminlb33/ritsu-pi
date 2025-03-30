@@ -7,11 +7,12 @@ The published port follows these convention:
 
 | Service            | Container Port             | Published Port |
 |--------------------|----------------------------|----------------|
-| cAdvisor           | 8080                       | 8101           |
 | DNSCrypt           | 5053 (UDP)                 | -              |
+| Samba Share        |                            | 139, 445       |
+| cAdvisor Exporter  | 8080                       | 8101           |
 | Blackbox Exporter  | 9115                       | 8102           |
 | Mikrotik Exporter  | 9115                       | 8103           |
-| Node Exporter      | Not in container           | 8104           |
+| Node Exporter      | -                          | 8104           |
 | Speedtest Exporter | 9798                       | 8105           |
 | Grafana            | 3000                       | 8001           |
 | Jellyfin           | 80                         | 8002           |
@@ -20,4 +21,6 @@ The published port follows these convention:
 | Prometheus         | 9090                       | 8005           |
 | qBittorrent        | 8080 (Web), 6881 (TCP/UDP) | 8006, 6881     |
 | JDownloader 2      | 3129 (API), 5800           | 8007           |
-| Samba Share        | Not in container           | 139, 445       |
+| InfluxDB 2         | 8086 (Web)                 | 8008           |
+| Telegraf           | 8200 (HTTP Prom)           | -              |
+| MLflow             | 5000 (Web)                 | 8009           |

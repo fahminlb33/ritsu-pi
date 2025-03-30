@@ -54,3 +54,25 @@ scrape_configs:
     static_configs:
       - targets: ["10.20.20.104"]
 {% endif %}
+
+{% if prometheus_remote_write.enabled %}
+# remote write to telegraf
+remote_write:
+  - name: telegraf
+    url: "http://telegraf:{{ prometheus_remote_write.promwrite_port }}/receive"
+    queue_config:
+      max_shards: 20
+    write_relabel_configs:
+      - source_labels: ['__name__']
+        regex: '.*_com_.*'
+        action: 'drop'
+      - source_labels: ['__name__']
+        regex: '.*_flame_.*'
+        action: 'drop'
+      - source_labels: ['__name__']
+        regex: '.*_portainer_.*'
+        action: 'drop'
+      - source_labels: ['__name__']
+        regex: '.*_opencontainers_.*'
+        action: 'drop'
+{% endif %}

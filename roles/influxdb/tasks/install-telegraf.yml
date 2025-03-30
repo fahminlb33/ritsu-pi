@@ -1,0 +1,26 @@
+---
+- name: Create configuration
+  ansible.builtin.template:
+    src: templates/telegraf.conf.j2
+    dest: "{{ config_dir }}/influxdb/telegraf.conf"
+    mode: "0775"
+  notify: Restart Telegraf
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ influxdb_state }}"
+    name: "{{ influxdb_telegraf_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: telegraf
+    image: "{{ influxdb_telegraf_image }}"
+    recreate: true
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "{{ config_dir }}/influxdb/telegraf.conf:/etc/telegraf/telegraf.conf:ro"
+    state: "{{ 'started' if (influxdb_state == 'present') else 'absent' }}"

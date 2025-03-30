@@ -1,0 +1,26 @@
+---
+# ------------------------------------------------------------------------------
+# InfluxDB 2 & Telegraf
+# Time series database, mainly for storing long term data from Prometheus
+#
+influxdb_state: present
+
+# Docker
+influxdb_image: "influxdb:2.7.11"
+influxdb_telegraf_image: "telegraf:1.34.1"
+
+# external access
+influxdb_port: 8011
+
+# telegraf
+influxdb_telegraf:
+  promwrite_port: 8200
+  token: ""
+
+# init credentials
+influxdb_init:
+  mode: "setup"
+  username: "YOUR USERNAME HERE"
+  password: "YOUR PASSWORD HERE"
+  organization: "kodesiana"
+  bucket: "kodesiana"
