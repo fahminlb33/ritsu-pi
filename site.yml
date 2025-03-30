@@ -27,145 +27,145 @@
       gateway: "172.18.0.1"
 
   roles:
-    # # ===> common
-    # - role: common
-    #   tags: [common]
-    #   vars:
-    #     common_config_static_ip: true
+    # ===> common
+    - role: common
+      tags: [common]
+      vars:
+        common_config_static_ip: true
 
-    # # ===> networking
-    # - role: gluetun
-    #   tags: [networking, security, vpn, gluetun]
-    #   vars:
-    #     gluetun_state: present
+    # ===> networking
+    - role: gluetun
+      tags: [networking, security, vpn, gluetun]
+      vars:
+        gluetun_state: present
 
-    #     # docker image
-    #     gluetun_image: qmcgaw/gluetun:v3.39.1
+        # docker image
+        gluetun_image: qmcgaw/gluetun:v3.39.1
 
-    #     # published port
-    #     gluetun_published_ports:
-    #       # qBittorrent
-    #       - 8006:8006
-    #       - 6881:6881
-    #       - 6881:6881/udp
-    #       # JDownloader 2
-    #       - 3129:3129
+        # published port
+        gluetun_published_ports:
+          # qBittorrent
+          - 8006:8006
+          - 6881:6881
+          - 6881:6881/udp
+          # JDownloader 2
+          - 3129:3129
 
-    #     # extra env
-    #     gluetun_envs:
-    #       TZ: "{{ timezone }}"
-    #       SERVER_COUNTRIES: "Canada"
-    #       VPN_TYPE: "wireguard"
-    #       PORT_FORWARD_ONLY: "on"
-    #       VPN_PORT_FORWARDING: "on"
-    #       VPN_SERVICE_PROVIDER: "protonvpn"
-    #       VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
-    #       WIREGUARD_PRIVATE_KEY: "{{ protonvpn_wireguard_private_key }}"
+        # extra env
+        gluetun_envs:
+          TZ: "{{ timezone }}"
+          SERVER_COUNTRIES: "Canada"
+          VPN_TYPE: "wireguard"
+          PORT_FORWARD_ONLY: "on"
+          VPN_PORT_FORWARDING: "on"
+          VPN_SERVICE_PROVIDER: "protonvpn"
+          VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+          WIREGUARD_PRIVATE_KEY: "{{ protonvpn_wireguard_private_key }}"
 
-    # - role: dnscrypt
-    #   tags: [networking, security, dnscrypt]
-    #   vars:
-    #     dnscrypt_state: present
+    - role: dnscrypt
+      tags: [networking, security, dnscrypt]
+      vars:
+        dnscrypt_state: present
 
-    #     # docker image
-    #     dnscrypt_image: klutchell/dnscrypt-proxy:latest
+        # docker image
+        dnscrypt_image: klutchell/dnscrypt-proxy:latest
 
-    #     # internal docker network config
-    #     dnscrypt_bind_ip: "172.18.1.100"
-    #     dnscrypt_bind_dns_port: 54
+        # internal docker network config
+        dnscrypt_bind_ip: "172.18.1.100"
+        dnscrypt_bind_dns_port: 54
 
-    #     # upstream DNS servers
-    #     dnscrypt_upstream_dns:
-    #       - cloudflare
-    #       - google
+        # upstream DNS servers
+        dnscrypt_upstream_dns:
+          - cloudflare
+          - google
 
-    # - role: pihole
-    #   tags: [networking, security, pihole]
-    #   vars:
-    #     pihole_state: present
+    - role: pihole
+      tags: [networking, security, pihole]
+      vars:
+        pihole_state: present
 
-    #     # docker image
-    #     pihole_image: pihole/pihole:2024.07.0
+        # docker image
+        pihole_image: pihole/pihole:2024.07.0
 
-    #     # web UI access
-    #     pihole_port: 8003
-    #     # pihole_password: "{{ pihole_password }}" # defined in secrets.yml
+        # web UI access
+        pihole_port: 8003
+        # pihole_password: "{{ pihole_password }}" # defined in secrets.yml
 
-    #     # enable DNSCrypt integration
-    #     # this config can only be enabled for first time installation
-    #     pihole_dnscrypt: true
+        # enable DNSCrypt integration
+        # this config can only be enabled for first time installation
+        pihole_dnscrypt: true
 
-    # # ===> downloaders
-    # - role: jdownloader
-    #   tags: [networking, file, jdownloader]
-    #   vars:
-    #     jdownloader_state: present
+    # ===> downloaders
+    - role: jdownloader
+      tags: [networking, file, jdownloader]
+      vars:
+        jdownloader_state: present
 
-    #     # Docker
-    #     jdownloader_image: antlafarge/jdownloader:latest
+        # Docker
+        jdownloader_image: antlafarge/jdownloader:latest
 
-    #     # download directory
-    #     jdownloader_download_dir: /media/primary/downloads
+        # download directory
+        jdownloader_download_dir: /media/primary/downloads
 
-    #     # use gluetun?
-    #     jdownloader_gluetun: true
+        # use gluetun?
+        jdownloader_gluetun: true
 
-    #     # MyJDownloader
-    #     jdownloader_myjd:
-    #       device: RAMIEL-PI
-    #       email: "{{ jdownloader_myjd_email }}"       # defined in secrets.yml
-    #       password: "{{ jdownloader_myjd_password }}" # defined in secrets.yml
+        # MyJDownloader
+        jdownloader_myjd:
+          device: RAMIEL-PI
+          email: "{{ jdownloader_myjd_email }}"       # defined in secrets.yml
+          password: "{{ jdownloader_myjd_password }}" # defined in secrets.yml
 
-    # - role: qbittorrent
-    #   tags: [networking, file, qbittorrent]
-    #   vars:
-    #     qbittorrent_state: present
-    #     qbittorrent_image: lscr.io/linuxserver/qbittorrent:5.0.0
+    - role: qbittorrent
+      tags: [networking, file, qbittorrent]
+      vars:
+        qbittorrent_state: present
+        qbittorrent_image: lscr.io/linuxserver/qbittorrent:5.0.0
 
-    #     # web UI access
-    #     qbittorrent_port: 8006
-    #     qbittorrent_torrenting_port: 6881
+        # web UI access
+        qbittorrent_port: 8006
+        qbittorrent_torrenting_port: 6881
 
-    #     # download directory
-    #     qbittorrent_media_dir: /media/primary/media
-    #     qbittorrent_download_dir: /media/primary/downloads
+        # download directory
+        qbittorrent_media_dir: /media/primary/media
+        qbittorrent_download_dir: /media/primary/downloads
 
-    #     # use gluetun?
-    #     qbittorrent_gluetun: true
+        # use gluetun?
+        qbittorrent_gluetun: true
 
-    # # ===> media server
-    # - role: jellyfin
-    #   tags: [media, jellyfin]
-    #   vars:
-    #     jellyfin_state: present
+    # ===> media server
+    - role: jellyfin
+      tags: [media, jellyfin]
+      vars:
+        jellyfin_state: present
 
-    #     # docker image
-    #     jellyfin_image: jellyfin/jellyfin:10.9.11
+        # docker image
+        jellyfin_image: jellyfin/jellyfin:10.9.11
 
-    #     # web UI access
-    #     jellyfin_port: 8002
+        # web UI access
+        jellyfin_port: 8002
 
-    #     # media directory containing movies, music, etc.
-    #     jellyfin_media_dir: /media/primary/media
+        # media directory containing movies, music, etc.
+        jellyfin_media_dir: /media/primary/media
 
-    # - role: samba
-    #   tags: [media, file, samba]
-    #   vars:
-    #     samba_state: present
+    - role: samba
+      tags: [media, file, samba]
+      vars:
+        samba_state: present
 
-    #     # SMB user
-    #     samba_user:
-    #       username: "{{ samba_user_username }}" # defined in secrets.yml
-    #       password: "{{ samba_user_password }}" # defined in secrets.yml
+        # SMB user
+        samba_user:
+          username: "{{ samba_user_username }}" # defined in secrets.yml
+          password: "{{ samba_user_password }}" # defined in secrets.yml
 
-    #     # directories to share
-    #     samba_mount_points:
-    #       - name: ramiel_primary
-    #         path: /media/primary
-    #         writeable: true
-    #         create_mask: "0777"
-    #         directory_mask: "0777"
-    #         public: false
+        # directories to share
+        samba_mount_points:
+          - name: ramiel_primary
+            path: /media/primary
+            writeable: true
+            create_mask: "0777"
+            directory_mask: "0777"
+            public: false
 
     # ===> monitoring
     - role: prometheus
@@ -268,68 +268,68 @@
           organization: "kodesiana"
           bucket: "ramiel"
 
-    # - role: grafana
-    #   tags: [monitoring, grafana]
-    #   vars:
-    #     grafana_state: present
-    #     grafana_image: grafana/grafana:11.3.0
+    - role: grafana
+      tags: [monitoring, grafana]
+      vars:
+        grafana_state: present
+        grafana_image: grafana/grafana:11.3.0
 
-    #     # web UI access
-    #     grafana_port: 8001
+        # web UI access
+        grafana_port: 8001
 
-    #     # login info
-    #     # grafana_password: "{{ grafana_password }}" # defined in secrets.yml
-    #     grafana_allow_signup: false
+        # login info
+        # grafana_password: "{{ grafana_password }}" # defined in secrets.yml
+        grafana_allow_signup: false
 
-    #     # provisioning
-    #     grafana_provision_dashboard:
-    #       node: true
-    #       blackbox: true
-    #       cadvisor: true
-    #       mikrotik: true
-    #       speedtest: true
+        # provisioning
+        grafana_provision_dashboard:
+          node: true
+          blackbox: true
+          cadvisor: true
+          mikrotik: true
+          speedtest: true
 
-    # - role: portainer
-    #   tags: [monitoring, portainer]
-    #   vars:
-    #     portainer_state: present
+    - role: portainer
+      tags: [monitoring, portainer]
+      vars:
+        portainer_state: present
 
-    #     # docker image
-    #     portainer_image: portainer/portainer-ce:2.21.4
+        # docker image
+        portainer_image: portainer/portainer-ce:2.21.4
 
-    #     # web UI access
-    #     portainer_port: 8004
+        # web UI access
+        portainer_port: 8004
 
-    # - role: mlflow
-    #   tags: [monitoring, mlflow]
-    #   vars:
-    #     mlflow_state: present
+    - role: mlflow
+      tags: [monitoring, mlflow]
+      vars:
+        mlflow_state: present
 
-    #     # docker image
-    #     mlflow_image: ghcr.io/mlflow/mlflow:v2.17.0
+        # docker image
+        mlflow_image: ghcr.io/mlflow/mlflow:v2.17.0
 
-    #     # web UI access
-    #     mlflow_port: 8009
+        # web UI access
+        mlflow_port: 8009
 
-    # - role: seq
-    #   tags: [monitoring, seq]
-    #   vars:
-    #     seq_state: present
+    - role: seq
+      tags: [monitoring, seq]
+      vars:
+        seq_state: present
 
-    #     # docker image
-    #     seq_image: datalust/seq:2024.3
+        # docker image
+        seq_image: datalust/seq:2024.3
 
-    #     # web UI
-    #     seq_port: 8008
+        # web UI
+        seq_port: 8008
 
-    # # ===> dashboard
-    # - role: flame
-    #   tags: [common, dashboard]
-    #   vars:
-    #     flame_state: present
+    # ===> dashboard
+    - role: flame
+      tags: [common, dashboard]
+      vars:
+        flame_state: present
 
-    #     # docker image
-    #     flame_image: pawelmalak/flame:multiarch2.3.1
+        # docker image
+        flame_image: pawelmalak/flame:multiarch2.3.1
 
-    #     # default password
-    #     flame_password: "{{ flame_dashboard_password }}"
+        # default password
+        flame_password: "{{ flame_dashboard_password }}"
