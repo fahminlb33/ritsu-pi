@@ -1,3 +1,7 @@
+# Ansible
+.venv
+.ansible
+
 # Ansible Vault Key
 secrets.yml
 secrets_pass
