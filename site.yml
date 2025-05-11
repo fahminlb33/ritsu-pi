@@ -164,7 +164,7 @@
       tags: [monitoring, prometheus]
       vars:
         prometheus_state: present
-        prometheus_image: prom/prometheus:v3.2.1
+        prometheus_image: prom/prometheus:v3.3.1
 
         # web UI access
         prometheus_port: 8005
@@ -172,19 +172,19 @@
         # retention
         prometheus_retention:
           time: 1y
-          size: 100GB
+          size: 50GB
 
         # apps to be monitored
         prometheus_exporters:
           cadvisor:
             enabled: true
             state: present
-            image: gcr.io/cadvisor/cadvisor:v0.51.0
+            image: gcr.io/cadvisor/cadvisor:v0.52.0
             port: 8101
 
           node:
             enabled: true
-            version: "1.9.0"
+            version: "1.9.1"
             arch: linux-armv7
             install_path: /usr/local/bin/node_exporter
             port: 8102
@@ -235,8 +235,20 @@
         prometheus_remote_write:
           enabled: true
           vector_image: timberio/vector:0.46.1-debian
+          vector_data_path: "/media/primary/ritsu-pi2/prometheus/vector-data"
           vector_api_port: 8686
-          vector_log_path: "/media/primary/logs/prometheus-archive"
+
+          output_file:
+            enabled: true
+            vector_log_path: "/media/primary/logs/prometheus-archive"
+
+          output_s3:
+            enabled: false
+            bucket: ritsu-pi-ramiel
+            region: ap-southeast-3
+            endpoint: "{{ vector_s3_endpoint }}"
+            access_key_id: "{{ vector_s3_access_key_id }}"
+            secret_access_key: "{{ vector_s3_secret_access_key }}"
 
     - role: grafana
       tags: [monitoring, grafana]

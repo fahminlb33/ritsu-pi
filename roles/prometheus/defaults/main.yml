@@ -72,5 +72,17 @@ prometheus_exporters:
 prometheus_remote_write:
   enabled: false
   vector_image: timberio/vector:0.46.1-debian
+  vector_data_path: "/media/primary/ritsu-pi2/prometheus/vector-data"
   vector_api_port: 8686
-  vector_log_path: ""
+
+  output_file:
+    enabled: true
+    vector_log_path: "/media/primary/logs/prometheus-archive"
+
+  output_s3:
+    enabled: false
+    bucket: ""
+    region: ap-southeast-3
+    endpoint: "{{ vector_s3_endpoint }}"
+    access_key_id: "{{ vector_s3_access_key_id }}"
+    secret_access_key: "{{ vector_s3_secret_access_key }}"

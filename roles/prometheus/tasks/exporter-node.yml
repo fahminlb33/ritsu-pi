@@ -7,7 +7,7 @@
 
 - name: Setting node exporter version fact
   ansible.builtin.set_fact:
-    node_exporter_update: "{{ '{{ prometheus_exporters.node.version }}' in '{{ node_exporter_installed_version.stdout }}' }}"
+    node_exporter_update: "{{ 'version {{ prometheus_exporters.node.version }}' not in '{{ node_exporter_installed_version.stdout }}' }}"
 
 - name: Create node exporter user
   ansible.builtin.user:
@@ -18,7 +18,6 @@
     system: true
     create_home: false
   become: true
-  when: node_exporter_update
 
 - name: Download and unzip node exporter
   ansible.builtin.unarchive:
@@ -53,7 +52,7 @@
     dest: /etc/systemd/system/node_exporter.service
     owner: root
     group: root
-    mode: "0775"
+    mode: "0644"
   become: true
 
 - name: Make sure node exporter is started

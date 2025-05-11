@@ -8,6 +8,7 @@ sources:
     address: 0.0.0.0:9090
 
 sinks:
+{% if prometheus_remote_write.output_file.enabled %}
   ritsu_local_file:
     type: file
     inputs:
@@ -16,3 +17,28 @@ sinks:
     compression: zstd
     encoding:
       codec: json
+{% endif %}
+
+{% if prometheus_remote_write.output_s3.enabled %}
+  ritsu_cf_r2:
+    type: aws_s3
+    inputs:
+      - prometheus
+    bucket: "{{ prometheus_remote_write.output_s3.bucket }}"
+    force_path_style: true
+    acl: private
+    auth:
+      access_key_id: "{{ prometheus_remote_write.output_s3.access_key_id }}"
+      secret_access_key: "{{ prometheus_remote_write.output_s3.secret_access_key }}"
+    endpoint: "{{ prometheus_remote_write.output_s3.endpoint }}"
+    region: "{{ prometheus_remote_write.output_s3.region }}"
+    buffer:
+      type: disk
+      when_full: "block"
+      max_size: 268435488 # 256 MB
+    compression: zstd
+    encoding:
+      codec: json
+    framing:
+      method: "newline_delimited"
+{% endif %}

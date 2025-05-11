@@ -5,7 +5,8 @@
     state: directory
     mode: "0775"
   loop:
-    - "{{ prometheus_remote_write.vector_log_path }}"
+    - "{{ prometheus_remote_write.vector_data_path }}"
+    - "{{ prometheus_remote_write.output_file.vector_log_path }}"
 
 - name: Install node exporter as service
   ansible.builtin.template:
@@ -35,5 +36,6 @@
       - name: "{{ docker_network.name }}"
     volumes:
       - "{{ config_dir }}/prometheus/vector.yml:/etc/vector/vector.yaml:ro"
-      - "{{ prometheus_remote_write.vector_log_path }}:/remote-write/logs:rw"
+      - "{{ prometheus_remote_write.vector_data_path }}:/var/lib/vector/"
+      - "{{ prometheus_remote_write.output_file.vector_log_path }}:/remote-write/logs:rw"
     state: "{{ 'started' if (prometheus_remote_write.enabled) else 'absent' }}"
