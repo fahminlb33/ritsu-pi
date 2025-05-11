@@ -5,5 +5,5 @@
 
   roles:
     # # common
-    - role: setup-network
+    - role: setup_network
       tags: [networking]
