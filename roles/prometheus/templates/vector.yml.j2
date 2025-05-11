@@ -1,0 +1,18 @@
+api:
+  enabled: true
+  address: 0.0.0.0:8686
+
+sources:
+  prometheus:
+    type: prometheus_remote_write
+    address: 0.0.0.0:9090
+
+sinks:
+  ritsu_local_file:
+    type: file
+    inputs:
+      - prometheus
+    path: "/remote-write/logs/prom-%Y-%m-%d.csv"
+    compression: zstd
+    encoding:
+      codec: json

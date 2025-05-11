@@ -1,0 +1,39 @@
+---
+- name: Create config and data directory
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "{{ prometheus_remote_write.vector_log_path }}"
+
+- name: Install node exporter as service
+  ansible.builtin.template:
+    src: templates/vector.yml.j2
+    dest: "{{ config_dir }}/prometheus/vector.yml"
+    owner: "{{ docker_user.uid }}"
+    group: "{{ docker_user.gid }}"
+    mode: "0775"
+  become: true
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "present"
+    name: "{{ prometheus_remote_write.vector_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: prometheus-vector
+    image: "{{ prometheus_remote_write.vector_image }}"
+    recreate: true
+    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ prometheus_remote_write.vector_api_port }}:8686"
+    networks:
+      - name: "{{ docker_network.name }}"
+    volumes:
+      - "{{ config_dir }}/prometheus/vector.yml:/etc/vector/vector.yaml:ro"
+      - "{{ prometheus_remote_write.vector_log_path }}:/remote-write/logs:rw"
+    state: "{{ 'started' if (prometheus_remote_write.enabled) else 'absent' }}"

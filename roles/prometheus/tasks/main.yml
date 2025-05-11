@@ -19,5 +19,9 @@
   ansible.builtin.import_tasks: exporter-speedtest.yml
   when: prometheus_exporters.speedtest.enabled
 
+- name: Install Vector Agent
+  ansible.builtin.import_tasks: remote-write-vector.yml
+  when: prometheus_remote_write.enabled
+
 - name: Install Prometheus
   ansible.builtin.import_tasks: install-prometheus.yml

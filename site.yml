@@ -38,11 +38,11 @@
       tags: [networking, security, vpn, gluetun]
       vars:
         gluetun_state: present
-
-        # docker image
         gluetun_image: qmcgaw/gluetun:v3.39.1
 
         # published port
+        # this is used to redirect traffic from
+        # the containers mapped to this container network
         gluetun_published_ports:
           # qBittorrent
           - 8006:8006
@@ -66,8 +66,6 @@
       tags: [networking, security, dnscrypt]
       vars:
         dnscrypt_state: present
-
-        # docker image
         dnscrypt_image: klutchell/dnscrypt-proxy:latest
 
         # internal docker network config
@@ -83,8 +81,6 @@
       tags: [networking, security, pihole]
       vars:
         pihole_state: present
-
-        # docker image
         pihole_image: pihole/pihole:2024.07.0
 
         # web UI access
@@ -100,8 +96,6 @@
       tags: [networking, file, jdownloader]
       vars:
         jdownloader_state: present
-
-        # Docker
         jdownloader_image: antlafarge/jdownloader:latest
 
         # download directory
@@ -138,8 +132,6 @@
       tags: [media, jellyfin]
       vars:
         jellyfin_state: present
-
-        # docker image
         jellyfin_image: jellyfin/jellyfin:10.9.11
 
         # web UI access
@@ -179,7 +171,7 @@
 
         # retention
         prometheus_retention:
-          time: 5y
+          time: 1y
           size: 100GB
 
         # apps to be monitored
@@ -237,11 +229,14 @@
 
           sensor_suhu:
             enabled: true
+            host: 10.20.20.104
 
         # remote write to telegraf
         prometheus_remote_write:
           enabled: true
-          promwrite_port: 8200
+          vector_image: timberio/vector:0.46.1-debian
+          vector_api_port: 8686
+          vector_log_path: "/media/primary/logs/prometheus-archive"
 
     - role: grafana
       tags: [monitoring, grafana]
@@ -268,8 +263,6 @@
       tags: [monitoring, portainer]
       vars:
         portainer_state: present
-
-        # docker image
         portainer_image: portainer/portainer-ce:2.21.4
 
         # web UI access
@@ -279,8 +272,6 @@
       tags: [monitoring, mlflow]
       vars:
         mlflow_state: present
-
-        # docker image
         mlflow_image: ghcr.io/mlflow/mlflow:v2.17.0
 
         # web UI access
@@ -291,8 +282,6 @@
       tags: [common, dashboard]
       vars:
         flame_state: present
-
-        # docker image
         flame_image: pawelmalak/flame:multiarch2.3.1
 
         # default password

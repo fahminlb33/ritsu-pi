@@ -15,6 +15,12 @@ prometheus_retention:
 
 # apps to be monitored
 prometheus_exporters:
+  cadvisor:
+    enabled: true
+    state: present
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    port: 8101
+
   node:
     enabled: true
     version: 1.8.2
@@ -27,19 +33,16 @@ prometheus_exporters:
     enabled: true
     state: present
     image: prom/blackbox-exporter:v0.23.0
-    port: 8102
-
-  cadvisor:
-    enabled: true
-    state: present
-    image: gcr.io/cadvisor/cadvisor:v0.47.2
-    port: 8101
+    port: 8103
+    ping_hosts:
+      - https://www.google.com
+      - https://www.github.com
 
   mikrotik:
     enabled: true
     state: present
     image: ghcr.io/akpw/mktxp:stable-20230706091740
-    port: 8103
+    port: 8104
 
     # Mikrotik router host
     router:
@@ -60,3 +63,14 @@ prometheus_exporters:
     # Configure the sample_interval to limit the number of checks interval because
     # the speed test will consume a considerable amount of bandwidth.
     scrape_interval: 1h
+
+  sensor_suhu:
+    enabled: true
+    host: 10.20.20.104
+
+# optional remote write
+prometheus_remote_write:
+  enabled: false
+  vector_image: timberio/vector:0.46.1-debian
+  vector_api_port: 8686
+  vector_log_path: ""

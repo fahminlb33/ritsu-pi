@@ -2,8 +2,8 @@
 
 # Global prometheus config
 global:
-  scrape_timeout: 25s       # must be less than scrape_interval
-  scrape_interval: 30s
+  scrape_timeout: 30s
+  scrape_interval: 1m
 
 # scrape data from exporters
 scrape_configs:
@@ -52,27 +52,17 @@ scrape_configs:
 {% if prometheus_exporters.sensor_suhu.enabled %}
   - job_name: exporter_sensor_suhu
     static_configs:
-      - targets: ["10.20.20.104"]
+      - targets: ["{{ prometheus_exporters.sensor_suhu.host }}"]
 {% endif %}
 
 {% if prometheus_remote_write.enabled %}
-# remote write to telegraf
+# remote write to vector
 remote_write:
-  - name: telegraf
-    url: "http://telegraf:{{ prometheus_remote_write.promwrite_port }}/receive"
+  - name: vector
+    url: "http://prometheus-vector:9090"
     queue_config:
       max_shards: 20
     write_relabel_configs:
-      - source_labels: ['__name__']
-        regex: '.*_com_.*'
-        action: 'drop'
-      - source_labels: ['__name__']
-        regex: '.*_flame_.*'
-        action: 'drop'
-      - source_labels: ['__name__']
-        regex: '.*_portainer_.*'
-        action: 'drop'
-      - source_labels: ['__name__']
-        regex: '.*_opencontainers_.*'
-        action: 'drop'
+      - regex: 'container_label_.*'
+        action: 'labeldrop'
 {% endif %}
