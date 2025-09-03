@@ -1,7 +1,7 @@
 ---
 - name: Create config directories
   ansible.builtin.file:
-    path: "{{ config_dir }}/jellyfin/{{ item }}"
+    path: "{{ jellyfin_config_dir }}/{{ item }}"
     state: directory
     mode: "0775"
   loop:
@@ -29,20 +29,20 @@
   community.docker.docker_container:
     name: jellyfin
     image: "{{ jellyfin_image }}"
-    recreate: true
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
     restart_policy: unless-stopped
     published_ports:
       - "{{ jellyfin_port }}:8096"
     networks:
-      - name: "{{ docker_network.name }}"
+      - name: ritsu-pi
     volumes:
+      - "{{ jellyfin_config_dir }}/config:/config:rw"
+      - "{{ jellyfin_config_dir }}/cache:/cache:rw"
       - "{{ jellyfin_media_dir }}:/media:rw"
-      - "{{ config_dir }}/jellyfin/config:/config:rw"
-      - "{{ config_dir }}/jellyfin/cache:/cache:rw"
+    devices:
+      - "/dev/dri:/dev/dri"
     labels:
       flame.type: "application"
       flame.name: "Jellyfin"
-      flame.url: "http://{{ flame_hostname }}:{{ jellyfin_port }}"
+      flame.url: "http://{{ server_hostname }}:{{ jellyfin_port }}"
       flame.icon: "custom"
-    state: "{{ 'started' if (jellyfin_state == 'present') else 'absent' }}"
+    state: "{{ 'started' if jellyfin_state == 'present' else 'absent' }}"
