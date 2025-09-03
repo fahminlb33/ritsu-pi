@@ -1,0 +1,18 @@
+---
+adblock_state: present
+adblock_config_dir: "{{ config_root }}/adblock"
+
+adblock_dnscrypt:
+  image: klutchell/dnscrypt-proxy:2.1.12
+  bind:
+    # must be in the same subnet as the Docker network
+    ip: "172.18.1.100"
+  upstream:
+    - cloudflare
+    - google
+
+adblock_pihole:
+  image: pihole/pihole:2025.08.0
+  port: 8003
+  port_https: 80031
+  password: CHANGE-ME

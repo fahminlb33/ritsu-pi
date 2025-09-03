@@ -1,7 +1,0 @@
----
-- name: Restart DNSCrypt
-  community.docker.docker_container:
-    state: started
-    restart: true
-    name: dnscrypt
-    image: "{{ dnscrypt_image }}"
