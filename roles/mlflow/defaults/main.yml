@@ -1,9 +1,5 @@
 ---
-# Mlflow Tracking Server
 mlflow_state: present
-
-# docker image
-mlflow_image: ghcr.io/mlflow/mlflow:v2.17.0
-
-# web UI
+mlflow_image: ghcr.io/mlflow/mlflow:v3.3.2
 mlflow_port: 8009
+mlflow_config_dir: "{{ config_root }}/mlflow"

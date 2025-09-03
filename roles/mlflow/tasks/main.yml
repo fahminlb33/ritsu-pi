@@ -1,10 +1,10 @@
 ---
 - name: Create data directory
   ansible.builtin.file:
-    path: "{{ config_dir }}/mlflow"
+    path: "{{ mlflow_config_dir }}"
     state: directory
     mode: "0775"
-  register: mlflow_data_dir
+  register: mlflow_config_dir_reg
 
 - name: Pull image from registry
   community.docker.docker_image:
@@ -16,23 +16,20 @@
   community.docker.docker_container:
     name: mlflow
     image: "{{ mlflow_image }}"
-    recreate: true
-    user: "{{ docker_user.uid }}:{{ docker_user.gid }}"
-    command: mlflow server --host 0.0.0.0 --port 5000 --app-name basic-auth
+    command: mlflow server --host 0.0.0.0 --port {{ mlflow_port }}
     restart_policy: unless-stopped
     working_dir: /home/mlflow
     env:
       MLFLOW_BACKEND_STORE_URI: sqlite:///mlflow.db
-      MLFLOW_AUTH_CONFIG_PATH: /home/mlflow/auth/basic-auth.ini
     published_ports:
-      - "{{ mlflow_port }}:5000"
+      - "{{ mlflow_port }}:{{ mlflow_port }}"
     networks:
-      - name: "{{ docker_network.name }}"
+      - name: ritsu-pi
     volumes:
-      - "{{ mlflow_data_dir.path }}:/home/mlflow:rw"
+      - "{{ mlflow_config_dir_reg.path }}:/home/mlflow:rw"
     labels:
       flame.type: "application"
       flame.name: "MLflow"
-      flame.url: "http://{{ flame_hostname }}:{{ mlflow_port }}"
+      flame.url: "http://{{ server_hostname }}:{{ mlflow_port }}"
       flame.icon: "custom"
-    state: "{{ 'started' if (mlflow_state == 'present') else 'absent' }}"
+    state: "{{ 'started' if mlflow_state == 'present' else 'absent' }}"
