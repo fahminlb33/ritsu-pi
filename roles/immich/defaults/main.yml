@@ -1,0 +1,22 @@
+---
+immich_state: present
+immich_port: 2283
+
+immich_config_dir: "{{ config_root }}/immich"
+immich_upload_dir: /var/lib/immich/uploads
+
+immich_images:
+  server: ghcr.io/immich-app/immich-server:v1.140.1
+  ml: ghcr.io/immich-app/immich-machine-learning:v1.140.1
+  redis: valkey/valkey:8
+  postgres: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+
+immich_hwaccel:
+  transcoding: quicksync
+  ml: openvino
+
+immich_db:
+  name: immich
+  username: immich
+  password: CHANGE-ME
+  storage_type: HDD # HDD or SSD

@@ -1,0 +1,74 @@
+# {{ ansible_managed }}
+
+name: immich
+
+networks:
+  ritsu-pi:
+    external: true
+
+volumes:
+  model-cache:
+
+services:
+  server:
+    container_name: immich_server
+    image: "{{ immich_images.server }}"
+    restart: unless-stopped
+    env_file:
+      - immich.env
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ immich_port }}:2283"
+    volumes:
+      - "{{ immich_upload_dir }}:/data"
+      - "/etc/localtime:/etc/localtime:ro"
+    depends_on:
+      - redis
+      - postgres
+    healthcheck:
+      disable: false
+    extends:
+      file: hwaccel.transcoding.yml
+      service: "{{ immich_hwaccel.transcoding | default('cpu') }}"
+
+  ml:
+    container_name: immich_machine_learning
+    image: "{{ immich_images.ml }}"
+    restart: unless-stopped
+    env_file:
+      - immich.env
+    networks:
+      - ritsu-pi
+    volumes:
+      - model-cache:/cache
+    healthcheck:
+      disable: false
+    extends:
+      file: hwaccel.ml.yml
+      service: "{{ immich_hwaccel.ml | default('cpu') }}"
+
+  redis:
+    container_name: immich_redis
+    image: "{{ immich_images.redis }}"
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    healthcheck:
+      test: redis-cli ping || exit 1
+
+  postgres:
+    container_name: immich_postgres
+    image: "{{ immich_images.postgres }}"
+    restart: unless-stopped
+    environment:
+      - "POSTGRES_DB={{ immich_db.name }}"
+      - "POSTGRES_USER={{ immich_db.username }}"
+      - "POSTGRES_PASSWORD={{ immich_db.password }}"
+      - "POSTGRES_INITDB_ARGS='--data-checksums'"
+      - "DB_STORAGE_TYPE={{ immich_db.storage_type | default('HDD') }}"
+    networks:
+      - ritsu-pi
+    shm_size: 128mb
+    volumes:
+      - "{{ immich_config_dir }}/postgres:/var/lib/postgresql/data"

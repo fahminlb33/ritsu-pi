@@ -1,0 +1,37 @@
+---
+- name: Create Immich config directory
+  ansible.builtin.file:
+    path: "{{ immich_config_dir }}/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "postgres"
+
+- name: Generate Immich config files
+  ansible.builtin.template:
+    src: "templates/{{ item.src }}"
+    dest: "{{ immich_config_dir }}/{{ item.dest }}"
+    mode: "0775"
+  loop:
+    - src: compose.yml.j2
+      dest: compose.yml
+    - src: hwaccel.ml.yml.j2
+      dest: hwaccel.ml.yml
+    - src: hwaccel.transcoding.yml.j2
+      dest: hwaccel.transcoding.yml
+    - src: immich.env.j2
+      dest: immich.env
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ immich_state }}"
+    name: "{{ item.value }}"
+    source: pull
+  loop: "{{ immich_images | dict2items }}"
+
+- name: Start Docker Compose services
+  community.docker.docker_compose_v2:
+    state: "{{ immich_state }}"
+    project_src: "{{ immich_config_dir }}"
+    remove_orphans: true
+    remove_volumes: true
