@@ -1,0 +1,37 @@
+downloader_state: present
+downloader_config_dir: "{{ config_root }}/arr-stack"
+
+# VPN
+downloader_gluetun:
+  image: qmcgaw/gluetun:v3.40.0
+  env:
+    SERVER_COUNTRIES: "Canada"
+    VPN_TYPE: "wireguard"
+    VPN_PORT_FORWARDING: "on"
+    VPN_SERVICE_PROVIDER: "protonvpn"
+    VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+    WIREGUARD_PRIVATE_KEY: "PRIVATE-KEY-HERE"
+
+# Downloaders
+downloader_qbittorrent:
+  image: lscr.io/linuxserver/qbittorrent:5.1.2
+  port: 8080
+  download_dir: "/media/merged"
+
+downloader_sabnzbd:
+  state: present
+  image: lscr.io/linuxserver/sabnzbd:4.5.3
+  port: 9696
+  download_dir_complete: "/media/merged"
+  download_dir_incomplete: "/media/merged"
+
+downloader_jdownloader:
+  image: jlesage/jdownloader-2:v25.07.2
+  download_dir: "/media/merged"
+  ports:
+    vpn: 13001
+    novpn: 13002
+  myjd:
+    email: ""
+    password: ""
+    device: ""

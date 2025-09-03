@@ -1,0 +1,51 @@
+---
+- name: Create downloader config directory
+  ansible.builtin.file:
+    path: "{{ downloader_config_dir }}/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "gluetun"
+    - "qbittorrent"
+    - "sabnzbd"
+    - "jdownloader-vpn"
+    - "jdownloader-novpn"
+    - "prowlarr"
+    - "lidarr"
+    - "sonarr"
+    - "radarr"
+    - "bazarr"
+
+- name: Create media directory tree
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "{{ downloader_qbittorrent.download_dir }}"
+    - "{{ downloader_sabnzbd.download_dir_complete }}"
+    - "{{ downloader_sabnzbd.download_dir_incomplete }}"
+    - "{{ downloader_jdownloader.download_dir }}"
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ downloader_state }}"
+    name: "{{ item }}"
+    source: pull
+  loop:
+    - "{{ downloader_gluetun.image }}"
+    - "{{ downloader_jdownloader.image }}"
+    - "{{ downloader_qbittorrent.image }}"
+    - "{{ downloader_sabnzbd.image }}"
+
+- name: Copy Docker Compose template
+  ansible.builtin.template:
+    src: templates/compose.yml.j2
+    dest: "{{ downloader_config_dir }}/compose.yml"
+    mode: "0775"
+
+- name: Start Docker Compose services
+  community.docker.docker_compose_v2:
+    state: "{{ downloader_state }}"
+    project_src: "{{ downloader_config_dir }}"
+    remove_orphans: true
