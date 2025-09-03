@@ -1,0 +1,29 @@
+---
+- name: Create config directory
+  ansible.builtin.file:
+    path: "{{ dashboard_config_dir }}"
+    state: directory
+    mode: "0775"
+  register: dashboard_config_dir_reg
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ dashboard_state }}"
+    name: "{{ dashboard_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: dashboard
+    image: "{{ dashboard_image }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - "80:5005"
+    networks:
+      - name: ritsu-pi
+    volumes:
+      - "{{ dashboard_config_dir_reg.path }}:/app/data:rw"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    env:
+      PASSWORD: "{{ dashboard_password }}"
+    state: "{{ 'started' if dashboard_state == 'present' else 'absent' }}"

@@ -1,0 +1,5 @@
+---
+dashboard_state: present
+dashboard_image: pawelmalak/flame:2.3.1
+dashboard_config_dir: "{{ config_root }}/dashboard"
+dashboard_password: "" # admin password
