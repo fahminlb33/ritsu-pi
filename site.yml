@@ -7,294 +7,292 @@
   vars:
     # Location where configuration files be stored.
     # Note: ALWAYS USE ABSOLUTE PATH
-    config_dir: /media/primary/ritsu-pi2
+    config_root: /home/ramiel/ritsu-pi
 
     # Timezone
     timezone: Asia/Jakarta
 
     # Flame dashboard
-    flame_hostname: 10.20.20.102
+    server_hostname: 10.20.20.101
 
     # Docker
-    docker_user:
-      uid: "1000"
-      gid: "1000"
-
     docker_network:
-      name: mainnet
-      driver: bridge
-      subnet: "172.18.0.1/16"
+      subnet: "172.18.0.0/16"
       gateway: "172.18.0.1"
-
+  pre_tasks:
+    - name: Include common tasks
+      ansible.builtin.import_tasks: tasks/main.yml
   roles:
-    # ===> common
-    - role: common
-      tags: [common]
-      vars:
-        common_config_static_ip: true
-
     # ===> networking
-    - role: gluetun
+    - role: adblock
+      tags: [networking, security, adblock, dnscrypt, pihole]
+      vars:
+        adblock_state: present
+        adblock_config_dir: "{{ config_root }}/adblock"
+
+        adblock_dnscrypt:
+          image: klutchell/dnscrypt-proxy:v2.1.12
+          bind:
+          # must be in the same subnet as the Docker network
+            ip: "172.18.1.100"
+          upstream:
+            - cloudflare
+            - google
+
+        adblock_pihole:
+          image: pihole/pihole:2025.08.0
+          port: 8001
+          port_https: 8301
+          password: "{{ pihole_password }}"
+
+    - role: downloader
       tags: [networking, security, vpn, gluetun]
       vars:
-        gluetun_state: present
-        gluetun_image: qmcgaw/gluetun:v3.39.1
+        downloader_state: present
+        downloader_config_dir: "{{ config_root }}/downloader"
 
-        # published port
-        # this is used to redirect traffic from
-        # the containers mapped to this container network
-        gluetun_published_ports:
-          # qBittorrent
-          - 8006:8006
-          - 6881:6881
-          - 6881:6881/udp
-          # JDownloader 2
-          - 3129:3129
+        # VPN
+        downloader_gluetun:
+          image: qmcgaw/gluetun:v3.40.0
+          env:
+            TZ: "{{ timezone }}"
+            SERVER_COUNTRIES: "Canada"
+            VPN_TYPE: "wireguard"
+            VPN_PORT_FORWARDING: "on"
+            VPN_SERVICE_PROVIDER: "protonvpn"
+            VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+            PORT_FORWARD_ONLY: "on"
+            WIREGUARD_PRIVATE_KEY: "{{ protonvpn_wireguard_private_key }}"
+            FIREWALL_VPN_INPUT_PORTS: "6881"
 
-        # extra env
-        gluetun_envs:
-          TZ: "{{ timezone }}"
-          SERVER_COUNTRIES: "Canada"
-          VPN_TYPE: "wireguard"
-          PORT_FORWARD_ONLY: "on"
-          VPN_PORT_FORWARDING: "on"
-          VPN_SERVICE_PROVIDER: "protonvpn"
-          VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
-          WIREGUARD_PRIVATE_KEY: "{{ protonvpn_wireguard_private_key }}"
+        # Downloaders
+        downloader_qbittorrent:
+          image: lscr.io/linuxserver/qbittorrent:5.1.2
+          port: 8004
+          download_dir: "/mnt/pool/downloads"
 
-    - role: dnscrypt
-      tags: [networking, security, dnscrypt]
-      vars:
-        dnscrypt_state: present
-        dnscrypt_image: klutchell/dnscrypt-proxy:latest
+        downloader_sabnzbd:
+          state: absent
+          image: lscr.io/linuxserver/sabnzbd:4.5.3
+          port: 8005
+          download_dir_complete: "/mnt/pool/downloads"
+          download_dir_incomplete: "/mnt/pool/downloads"
 
-        # internal docker network config
-        dnscrypt_bind_ip: "172.18.1.100"
-        dnscrypt_bind_dns_port: 54
-
-        # upstream DNS servers
-        dnscrypt_upstream_dns:
-          - cloudflare
-          - google
-
-    - role: pihole
-      tags: [networking, security, pihole]
-      vars:
-        pihole_state: present
-        pihole_image: pihole/pihole:2024.07.0
-
-        # web UI access
-        pihole_port: 8003
-        # pihole_password: "{{ pihole_password }}" # defined in secrets.yml
-
-        # enable DNSCrypt integration
-        # this config can only be enabled for first time installation
-        pihole_dnscrypt: true
-
-    # ===> downloaders
-    - role: jdownloader
-      tags: [networking, file, jdownloader]
-      vars:
-        jdownloader_state: present
-        jdownloader_image: antlafarge/jdownloader:latest
-
-        # download directory
-        jdownloader_download_dir: /media/primary/downloads
-
-        # use gluetun?
-        jdownloader_gluetun: true
-
-        # MyJDownloader
-        jdownloader_myjd:
-          device: RAMIEL-PI
-          email: "{{ jdownloader_myjd_email }}"       # defined in secrets.yml
-          password: "{{ jdownloader_myjd_password }}" # defined in secrets.yml
-
-    - role: qbittorrent
-      tags: [networking, file, qbittorrent]
-      vars:
-        qbittorrent_state: present
-        qbittorrent_image: lscr.io/linuxserver/qbittorrent:5.0.0
-
-        # web UI access
-        qbittorrent_port: 8006
-        qbittorrent_torrenting_port: 6881
-
-        # download directory
-        qbittorrent_media_dir: /media/primary/media
-        qbittorrent_download_dir: /media/primary/downloads
-
-        # use gluetun?
-        qbittorrent_gluetun: true
+        downloader_jdownloader:
+          image: jlesage/jdownloader-2:v25.07.2
+          download_dir: "/mnt/pool/downloads"
+          ports:
+            vpn: 13001
+            novpn: 13002
+          myjd:
+            email: "{{ jdownloader_myjd_email }}"
+            password: "{{ jdownloader_myjd_password }}"
+            device: "ramiel"
 
     # ===> media server
+    - role: arr_stack
+      tags: [networking, security, vpn, gluetun]
+      vars:
+        arr_stack_state: present
+        arr_stack_config_dir: "{{ config_root }}/arr-stack"
+        arr_stack_media_dir: /mnt/pool/media
+
+        arr_stack_prowlarr:
+          image: lscr.io/linuxserver/prowlarr:2.0.5
+          port: 8201
+
+        arr_stack_lidarr:
+          image: lscr.io/linuxserver/lidarr:2.13.3
+          port: 8202
+
+        arr_stack_sonarr:
+          image: lscr.io/linuxserver/sonarr:4.0.15
+          port: 8203
+
+        arr_stack_radarr:
+          image: lscr.io/linuxserver/radarr:5.26.2
+          port: 8204
+
+        arr_stack_bazarr:
+          image: lscr.io/linuxserver/bazarr:1.5.2
+          port: 8205
+
     - role: jellyfin
       tags: [media, jellyfin]
       vars:
         jellyfin_state: present
         jellyfin_image: jellyfin/jellyfin:10.9.11
-
-        # web UI access
         jellyfin_port: 8002
+        jellyfin_media_dir: /mnt/pool/media
 
-        # media directory containing movies, music, etc.
-        jellyfin_media_dir: /media/primary/media
-
-    - role: samba
-      tags: [media, file, samba]
+    - role: immich
+      tags: [networking, security, pihole]
       vars:
-        samba_state: present
+        immich_state: present
+        immich_port: 8003
 
-        # SMB user
-        samba_user:
-          username: "{{ samba_user_username }}" # defined in secrets.yml
-          password: "{{ samba_user_password }}" # defined in secrets.yml
+        immich_config_dir: "{{ config_root }}/immich"
+        immich_upload_dir: /mnt/pool/photos
 
-        # directories to share
-        samba_mount_points:
-          - name: ramiel_primary
-            path: /media/primary
-            writeable: true
-            create_mask: "0777"
-            directory_mask: "0777"
-            public: false
+        immich_images:
+          server: ghcr.io/immich-app/immich-server:v1.140.1
+          ml: ghcr.io/immich-app/immich-machine-learning:v1.140.1
+          postgres: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
+          redis: valkey/valkey:8
+
+        immich_hwaccel:
+          transcoding: quicksync
+          ml: openvino
+
+        immich_db:
+          name: immich
+          username: "{{ immich_db_username }}"
+          password: "{{ immich_db_password }}"
+          storage_type: HDD
 
     # ===> monitoring
-    - role: prometheus
+    - role: monitoring
       tags: [monitoring, prometheus]
       vars:
-        prometheus_state: present
-        prometheus_image: prom/prometheus:v3.3.1
+        monitoring_state: present
+        monitoring_config_dir: "{{ config_root }}/monitoring"
 
-        # web UI access
-        prometheus_port: 8005
+        monitoring_portainer:
+          state: present
+          image: portainer/portainer-ce:2.33.1
+          port: 8306
+          port_https: 8006
 
-        # retention
-        prometheus_retention:
-          time: 1y
-          size: 50GB
+        monitoring_grafana:
+          state: present
+          image: grafana/grafana:12.1.1-ubuntu
+          port: 8007
+          user:
+            username: "{{ grafana_username }}"
+            password: "{{ grafana_password }}"
+            allow_signup: false
 
-        # apps to be monitored
-        prometheus_exporters:
-          cadvisor:
+        monitoring_prometheus:
+          state: present
+          image: prom/prometheus:v3.5.0
+          port: 8008
+          retention:
+            time: 2y
+            size: 100GB
+          remote_write:
             enabled: true
+            url: http://vector:9090
+          extra_config:
+            - job_name: immich_api
+              static_configs:
+                - targets: ['immich-server:8081']
+            - job_name: immich_microservices
+              static_configs:
+                - targets: ['immich-server:8082']
+
+        monitoring_vector:
+          state: present
+          image: timberio/vector:0.49.0-debian
+          port: 8009
+          remote_write:
+            port: 9090
+            logs_path: /mnt/pool/prometheus-archive
+
+        monitoring_exporters:
+          node:
             state: present
-            image: gcr.io/cadvisor/cadvisor:v0.52.0
+            image: prom/node-exporter:v1.9.1
             port: 8101
 
-          node:
-            enabled: true
-            version: "1.9.1"
-            arch: linux-armv7
-            install_path: /usr/local/bin/node_exporter
+          cadvisor:
+            state: present
+            image: gcr.io/cadvisor/cadvisor:v0.52.0
             port: 8102
-            user_owner: node-exporter
-            user_group: node-exporter
 
           blackbox:
-            enabled: true
             state: present
-            image: prom/blackbox-exporter:v0.26.0
+            image: prom/blackbox-exporter:v0.27.0
             port: 8103
-
             ping_hosts:
               - https://www.google.com
               - https://www.github.com
 
-          mikrotik:
-            enabled: true
+          speedtest:
             state: present
-            image: ghcr.io/akpw/mktxp:1.2.10
+            image: danopstech/speedtest_exporter:v0.0.5
             port: 8104
+            # Configure the sample_interval to limit the number of checks interval because
+            # the speed test will consume a considerable amount of bandwidth.
+            scrape_interval: 1h
+            # https://github.com/danopstech/speedtest_exporter
 
+          mikrotik:
+            state: present
+            image: ghcr.io/akpw/mktxp:1.2.12
+            port: 8105
             # Mikrotik router host
             router:
               host: 10.20.20.1
               port: 8728
-
             # Mikrotik user with API access
             user:
-              username: "{{ mktxp_username }}" # defined in secrets.yml
-              password: "{{ mktxp_password }}" # defined in secrets.yml
+              username: "{{ mktxp_username }}"
+              password: "{{ mktxp_password }}"
 
-          speedtest:
-            enabled: true
+          apcusbd:
             state: present
-            image: miguelndecarvalho/speedtest-exporter:v3.5.4
-            port: 8105
+            image: iodeveloper/prom-apcupsd-exporter:1.0.1
+            port: 8106
+            # https://grafana.com/grafana/dashboards/19329-apc-ups/
 
-            # Configure the sample_interval to limit the number of checks interval because
-            # the speed test will consume a considerable amount of bandwidth.
-            scrape_interval: 1h
+          smartctl:
+            state: present
+            image: prometheuscommunity/smartctl-exporter:v0.14.0
+            port: 8107
 
-          sensor_suhu:
-            enabled: true
-            host: 10.20.20.104
-
-        # remote write to telegraf
-        prometheus_remote_write:
-          enabled: true
-          vector_image: timberio/vector:0.46.1-debian
-          vector_data_path: "/media/primary/ritsu-pi2/prometheus/vector-data"
-          vector_api_port: 8686
-
-          output_file:
-            enabled: true
-            vector_log_path: "/media/primary/logs/prometheus-archive"
-
-          output_s3:
-            enabled: false
-            bucket: ritsu-pi-ramiel
-            region: ap-southeast-3
-            endpoint: "{{ vector_s3_endpoint }}"
-            access_key_id: "{{ vector_s3_access_key_id }}"
-            secret_access_key: "{{ vector_s3_secret_access_key }}"
-
-    - role: grafana
-      tags: [monitoring, grafana]
-      vars:
-        grafana_state: present
-        grafana_image: grafana/grafana:11.3.0
-
-        # web UI access
-        grafana_port: 8001
-
-        # login info
-        # grafana_password: "{{ grafana_password }}" # defined in secrets.yml
-        grafana_allow_signup: false
-
-        # provisioning
-        grafana_provision_dashboard:
-          node: true
-          blackbox: true
-          cadvisor: true
-          mikrotik: true
-          speedtest: true
-
-    - role: portainer
-      tags: [monitoring, portainer]
-      vars:
-        portainer_state: present
-        portainer_image: portainer/portainer-ce:2.21.4
-
-        # web UI access
-        portainer_port: 8004
-
-    - role: mlflow
-      tags: [monitoring, mlflow]
-      vars:
-        mlflow_state: present
-        mlflow_image: ghcr.io/mlflow/mlflow:v2.17.0
-
-        # web UI access
-        mlflow_port: 8009
-
-    # ===> dashboard
-    - role: flame
+    - role: dashboard
       tags: [common, dashboard]
       vars:
-        flame_state: present
-        flame_image: pawelmalak/flame:multiarch2.3.1
+        dashboard_state: present
+        dashboard_image: pawelmalak/flame:multiarch2.3.1
+        dashboard_config_dir: "{{ config_root }}/dashboard"
+        dashboard_password: "{{ dashboard_admin_password }}"
 
-        # default password
-        flame_password: "{{ flame_dashboard_password }}"
+    # ==> AI/ML tools
+    - role: mlflow
+      tags: [monitoring, database, mlflow]
+      vars:
+        mlflow_state: present
+        mlflow_image: ghcr.io/mlflow/mlflow:v3.3.2
+        mlflow_port: 8010
+        mlflow_config_dir: "{{ config_root }}/mlflow"
+
+    # ==> databases
+    - role: postgresql
+      tags: [database, postgresql]
+      vars:
+        postgresql_major_version: 17
+        postgresql_extensions:
+          pg_search:
+            version: "0.18.0"
+          vectorchord:
+            version: "0.5.0"
+      become: true
+
+    # ==> file sharing
+    - role: samba
+      tags: [file, media, share, samba]
+      vars:
+        # SMB user
+        samba_user:
+          group: smbusers
+          username: "{{ samba_user_username }}"
+          password: "{{ samba_user_password }}"
+
+        # directories to share
+        samba_mount_points:
+          - name: ramiel
+            path: /mnt/pool
+            writeable: true
+            browsable: true
+      become: true
