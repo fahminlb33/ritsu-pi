@@ -1,5 +1,7 @@
 # Port Mappings
 
+> THIS DOCUMENT IS OUTDATED
+
 The published port follows these convention:
 
 - Web UI: 80xx

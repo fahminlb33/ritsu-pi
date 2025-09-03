@@ -1,42 +1,50 @@
 # ritsu-pi
 
-ritsu-pi is a collectioin of Ansible playbook to build your own Raspberry Pi cluster with various monitoring and apps. You can build a home media server, download servers, seedbox, or even create a kubernetes cluster (in the future, I hope!).
-
-To allow an easy deployment and maintenance, *almost* all of the apps included in ritsu-pi is running on top of Docker. With this approach you can easily update and customize your setup. But this also comes with a down side, you will need a recent version of Raspberry Pi because it is power hungry and I personally use Pi 4 Model B. You can use older version but you might experience some performance degradation.
+ritsu-pi is a collectioin of Ansible playbook to build your own homelab with various monitoring and apps. You can build a home media server, download servers, seedbox, or just about anything. To allow an easy deployment and maintenance, *almost* all of the apps included in ritsu-pi is running on top of Docker. With this approach you can easily update and customize your setup.
 
 > This project is heavily inspired from [internet-pi](https://github.com/geerlingguy/internet-pi), cheers to [@geerlingguy](https://github.com/geerlingguy) for his awesome project!
+
+> **September 2025 Update** I'm upgrading my homelab and no longer use Raspberry Pi for my main server. Rest assured, this project should still work with Raspberry Pi.
 
 ## :battery: Batteries included
 
 ritsu-pi packed quite a bunch of apps for your pi server. Docker is mandatory and everything else is optional and can be configured via `config.yml`.
 
 - [x] Docker
-- [x] Prometheus
-- [x] Grafana
-- [x] Portainer
-- [x] Blackbox Exporter
-- [x] cAdvisor Exporter
-- [x] Mikrotik Exporter
-- [x] Node Exporter
-- [x] SpeedTest Exporter
-- [x] JDownloader
-- [x] qBittorrent
-- [x] DNSCrypt
-- [x] Pi-Hole
+- [x] AdBlock
+  - [x] DNSCrypt
+  - [x] Pi-Hole
+- [x] Downloaders
+  - [x] Gluetun VPN
+  - [x] JDownloader
+  - [x] qBittorrent
+  - [x] Sabnzbd
+- [x] Arr Stack
+  - [x] Prowlarr
+  - [x] Lidarr
+  - [x] Sonarr
+  - [x] Radarr
+  - [x] Bazarr
 - [x] Jellyfin
+- [x] Immich
+- [x] Monitoring
+  - [x] Portainer
+  - [x] Grafana
+  - [x] Prometheus
+  - [x] [Vector](https://vector.dev/)
+  - [x] Node Exporter
+  - [x] cAdvisor Exporter
+  - [x] Blackbox Exporter
+  - [x] SpeedTest Exporter
+  - [x] Mikrotik Exporter
+  - [x] Apcusbd Exporter
+  - [x] Smartctl Exporter
+- [x] Flame Dashboard
+- [x] MLflow
+- [x] PostgreSQL
 - [x] Samba Server
 
-See [INSTALL.MD](./INSTALL.MD) for step by step installation guide.
-
-### :eyes: Maybe in the future
-
-I'm also planning to include other apps especially for home entertainment:tv:
-
-- [ ] Radarr
-- [ ] Sonarr
-- [ ] Lidarr
-- [ ] Bazarr
-- [ ] Jackett/Prowlarr
+See [the docs](./docs/install.md) for step by step installation guide.
 
 ### :question: Why is it named "ritsu?"
 
@@ -55,4 +63,4 @@ Apache License version 2.0
 
 ## Author
 
-Created in 2022 by [Fahmi Noor Fiqri](https://www.kodesiana.com/).
+Created by [Fahmi Noor Fiqri](https://www.kodesiana.com/).
