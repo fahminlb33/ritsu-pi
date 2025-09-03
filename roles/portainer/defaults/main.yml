@@ -1,9 +1,0 @@
----
-# Portainer
-portainer_state: present
-
-# docker image
-portainer_image: portainer/portainer-ce:2.21.4
-
-# web UI access
-portainer_port: 8004

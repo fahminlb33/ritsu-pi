@@ -1,0 +1,16 @@
+---
+- name: Create Vector directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "{{ monitoring_config_dir }}/vector/data"
+    - "{{ monitoring_vector.remote_write.logs_path }}"
+
+- name: Create Vector configuration
+  ansible.builtin.template:
+    src: templates/vector.yml.j2
+    dest: "{{ monitoring_config_dir }}/vector/vector.yml"
+    mode: "0775"
+  notify: Restart Vector

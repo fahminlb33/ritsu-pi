@@ -1,0 +1,19 @@
+---
+- name: Create Mikrotik exporter directory
+  ansible.builtin.file:
+    path: "{{ monitoring_config_dir }}/exporters/mikrotik"
+    state: directory
+    mode: "0775"
+  register: monitoring_exporters_mikrotik_config_dir
+
+- name: Create Mikrotik exporter configuration
+  ansible.builtin.template:
+    src: templates/mktxp/{{ item.src }}
+    dest: "{{ monitoring_exporters_mikrotik_config_dir.path }}/{{ item.dest }}"
+    mode: "0775"
+  notify: Restart Mikrotik Exporter
+  loop:
+    - src: _mktxp.conf.j2
+      dest: _mktxp.conf
+    - src: mktxp.conf.j2
+      dest: mktxp.conf

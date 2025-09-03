@@ -1,0 +1,210 @@
+# {{ ansible_managed }}
+
+name: monitoring
+
+networks:
+  ritsu-pi:
+    external: true
+
+services:
+{% if monitoring_portainer.state == 'present' %}
+  portainer:
+    container_name: portainer
+    image: "{{ monitoring_portainer.image }}"
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "{{ monitoring_portainer.port }}:8000"
+      - "{{ monitoring_portainer.port_https }}:9443"
+    networks:
+      - ritsu-pi
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "{{ monitoring_config_dir }}/portainer/data:/data:rw"
+    labels:
+      flame.type: "application"
+      flame.name: "Portainer"
+      flame.url: "http://{{ server_hostname }}:{{ monitoring_portainer.port_https }}"
+      flame.icon: "custom"
+{% endif %}
+
+{% if monitoring_grafana.state == 'present' %}
+  grafana:
+    container_name: grafana
+    image: "{{ monitoring_grafana.image }}"
+    restart: unless-stopped
+    user: "{{ ansible_user_uid }}:{{ ansible_user_gid }}"
+    environment:
+      - GF_SECURITY_ADMIN_USER={{ monitoring_grafana.user.username }}
+      - GF_SECURITY_ADMIN_PASSWORD={{ monitoring_grafana.user.password }}
+      - GF_USERS_ALLOW_SIGN_UP={{ monitoring_grafana.user.allow_signup | string | lower }}
+    networks:
+      - ritsu-pi
+    ports:
+        - "{{ monitoring_grafana.port }}:3000"
+    volumes:
+      - "{{ monitoring_config_dir }}/grafana/data:/var/lib/grafana"
+      - "{{ monitoring_config_dir }}/grafana/dashboards:/var/lib/grafana/dashboards"
+      - "{{ monitoring_config_dir }}/grafana/provisioning:/etc/grafana/provisioning"
+    labels:
+      flame.type: "application"
+      flame.name: "Grafana"
+      flame.url: "http://{{ server_hostname }}:{{ monitoring_grafana.port }}"
+      flame.icon: "custom"
+{% endif %}
+
+{% if monitoring_prometheus.state == 'present' %}
+  prometheus:
+    container_name: prometheus
+    image: "{{ monitoring_prometheus.image }}"
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus/data
+      - --storage.tsdb.retention.size={{ monitoring_prometheus.retention.size }}
+      - --storage.tsdb.retention.time={{ monitoring_prometheus.retention.time }}
+    restart: unless-stopped
+    user: "{{ ansible_user_uid }}:{{ ansible_user_gid }}"
+    networks:
+      - ritsu-pi
+    ports:
+        - "{{ monitoring_prometheus.port }}:9090"
+    volumes:
+      - "{{ monitoring_config_dir }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
+      - "{{ monitoring_config_dir }}/prometheus/data:/prometheus/data:rw"
+    labels:
+      flame.type: "application"
+      flame.name: "Prometheus"
+      flame.url: "http://{{ server_hostname }}:{{ monitoring_prometheus.port }}"
+      flame.icon: "custom"
+{% endif %}
+
+{% if monitoring_vector.state == 'present' %}
+  vector:
+    container_name: vector
+    image: "{{ monitoring_vector.image }}"
+    restart: unless-stopped
+    ports:
+      - "{{ monitoring_vector.port }}:8686"
+    networks:
+      - ritsu-pi
+    volumes:
+      - "{{ monitoring_config_dir }}/vector/vector.yml:/etc/vector/vector.yaml:ro"
+      - "{{ monitoring_config_dir }}/vector/data:/var/lib/vector/"
+      - "{{ monitoring_vector.remote_write.logs_path }}:/opt/vector/logs:rw"
+{% endif %}
+
+{% if monitoring_exporters.node.state == 'present' %}
+  node:
+    container_name: node-exporter
+    image: "{{ monitoring_exporters.node.image }}"
+    command:
+      - --path.procfs=/host/proc
+      - --path.rootfs=/rootfs
+      - --path.sysfs=/host/sys
+      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
+    restart: unless-stopped
+    ports:
+     - "{{ monitoring_exporters.node.port }}:9100"
+    networks:
+      - ritsu-pi
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+{% endif %}
+
+{% if monitoring_exporters.cadvisor.state == 'present' %}
+  cadvisor:
+    container_name: cadvisor-exporter
+    image: "{{ monitoring_exporters.cadvisor.image }}"
+    restart: unless-stopped
+    privileged: true
+    ports:
+      - "{{ monitoring_exporters.cadvisor.port }}:8080"
+    networks:
+      - ritsu-pi
+    volumes:
+      - /:/rootfs:ro
+      - /sys:/sys:ro
+      - /var/run:/var/run:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+      - /dev/disk/:/dev/disk:ro
+    devices:
+      - /dev/kmsg
+    labels:
+      - flame.type=application
+      - flame.name=cAdvisor
+      - flame.url=http://{{ server_hostname }}:{{ monitoring_exporters.cadvisor.port }}
+      - flame.icon=custom
+{% endif %}
+
+{% if monitoring_exporters.blackbox.state == 'present' %}
+  blackbox:
+    container_name: blackbox-exporter
+    image: "{{ monitoring_exporters.blackbox.image }}"
+    command: --config.file=/config/blackbox.yml
+    restart: unless-stopped
+    ports:
+      - "{{ monitoring_exporters.blackbox.port }}:9115"
+    networks:
+      - ritsu-pi
+    volumes:
+      - "{{ monitoring_exporters_blackbox_config_dir.path }}/blackbox.yml:/config/blackbox.yml:ro"
+{% endif %}
+
+{% if monitoring_exporters.speedtest.state == 'present' %}
+  speedtest:
+    container_name: speedtest-exporter
+    image: "{{ monitoring_exporters.speedtest.image }}"
+    restart: unless-stopped    
+    ports:
+      - "{{ monitoring_exporters.speedtest.port }}:9090"
+    networks:
+      - ritsu-pi
+    healthcheck:
+      test: ["NONE"]
+{% endif %}
+
+{% if monitoring_exporters.mikrotik.state == 'present' %}
+  mikrotik:
+    container_name: mikrotik-exporter
+    image: "{{ monitoring_exporters.mikrotik.image }}"
+    command: --cfg-dir /mktxp_config export
+    restart: unless-stopped
+    ports:
+      - "{{ monitoring_exporters.mikrotik.port }}:49090"
+    networks:
+      - ritsu-pi
+    volumes:
+      - "{{ monitoring_exporters_mikrotik_config_dir.path }}:/mktxp_config:rw"
+{% endif %}
+
+{% if monitoring_exporters.apcusbd.state == 'present' %}
+  apcusbd:
+    container_name: apcusbd-exporter
+    image: "{{ monitoring_exporters.apcusbd.image }}"
+    command: [
+      "--logLevel", "warn",
+      "--apcupsd", "host.docker.internal:3551",
+      "--apcupsdStartSkip", "20",
+      "--collectInterval", "10"
+    ]
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ monitoring_exporters.apcusbd.port }}:8001"
+{% endif %}
+
+{% if monitoring_exporters.smartctl.state == 'present' %}
+  smartctl:
+    container_name: smartctl-exporter
+    image: "{{ monitoring_exporters.smartctl.image }}"
+    restart: unless-stopped
+    privileged: true
+    user: root
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ monitoring_exporters.smartctl.port }}:9633"
+{% endif %}

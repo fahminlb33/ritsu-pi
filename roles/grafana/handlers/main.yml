@@ -1,7 +1,0 @@
----
-- name: Restart Grafana
-  community.docker.docker_container:
-    state: started
-    restart: true
-    name: grafana
-    image: "{{ grafana_image }}"

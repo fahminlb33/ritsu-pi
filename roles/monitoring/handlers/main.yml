@@ -1,0 +1,35 @@
+---
+- name: Restart Grafana
+  community.docker.docker_compose_v2:
+    state: restarted
+    project_src: "{{ monitoring_config_dir }}"
+    services:
+      - grafana
+
+- name: Restart Prometheus
+  community.docker.docker_compose_v2:
+    state: restarted
+    project_src: "{{ monitoring_config_dir }}"
+    services:
+      - prometheus
+
+- name: Restart Vector
+  community.docker.docker_compose_v2:
+    state: restarted
+    project_src: "{{ monitoring_config_dir }}"
+    services:
+      - vector
+
+- name: Restart Mikrotik Exporter
+  community.docker.docker_compose_v2:
+    state: restarted
+    project_src: "{{ monitoring_config_dir }}"
+    services:
+      - mikrotik
+
+- name: Restart Blackbox Exporter
+  community.docker.docker_compose_v2:
+    state: restarted
+    project_src: "{{ monitoring_config_dir }}"
+    services:
+      - blackbox

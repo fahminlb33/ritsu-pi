@@ -1,0 +1,14 @@
+---
+- name: Create Blackbox exporter config directory
+  ansible.builtin.file:
+    path: "{{ monitoring_config_dir }}/exporters/blackbox"
+    state: directory
+    mode: "0775"
+  register: monitoring_exporters_blackbox_config_dir
+
+- name: Create Blackbox exporter configuration
+  ansible.builtin.template:
+    src: templates/blackbox.yml.j2
+    dest: "{{ monitoring_exporters_blackbox_config_dir.path }}/blackbox.yml"
+    mode: "0775"
+  notify: Restart Blackbox Exporter

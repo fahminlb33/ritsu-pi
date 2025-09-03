@@ -1,0 +1,76 @@
+# {{ ansible_managed }}
+
+# Global prometheus config
+global:
+  scrape_timeout: 30s
+  scrape_interval: 1m
+
+# scrape data from exporters
+scrape_configs:
+{% if monitoring_exporters.node.state == 'present' %}
+  - job_name: node
+    static_configs:
+      - targets: ["node:9100"]
+{% endif %}
+
+{% if monitoring_exporters.cadvisor.state == 'present' %}
+  - job_name: cadvisor
+    static_configs:
+      - targets: ["cadvisor:8080"]
+{% endif %}
+
+{% if monitoring_exporters.blackbox.state == 'present' %}
+  - job_name: blackbox
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets: {{ monitoring_exporters.blackbox.ping_hosts | to_yaml }}
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox:9115
+{% endif %}
+
+{% if monitoring_exporters.speedtest.state == 'present' %}
+  - job_name: speedtest
+    scrape_interval: "{{ monitoring_exporters.speedtest.scrape_interval }}"
+    scrape_timeout: 15m
+    static_configs:
+      - targets: ["speedtest:9090"]
+{% endif %}
+
+{% if monitoring_exporters.mikrotik.state == 'present' %}
+  - job_name: exporter_mikrotik
+    static_configs:
+      - targets: ["mikrotik:49090"]
+{% endif %}
+
+{% if monitoring_exporters.apcusbd.state == 'present' %}
+  - job_name: apcusbd
+    static_configs:
+      - targets: ["apcusbd:8001"]
+{% endif %}
+
+{% if monitoring_exporters.smartctl.state == 'present' %}
+  - job_name: smartctl
+    static_configs:
+      - targets: ["smartctl:9633"]
+{% endif %}
+
+{{ monitoring_prometheus.extra_config | to_yaml | indent(width=2, first=True) }}
+
+{% if monitoring_prometheus.remote_write.enabled and monitoring_vector.state == 'present' %}
+# remote write to vector
+remote_write:
+  - name: vector
+    url: "http://vector:{{ monitoring_vector.remote_write.port }}"
+    queue_config:
+      max_shards: 20
+    write_relabel_configs:
+      - regex: 'container_label_.*'
+        action: 'labeldrop'
+{% endif %}

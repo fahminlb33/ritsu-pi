@@ -1,0 +1,44 @@
+---
+- name: Create Grafana directories
+  ansible.builtin.file:
+    path: "{{ monitoring_config_dir }}/grafana/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "data"
+    - "dashboards"
+    - "provisioning/dashboards"
+    - "provisioning/datasources"
+
+- name: Generate Grafana provisioning config
+  ansible.builtin.template:
+    src: templates/grafana/{{ item.src }}
+    dest: "{{ monitoring_config_dir }}/grafana/provisioning/{{ item.dest }}"
+    mode: "0775"
+  loop:
+    - src: provision_dashboard.yml.j2
+      dest: dashboards/default.yml
+    - src: provision_datasource.yml.j2
+      dest: datasources/default.yml
+
+- name: Copy Ritsu-Pi dashboards
+  ansible.builtin.copy:
+    src: templates/grafana/dashboards/{{ item.name }}
+    dest: "{{ monitoring_config_dir }}/grafana/dashboards/{{ item.name }}"
+    mode: "0775"
+  when: item.copy
+  loop:
+    - name: docker_cadvisor.json
+      copy: "{{ monitoring_exporters.cadvisor.state == 'present' }}"
+    - name: internet_uptime_blackbox.json
+      copy: "{{ monitoring_exporters.blackbox.state == 'present' }}"
+    - name: mikrotik_mktxp.json
+      copy: "{{ monitoring_exporters.mikrotik.state == 'present' }}"
+    - name: node_exporter_full.json
+      copy: "{{ monitoring_exporters.node.state == 'present' }}"
+    - name: node_exporter_summary.json
+      copy: "{{ monitoring_exporters.node.state == 'present' }}"
+    - name: speedtest.json
+      copy: "{{ monitoring_exporters.speedtest.state == 'present' }}"
+    - name: apc_ups.json
+      copy: "{{ monitoring_exporters.apcusbd.state == 'present' }}"

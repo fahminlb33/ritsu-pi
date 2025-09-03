@@ -1,0 +1,14 @@
+---
+- name: Create Prometheus directory
+  ansible.builtin.file:
+    path: "{{ monitoring_config_dir }}/prometheus/data"
+    state: directory
+    mode: "0775"
+  register: monitoring_prometheus_data_dir
+
+- name: Generate Prometheus config file
+  ansible.builtin.template:
+    src: templates/prometheus.yml.j2
+    dest: "{{ monitoring_config_dir }}/prometheus/prometheus.yml"
+    mode: "0775"
+  notify: Restart Prometheus

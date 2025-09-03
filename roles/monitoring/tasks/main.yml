@@ -1,0 +1,47 @@
+---
+- name: Create root config directory
+  ansible.builtin.file:
+    path: "{{ monitoring_config_dir }}"
+    state: directory
+    mode: "0775"
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ monitoring_state }}"
+    name: "{{ item }}"
+    source: pull
+  loop: "{{ root_images + exporter_images }}"
+  vars:
+    root_images:
+      - "{{ monitoring_portainer.image }}"
+      - "{{ monitoring_grafana.image }}"
+      - "{{ monitoring_prometheus.image }}"
+      - "{{ monitoring_vector.image }}"
+    exporter_images: "{{ monitoring_exporters | dict2items | map(attribute='value.image') }}"
+
+- name: Configure Portainer
+  ansible.builtin.import_tasks: portainer.yml
+
+- name: Configure Grafana
+  ansible.builtin.import_tasks: grafana.yml
+
+- name: Configure Prometheus
+  ansible.builtin.import_tasks: prometheus.yml
+
+- name: Configure Prometheus exporters
+  ansible.builtin.import_tasks: exporters/main.yml
+
+- name: Configure Vector pipeline
+  ansible.builtin.import_tasks: vector.yml
+
+- name: Copy Docker Compose template
+  ansible.builtin.template:
+    src: templates/compose.yml.j2
+    dest: "{{ monitoring_config_dir }}/compose.yml"
+    mode: "0775"
+
+- name: Start Docker Compose services
+  community.docker.docker_compose_v2:
+    state: "{{ monitoring_state }}"
+    project_src: "{{ monitoring_config_dir }}"
+    remove_orphans: true
