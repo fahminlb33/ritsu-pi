@@ -1,0 +1,54 @@
+---
+- name: Create arr config directories
+  ansible.builtin.file:
+    path: "{{ arr_stack_config_dir }}/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "prowlarr"
+    - "lidarr"
+    - "sonarr"
+    - "radarr"
+    - "bazarr"
+
+- name: Create media directory tree
+  ansible.builtin.file:
+    path: "{{ item[0] }}/{{ item[1] }}"
+    state: directory
+    mode: "0775"
+  loop: "{{ root_dirs | product(media_subdirs) | list }}"
+  vars:
+    root_dirs:
+      - "{{ arr_stack_media_dir }}/torrents"
+      - "{{ arr_stack_media_dir }}/usenet/incomplete"
+      - "{{ arr_stack_media_dir }}/usenet/complete"
+      - "{{ arr_stack_media_dir }}/jdownloader"
+      - "{{ arr_stack_media_dir }}/media"
+    media_subdirs:
+      - music
+      - movies
+      - tv
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ arr_stack_state }}"
+    name: "{{ item }}"
+    source: pull
+  loop:
+    - "{{ arr_stack_prowlarr.image }}"
+    - "{{ arr_stack_lidarr.image }}"
+    - "{{ arr_stack_sonarr.image }}"
+    - "{{ arr_stack_radarr.image }}"
+    - "{{ arr_stack_bazarr.image }}"
+
+- name: Copy Docker Compose template
+  ansible.builtin.template:
+    src: templates/compose.yml.j2
+    dest: "{{ arr_stack_config_dir }}/compose.yml"
+    mode: "0775"
+
+- name: Start Docker Compose services
+  community.docker.docker_compose_v2:
+    state: "{{ arr_stack_state }}"
+    project_src: "{{ arr_stack_config_dir }}"
+    remove_orphans: true

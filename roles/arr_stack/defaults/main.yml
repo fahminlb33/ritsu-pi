@@ -1,0 +1,24 @@
+arr_stack_state: present
+arr_stack_config_dir: "{{ config_root }}/arr-stack"
+arr_stack_media_dir: "/media/merged"
+
+# Arr Stack
+arr_stack_prowlarr:
+  image: lscr.io/linuxserver/prowlarr:2.0.5
+  port: 9696
+
+arr_stack_lidarr:
+  image: lscr.io/linuxserver/lidarr:2.13.3
+  port: 6767
+
+arr_stack_sonarr:
+  image: lscr.io/linuxserver/sonarr:4.0.15
+  port: 6767
+
+arr_stack_radarr:
+  image: lscr.io/linuxserver/radarr:5.26.2
+  port: 6767
+
+arr_stack_bazarr:
+  image: lscr.io/linuxserver/bazarr:1.5.2
+  port: 6767

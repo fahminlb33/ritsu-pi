@@ -1,0 +1,90 @@
+# {{ ansible_managed }}
+
+name: arr_stack
+
+networks:
+  ritsu-pi:
+    external: true
+
+services:
+  prowlarr:
+    container_name: prowlarr
+    image: "{{ arr_stack_prowlarr.image }}"
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ arr_stack_prowlarr.port }}:9696"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ timezone }}
+    volumes:
+      - "{{ arr_stack_config_dir }}/prowlarr:/config"
+      - "{{ arr_stack_media_dir }}:/data"
+
+  lidarr:
+    container_name: lidarr
+    image: "{{ arr_stack_lidarr.image }}"
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ arr_stack_lidarr.port }}:8686"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ timezone }}
+    volumes:
+      - '{{ arr_stack_config_dir }}/bazarr:/config'
+      - "{{ arr_stack_media_dir }}:/data"
+
+  sonarr:
+    container_name: sonarr
+    image: "{{ arr_stack_sonarr.image }}"
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ arr_stack_sonarr.port }}:8989"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ timezone }}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '{{ arr_stack_config_dir }}/sonarr:/config'
+      - "{{ arr_stack_media_dir }}:/data"
+
+  radarr:
+    container_name: radarr
+    image: "{{ arr_stack_radarr.image }}"
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ arr_stack_radarr.port }}:7878"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ timezone }}
+    volumes:
+      - '/etc/localtime:/etc/localtime:ro'
+      - '{{ arr_stack_config_dir }}/radarr:/config'
+      - "{{ arr_stack_media_dir }}:/data"
+      
+  bazarr:
+    container_name: bazarr
+    image: "{{ arr_stack_bazarr.image }}"
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ arr_stack_bazarr.port }}:6767"
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ={{ timezone }}
+    volumes:
+      - '{{ arr_stack_config_dir }}/bazarr:/config'
+      - "{{ arr_stack_media_dir }}:/data"
