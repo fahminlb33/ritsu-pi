@@ -1,9 +1,0 @@
----
-- name: Ritsu-pi Project
-  hosts: setup_network
-  gather_facts: true
-
-  roles:
-    # # common
-    - role: setup_network
-      tags: [networking]
