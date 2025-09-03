@@ -1,0 +1,15 @@
+---
+- name: Install PostgreSQL
+  ansible.builtin.include_tasks: postgresql.yml
+
+- name: Install PostgreSQL extensions
+  ansible.builtin.include_tasks: extensions.yml
+
+- name: Tune PostgreSQL configurations
+  ansible.builtin.include_tasks: tune.yml
+
+- name: Enable and restart PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: restarted
+    enabled: true

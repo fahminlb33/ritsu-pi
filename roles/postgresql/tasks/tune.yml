@@ -1,0 +1,40 @@
+# https://pgtune.leopard.in.ua/
+- name: Tune PostgreSQL parameters for performance
+  community.postgresql.postgresql_set:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+  loop:
+    - name: max_connections
+      value: "100"
+    - name: shared_buffers
+      value: "1GB"
+    - name: effective_cache_size
+      value: "3GB"
+    - name: maintenance_work_mem
+      value: "256MB"
+    - name: checkpoint_completion_target
+      value: "0.9"
+    - name: wal_buffers
+      value: 16MB
+    - name: default_statistics_target
+      value: "100"
+    - name: random_page_cost
+      value: "4"
+    - name: effective_io_concurrency
+      value: "2"
+    - name: work_mem
+      value: 9709kB
+    - name: huge_pages
+      value: "off"
+    - name: min_wal_size
+      value: "1GB"
+    - name: max_wal_size
+      value: "4GB"
+  register: postgresql_config_reg
+  notify: Restart PostgreSQL
+
+- name: Show changed Postgres settings
+  ansible.builtin.debug:
+    msg: "{{ item.name }}: {{ item.prev_val_pretty }} >> {{ item.value_pretty }}"
+  when: postgresql_config_reg.changed
+  loop: "{{ postgresql_config_reg.results }}"
