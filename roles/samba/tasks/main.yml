@@ -1,31 +1,42 @@
 ---
-- name: Assert source mount points exist
-  ansible.builtin.stat:
-    path: "{{ item.path }}"
-  with_items: "{{ samba_mount_points }}"
-  register: samba_mount_points_exist
-
-- name: Assert source mount points are directories
-  ansible.builtin.assert:
-    that:
-      - item.stat.exists
-      - item.stat.isdir
-  with_items: "{{ samba_mount_points_exist.results }}"
-
-- name: Ensure dependencies are installed
+- name: Ensure samba dependencies are installed # noqa: package-latest
   ansible.builtin.apt:
     name:
       - samba
       - samba-common
-    state: "{{ samba_state }}"
+    state: present
     update_cache: false
-  become: true
 
-- name: Ensure samba user is installed
+- name: Stat samba mount points
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  register: samba_mount_points_stat
+  loop: "{{ samba_mount_points }}"
+
+- name: Ensure samba mount point is exists
+  ansible.builtin.assert:
+    that: "{{ item.stat.exists }}"
+    fail_msg: "{{ item.stat.path }} is missing"
+  loop: "{{ samba_mount_points_stat.results }}"
+
+- name: Create samba group
+  ansible.builtin.group:
+    name: "{{ samba_user.group }}"
+    state: present
+
+- name: Create samba user
+  ansible.builtin.user:
+    name: "{{ samba_user.username }}"
+    shell: "/sbin/nologin"
+    append: true
+    group: "{{ samba_user.group }}"
+    create_home: false
+    state: present
+
+- name: Create samba password
   ansible.builtin.shell: >
     set -o nounset -o pipefail -o errexit &&
-    (pdbedit --user={{ username }} 2>&1 > /dev/null) \
-    || (echo {{ password }}; echo {{ password }}) \
+    (echo {{ password }}; echo {{ password }}) \
     | smbpasswd -s -a {{ username }}
   args:
     executable: /bin/bash
@@ -34,17 +45,10 @@
     password: "{{ samba_user.password }}"
   become: true
   no_log: true
-  register: samba_create_users
-  changed_when: "'Added user' in samba_create_users.stdout"
-  when: samba_state == 'present'
 
 - name: Create samba config
   ansible.builtin.template:
     src: samba.conf.j2
     dest: /etc/samba/smb.conf
-    owner: root
-    group: root
     mode: "0644"
-  become: true
   notify: Restart Samba
-  when: samba_state == 'present'

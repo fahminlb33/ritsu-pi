@@ -240,8 +240,16 @@
 {% for item in samba_mount_points %}
 [{{ item.name }}]
   path = {{ item.path }}
+
+  read only = no
   writeable = {{ 'yes' if item.writeable else 'no' }}
-  create mask = {{ item.create_mask }}
-  directory mask = {{ item.directory_mask }}
-  public = {{ 'yes' if item.public else 'no' }}
+  browsable = {{ 'yes' if item.browsable else 'no' }}
+
+  guest ok = false
+  valid users = {{ samba_user.username }}, @{{ samba_user.group }}
+  force user = {{ samba_user.username }}
+  write list = @{{ samba_user.group }}
+
+  create mask = 0775
+  directory mask = 0775
 {% endfor %}

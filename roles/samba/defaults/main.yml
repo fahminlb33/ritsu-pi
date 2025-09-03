@@ -1,12 +1,7 @@
 ---
-# Samba Share
-# Share your files mounted as a network drive.
-#
-# Note:
-# This will not be installed in Docker, but directly in your pi.
-
 # SMB user
 samba_user:
+  group: smbusers
   username: foo
   password: bar
 
@@ -15,6 +10,4 @@ samba_mount_points:
   - name: pi_share
     path: /media/primary
     writeable: true
-    create_mask: "0777"
-    directory_mask: "0777"
-    public: false
+    browsable: true
