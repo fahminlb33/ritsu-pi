@@ -13,7 +13,7 @@
   register: common_docker_repo
   become: true
 
-- name: Update apt and install Docker Engine # noqa: package-latest
+- name: Update apt and install Docker Engine
   ansible.builtin.apt:
     name:
       - docker-ce

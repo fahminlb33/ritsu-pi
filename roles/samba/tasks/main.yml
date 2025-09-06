@@ -1,5 +1,5 @@
 ---
-- name: Ensure samba dependencies are installed # noqa: package-latest
+- name: Ensure samba dependencies are installed
   ansible.builtin.apt:
     name:
       - samba

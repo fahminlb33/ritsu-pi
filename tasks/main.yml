@@ -14,7 +14,7 @@
     state: directory
     mode: "0775"
 
-- name: Install required system packages # noqa: package-latest
+- name: Install required system packages
   ansible.builtin.apt:
     name:
       - jq
