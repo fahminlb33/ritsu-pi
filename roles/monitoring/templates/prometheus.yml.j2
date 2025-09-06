@@ -2,7 +2,7 @@
 
 # Global prometheus config
 global:
-  scrape_timeout: 1m
+  scrape_timeout: {{ monitoring_prometheus.scrape_interval }}
   scrape_interval: {{ monitoring_prometheus.scrape_interval }}
 
 # scrape data from exporters
@@ -61,7 +61,9 @@ scrape_configs:
       - targets: ["smartctl:9633"]
 {% endif %}
 
+{% if monitoring_prometheus.extra_config %}
 {{ monitoring_prometheus.extra_config | to_yaml | indent(width=2, first=True) }}
+{% endif %}
 
 {% if monitoring_prometheus.remote_write.enabled and monitoring_vector.state == 'present' %}
 # remote write to vector
