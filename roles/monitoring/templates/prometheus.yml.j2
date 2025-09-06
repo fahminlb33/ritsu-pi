@@ -2,8 +2,8 @@
 
 # Global prometheus config
 global:
-  scrape_timeout: 30s
-  scrape_interval: 1m
+  scrape_timeout: 1m
+  scrape_interval: {{ monitoring_prometheus.scrape_interval }}
 
 # scrape data from exporters
 scrape_configs:

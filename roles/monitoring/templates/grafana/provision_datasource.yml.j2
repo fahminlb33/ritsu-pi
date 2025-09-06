@@ -17,4 +17,4 @@ datasources:
     url: http://prometheus:9090
     editable: true
     jsonData:
-      timeInterval: 1m # scrape interval
+      timeInterval: {{ monitoring_prometheus.scrape_interval }} # scrape interval

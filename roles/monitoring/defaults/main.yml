@@ -21,6 +21,7 @@ monitoring_prometheus:
   state: present
   image: prom/prometheus:v3.5.0
   port: 8005
+  scrape_interval: 15s
   retention:
     time: 2y
     size: 100GB
