@@ -23,7 +23,7 @@
       - docker-compose-plugin
       - python3-docker
     state: present
-    update_cache: true
+    update_cache: "{{ common_docker_repo.changed }}"
   become: true
 
 - name: Ensure Docker is started

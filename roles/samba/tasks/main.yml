@@ -5,7 +5,6 @@
       - samba
       - samba-common
     state: present
-    update_cache: false
 
 - name: Stat samba mount points
   ansible.builtin.stat:
