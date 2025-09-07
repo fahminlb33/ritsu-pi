@@ -40,7 +40,11 @@ scrape_configs:
     scrape_interval: "{{ monitoring_exporters.speedtest.scrape_interval }}"
     scrape_timeout: 15m
     static_configs:
-      - targets: ["speedtest:9090"]
+      - targets: ["speedtest:9898"]
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: 'speedtest_.*'
+        action: keep
 {% endif %}
 
 {% if monitoring_exporters.mikrotik.state == 'present' %}

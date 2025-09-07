@@ -158,7 +158,7 @@ services:
     image: "{{ monitoring_exporters.speedtest.image }}"
     restart: unless-stopped    
     ports:
-      - "{{ monitoring_exporters.speedtest.port }}:9090"
+      - "{{ monitoring_exporters.speedtest.port }}:9898"
     networks:
       - ritsu-pi
     healthcheck:

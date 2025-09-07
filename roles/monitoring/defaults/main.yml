@@ -59,12 +59,11 @@ monitoring_exporters:
 
   speedtest:
     state: present
-    image: danopstech/speedtest_exporter:v0.0.5
+    image: fahminlb33/speedtest-exporter:1.0.1
     port: 8104
     # Configure the sample_interval to limit the number of checks interval because
     # the speed test will consume a considerable amount of bandwidth.
     scrape_interval: 1h
-    # https://github.com/danopstech/speedtest_exporter
 
   mikrotik:
     state: present
