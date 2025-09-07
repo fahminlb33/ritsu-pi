@@ -30,6 +30,15 @@
     dest: "{{ adblock_config_dir }}/compose.yml"
     mode: "0775"
 
+- name: Create docker network
+  community.docker.docker_network:
+    name: pihole
+    driver: bridge
+    state: present
+    ipam_config:
+      - subnet: "{{ adblock_docker_network.subnet }}"
+        gateway: "{{ adblock_docker_network.gateway }}"
+
 - name: Start or stop Docker Compose services
   community.docker.docker_compose_v2:
     state: "{{ adblock_state }}"

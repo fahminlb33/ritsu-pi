@@ -14,11 +14,6 @@
 
     # Flame dashboard
     server_hostname: 10.20.20.101
-
-    # Docker
-    docker_network:
-      subnet: "172.18.0.0/16"
-      gateway: "172.18.0.1"
   pre_tasks:
     - name: Include common tasks
       ansible.builtin.import_tasks: tasks/main.yml
@@ -32,9 +27,6 @@
 
         adblock_dnscrypt:
           image: klutchell/dnscrypt-proxy:v2.1.12
-          bind:
-          # must be in the same subnet as the Docker network
-            ip: "172.18.1.100"
           upstream:
             - cloudflare
             - google

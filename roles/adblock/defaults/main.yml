@@ -2,11 +2,13 @@
 adblock_state: present
 adblock_config_dir: "{{ config_root }}/adblock"
 
+adblock_docker_network:
+  subnet: "172.19.0.0/16"
+  gateway: "172.19.0.1"
+  dnscrypt_bind_ip: "172.19.1.100"
+
 adblock_dnscrypt:
   image: klutchell/dnscrypt-proxy:2.1.12
-  bind:
-    # must be in the same subnet as the Docker network
-    ip: "172.18.1.100"
   upstream:
     - cloudflare
     - google

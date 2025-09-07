@@ -45,9 +45,6 @@
 
 - name: Create docker network
   community.docker.docker_network:
-    state: present
     name: ritsu-pi
     driver: bridge
-    ipam_config:
-      - subnet: "{{ docker_network.subnet }}"
-        gateway: "{{ docker_network.gateway }}"
+    state: present

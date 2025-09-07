@@ -3,7 +3,7 @@
 name: adblock
 
 networks:
-  ritsu-pi:
+  pihole:
     external: true
 
 services:
@@ -12,8 +12,8 @@ services:
     image: "{{ adblock_dnscrypt.image }}"
     restart: unless-stopped
     networks:
-      ritsu-pi:
-        ipv4_address: "{{ adblock_dnscrypt.bind.ip }}"
+      pihole:
+        ipv4_address: "{{ adblock_docker_network.dnscrypt_bind_ip }}"
     volumes:
       - "{{ adblock_config_dir }}/dnscrypt/dnscrypt-proxy.toml:/dnscrypt-proxy.toml:ro"
 
@@ -22,21 +22,20 @@ services:
     image: "{{ adblock_pihole.image }}"
     restart: unless-stopped
     networks:
-      - ritsu-pi
+      - pihole
     ports:
       - "53:53/tcp"
       - "53:53/udp"
       - "{{ adblock_pihole.port }}:80/tcp"
       - "{{ adblock_pihole.port_https }}:443/tcp"
     dns:
-      - "{{ adblock_dnscrypt.bind.ip }}"
       - "1.1.1.1"
       - "1.0.0.1"
     environment:
       - "TZ={{ timezone | default('Etc/UTC') }}"
       - "FTLCONF_webserver_api_password={{ adblock_pihole.password }}"
       - "FTLCONF_dns_listeningMode=all"
-      - "FTLCONF_dns_upstreams={{ adblock_dnscrypt.bind.ip }}#5053"
+      - "FTLCONF_dns_upstreams={{ adblock_docker_network.dnscrypt_bind_ip }}#5053"
     volumes:
       - "{{ adblock_config_dir }}/pihole:/etc/pihole"
     cap_add:
