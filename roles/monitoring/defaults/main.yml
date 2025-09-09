@@ -59,11 +59,12 @@ monitoring_exporters:
 
   speedtest:
     state: present
-    image: fahminlb33/speedtest-exporter:1.0.1
+    image: fahminlb33/speedtest-exporter:1.0.4
     port: 8104
     # Configure the sample_interval to limit the number of checks interval because
     # the speed test will consume a considerable amount of bandwidth.
     scrape_interval: 1h
+    server_id: 57770
 
   mikrotik:
     state: present

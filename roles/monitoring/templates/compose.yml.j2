@@ -159,6 +159,8 @@ services:
     restart: unless-stopped    
     ports:
       - "{{ monitoring_exporters.speedtest.port }}:9898"
+    environment:
+      - "SPEEDTEST_SERVER_ID={{ monitoring_exporters.speedtest.server_id }}"
     networks:
       - ritsu-pi
     healthcheck:
