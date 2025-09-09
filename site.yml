@@ -113,7 +113,7 @@
       tags: [media, jellyfin]
       vars:
         jellyfin_state: present
-        jellyfin_image: jellyfin/jellyfin:10.9.11
+        jellyfin_image: jellyfin/jellyfin:10.10.7
         jellyfin_port: 8002
         jellyfin_media_dir: /mnt/pool/media
 
