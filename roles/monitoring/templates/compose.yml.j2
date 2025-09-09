@@ -187,17 +187,13 @@ services:
   apcusbd:
     container_name: apcusbd-exporter
     image: "{{ monitoring_exporters.apcusbd.image }}"
-    command: [
-      "--logLevel", "warn",
-      "--apcupsd", "host.docker.internal:3551",
-      "--apcupsdStartSkip", "20",
-      "--collectInterval", "10"
-    ]
     restart: unless-stopped
+    environment:
+      - "APCUPS_ADDR={{ ansible_default_ipv4.address }}:3551"
     networks:
       - ritsu-pi
     ports:
-      - "{{ monitoring_exporters.apcusbd.port }}:8001"
+      - "{{ monitoring_exporters.apcusbd.port }}:9162"
 {% endif %}
 
 {% if monitoring_exporters.smartctl.state == 'present' %}

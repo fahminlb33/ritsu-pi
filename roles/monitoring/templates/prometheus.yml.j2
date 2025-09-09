@@ -56,7 +56,7 @@ scrape_configs:
 {% if monitoring_exporters.apcusbd.state == 'present' %}
   - job_name: apcusbd
     static_configs:
-      - targets: ["apcusbd:8001"]
+      - targets: ["apcusbd:9162"]
 {% endif %}
 
 {% if monitoring_exporters.smartctl.state == 'present' %}
