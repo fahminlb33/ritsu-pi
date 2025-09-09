@@ -234,7 +234,7 @@
 
           apcusbd:
             state: present
-            image: iodeveloper/prom-apcupsd-exporter:1.0.1
+            image: ghcr.io/twodarek/apcupsd_exporter:0dd7e0c8ebf963f2d3a3441958838747dea8a6b8
             port: 8106
             # https://grafana.com/grafana/dashboards/19329-apc-ups/
 
