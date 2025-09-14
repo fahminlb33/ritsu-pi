@@ -260,6 +260,21 @@
         mlflow_port: 8010
         mlflow_config_dir: "{{ config_root }}/mlflow"
 
+    - role: ollama
+      tags: [ai, genai, llm, ollama]
+      vars:
+        ollama_state: present
+        ollama_port: 8011
+        ollama_open_webui_port: 8012
+
+        ollama_config_dir: "{{ config_root }}/ollama"
+
+        ollama_image: ollama/ollama:0.11.10
+        ollama_open_webui_image: ghcr.io/open-webui/open-webui:v0.6.28
+
+        ollama_rag_embedding:
+          model: nomic-embed-text:v1.5
+
     # ==> databases
     - role: postgresql
       tags: [database, postgresql]

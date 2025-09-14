@@ -1,0 +1,39 @@
+# {{ ansible_managed }}
+
+name: ollama
+
+networks:
+  ritsu-pi:
+    external: true
+
+services:
+  ollama:
+    container_name: ollama
+    image: "{{ ollama_image }}"
+    restart: unless-stopped
+    tty: true
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ ollama_port }}:11434"
+    volumes:
+      - "{{ ollama_config_dir }}/ollama-cache:/root/.ollama"
+
+  open-webui:
+    container_name: open-webui
+    image: "{{ ollama_open_webui_image }}"
+    restart: unless-stopped
+    environment:
+      - "THREAD_POOL_SIZE=8"
+      - "OLLAMA_BASE_URL=http://ollama:11434"
+      - "WEBUI_SECRET_KEY=oNiTq34O0CT7*9^4x@csSjLj"
+      - "RAG_EMBEDDING_ENGINE=ollama"
+      - "RAG_EMBEDDING_MODEL={{ ollama_rag_embedding.model}}"
+    networks:
+      - ritsu-pi
+    ports:
+      - "{{ ollama_open_webui_port }}:8080"
+    volumes:
+      - "{{ ollama_config_dir }}/open-webui:/app/backend/data"
+    extra_hosts:
+      - host.docker.internal:host-gateway
