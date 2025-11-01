@@ -14,6 +14,8 @@ services:
     networks:
       pihole:
         ipv4_address: "{{ adblock_docker_network.dnscrypt_bind_ip }}"
+    ports:
+      - "{{ adblock_dnscrypt.port }}:8080"
     volumes:
       - "{{ adblock_config_dir }}/dnscrypt/dnscrypt-proxy.toml:/dnscrypt-proxy.toml:ro"
 

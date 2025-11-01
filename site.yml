@@ -26,10 +26,10 @@
         adblock_config_dir: "{{ config_root }}/adblock"
 
         adblock_dnscrypt:
-          image: klutchell/dnscrypt-proxy:v2.1.12
-          upstream:
-            - cloudflare
-            - google
+          image: klutchell/dnscrypt-proxy:2.1.14
+          port: 8302
+          username: "{{ dnscrypt_username }}"
+          password: "{{ dnscrypt_password }}"
 
         adblock_pihole:
           image: pihole/pihole:2025.08.0
