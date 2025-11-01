@@ -48,13 +48,14 @@
           image: qmcgaw/gluetun:v3.40.0
           env:
             TZ: "{{ timezone }}"
-            SERVER_COUNTRIES: "Canada"
-            VPN_TYPE: "wireguard"
-            VPN_PORT_FORWARDING: "on"
             VPN_SERVICE_PROVIDER: "protonvpn"
             VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+            VPN_PORT_FORWARDING: "on"
             PORT_FORWARD_ONLY: "on"
-            WIREGUARD_PRIVATE_KEY: "{{ protonvpn_wireguard_private_key }}"
+            VPN_TYPE: "openvpn"
+            SERVER_COUNTRIES: "Indonesia,Singapore"
+            OPENVPN_USER: "{{ protonvpn_openvpn_username }}"
+            OPENVPN_PASSWORD: "{{ protonvpn_openvpn_password }}"
             FIREWALL_VPN_INPUT_PORTS: "6881"
 
         # Downloaders
@@ -75,7 +76,9 @@
           download_dir: "/mnt/pool/downloads"
           ports:
             vpn: 13001
+            vpn_web: 8201
             novpn: 13002
+            novpn_web: 8202
           myjd:
             email: "{{ jdownloader_myjd_email }}"
             password: "{{ jdownloader_myjd_password }}"

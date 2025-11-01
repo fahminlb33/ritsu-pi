@@ -16,11 +16,15 @@ services:
     networks:
       - ritsu-pi
     ports:
-      - 6881:6881
-      - 6881:6881/udp
+      - 8888:8888/tcp # HTTP proxy
+      - 8388:8388/tcp # Shadowsocks
+      - 8388:8388/udp # Shadowsocks
+      - 6881:6881/tcp # Port Forwarding for qbittorrent
+      - 6881:6881/udp # Port Forwarding for qbittorrent
       - "{{ downloader_sabnzbd.port }}:8080"
       - "{{ downloader_qbittorrent.port }}:{{ downloader_qbittorrent.port }}"
       - "{{ downloader_jdownloader.ports.vpn }}:{{ downloader_jdownloader.ports.vpn }}"
+      - "{{ downloader_jdownloader.ports.vpn_web }}:{{ downloader_jdownloader.ports.vpn_web }}"
     environment: {{ downloader_gluetun.env | to_yaml }}
     cap_add:
       - NET_ADMIN
@@ -74,7 +78,8 @@ services:
       - MYJDOWNLOADER_EMAIL={{ downloader_jdownloader.myjd.email }}
       - MYJDOWNLOADER_PASSWORD={{ downloader_jdownloader.myjd.password }}
       - MYJDOWNLOADER_DEVICE_NAME={{ downloader_jdownloader.myjd.device }}-vpn
-      - JDOWNLOADER_HEADLESS=1
+      - JDOWNLOADER_HEADLESS=0
+      - WEB_LISTENING_PORT={{ downloader_jdownloader.ports.vpn_web }}
     volumes:
       - "{{ downloader_config_dir }}/jdownloader-vpn:/config"
       - "{{ downloader_jdownloader.download_dir }}:/output"
@@ -87,6 +92,7 @@ services:
       - ritsu-pi
     ports:
       - "{{ downloader_jdownloader.ports.novpn }}:{{ downloader_jdownloader.ports.novpn }}"
+      - "{{ downloader_jdownloader.ports.novpn_web }}:{{ downloader_jdownloader.ports.novpn_web }}"
     environment:
       - USER_ID=1000
       - GROUP_ID=1000
@@ -95,7 +101,8 @@ services:
       - MYJDOWNLOADER_EMAIL={{ downloader_jdownloader.myjd.email }}
       - MYJDOWNLOADER_PASSWORD={{ downloader_jdownloader.myjd.password }}
       - MYJDOWNLOADER_DEVICE_NAME={{ downloader_jdownloader.myjd.device }}-novpn
-      - JDOWNLOADER_HEADLESS=1
+      - JDOWNLOADER_HEADLESS=0
+      - WEB_LISTENING_PORT={{ downloader_jdownloader.ports.novpn_web }}
     volumes:
       - "{{ downloader_config_dir }}/jdownloader-novpn:/config"
       - "{{ downloader_jdownloader.download_dir }}:/output"
