@@ -178,13 +178,13 @@
           remote_write:
             enabled: true
             url: http://vector:9090
-          extra_config:
-            - job_name: immich_api
-              static_configs:
-                - targets: ['immich-server:8081']
-            - job_name: immich_microservices
-              static_configs:
-                - targets: ['immich-server:8082']
+          extra_config: {}
+            # - job_name: immich_api
+            #   static_configs:
+            #     - targets: ['immich-server:8081']
+            # - job_name: immich_microservices
+            #   static_configs:
+            #     - targets: ['immich-server:8082']
 
         monitoring_vector:
           state: present
@@ -220,7 +220,7 @@
             # Configure the sample_interval to limit the number of checks interval because
             # the speed test will consume a considerable amount of bandwidth.
             scrape_interval: 1h
-            server_id: 
+            server_id:
 
           mikrotik:
             state: present
