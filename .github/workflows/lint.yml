@@ -27,7 +27,7 @@ jobs:
         run: uv sync --locked --all-extras --dev
 
       - name: Install Ansible Galaxy roles
-        run: ansible-galaxy collection install -r requirements.yml
+        run: uv run ansible-galaxy collection install -r requirements.yml
 
       - name: Lint code
-        run: ansible-lint --offline -c .ansible-lint.yml
+        run: uv run ansible-lint --offline -c .ansible-lint.yml
