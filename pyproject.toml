@@ -1,7 +1,7 @@
 [project]
 name = "ritsu-pi"
 version = "0.1.0"
-description = "Add your description here"
+description = "Full stack home server in Raspberry Pi"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
