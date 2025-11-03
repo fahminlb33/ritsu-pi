@@ -28,7 +28,18 @@
 ##
 ## Remove the leading # first to enable this; lines starting with # are ignored.
 
-# server_names = ['scaleway-fr', 'google', 'yandex', 'cloudflare']
+server_names = [
+  'google',
+  'nextdns',
+  'wikimedia',
+  'cloudflare', 
+  # 'mullvad-doh',
+  # 'scaleway-fr',
+  # 'scaleway-ams',
+  'controld-unfiltered',
+  'quad9-dnscrypt-ip4-nofilter-pri', 
+  'quad9-dnscrypt-ip4-nofilter-ecs-pri',
+]
 
 
 ## List of local addresses and ports to listen to. Can be IPv4 and/or IPv6.
@@ -960,7 +971,7 @@ skip_incompatible = false
 enabled = true
 
 ## Listen address for the monitoring UI
-listen_address = "0.0.0.0:8080"
+listen_address = "0.0.0.0:{{ adblock_dnscrypt.port }}"
 
 ## Optional username and password for basic authentication
 ## To disable authentication, set username to an empty string: username = ""
