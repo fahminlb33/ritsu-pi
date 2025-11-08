@@ -31,9 +31,6 @@
 - name: Configure Prometheus exporters
   ansible.builtin.import_tasks: exporters/main.yml
 
-- name: Configure Vector pipeline
-  ansible.builtin.import_tasks: vector.yml
-
 - name: Copy Docker Compose template
   ansible.builtin.template:
     src: templates/compose.yml.j2
