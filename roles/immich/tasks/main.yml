@@ -6,6 +6,7 @@
     mode: "0775"
   loop:
     - "postgres"
+    - "model-cache"
 
 - name: Generate Immich config files
   ansible.builtin.template:
@@ -20,7 +21,7 @@
     - src: hwaccel.transcoding.yml.j2
       dest: hwaccel.transcoding.yml
     - src: immich.env.j2
-      dest: immich.env
+      dest: .env
 
 - name: Pull image from registry
   community.docker.docker_image:
@@ -34,4 +35,3 @@
     state: "{{ immich_state }}"
     project_src: "{{ immich_config_dir }}"
     remove_orphans: true
-    remove_volumes: true

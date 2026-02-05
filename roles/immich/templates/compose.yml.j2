@@ -6,16 +6,13 @@ networks:
   ritsu-pi:
     external: true
 
-volumes:
-  model-cache:
-
 services:
-  server:
+  immich-server:
     container_name: immich_server
     image: "{{ immich_images.server }}"
     restart: unless-stopped
     env_file:
-      - immich.env
+      - .env
     networks:
       - ritsu-pi
     ports:
@@ -25,23 +22,29 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
     depends_on:
       - redis
-      - postgres
+      - database
     healthcheck:
       disable: false
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.immich.rule=Host(`{{ immich_host }}`)"
+      - "traefik.http.routers.immich.entrypoints=websecure"
+      - "traefik.http.services.immich.loadbalancer.server.port=2283"
     extends:
       file: hwaccel.transcoding.yml
       service: "{{ immich_hwaccel.transcoding | default('cpu') }}"
 
-  ml:
+  immich-machine-learning:
     container_name: immich_machine_learning
     image: "{{ immich_images.ml }}"
     restart: unless-stopped
     env_file:
-      - immich.env
+      - .env
     networks:
       - ritsu-pi
     volumes:
-      - model-cache:/cache
+      - {{ immich_config_dir }}/model-cache:/cache
     healthcheck:
       disable: false
     extends:
@@ -57,7 +60,7 @@ services:
     healthcheck:
       test: redis-cli ping || exit 1
 
-  postgres:
+  database:
     container_name: immich_postgres
     image: "{{ immich_images.postgres }}"
     restart: unless-stopped
