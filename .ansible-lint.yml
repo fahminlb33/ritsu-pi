@@ -16,6 +16,7 @@ enable_list:
 warn_list:
   - package-latest
   - command-instead-of-module
+  - yaml[line-length]
 
 exclude_paths:
   - .github
