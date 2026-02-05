@@ -5,29 +5,50 @@
     state: directory
     mode: "0775"
   loop:
-    - "prowlarr"
+    # VPN
+    - "gluetun"
+    # downloaders
+    - "qbittorrent"
+    - "jdownloader-vpn"
+    - "jdownloader-novpn"
+    # arr stack
+    - "bazarr"
+    - "radarr"
     - "lidarr"
     - "sonarr"
-    - "radarr"
-    - "bazarr"
+    - "prowlarr"
+
+- name: Create download directory tree
+  ansible.builtin.file:
+    path: "{{ arr_stack_media_dir }}/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "torrents"
+    - "jdownloader"
+    - "trash"
+
+- name: Create torrents directory tree
+  ansible.builtin.file:
+    path: "{{ arr_stack_media_dir }}/torrents/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - books
+    - movies
+    - music
+    - series
 
 - name: Create media directory tree
   ansible.builtin.file:
-    path: "{{ item[0] }}/{{ item[1] }}"
+    path: "{{ arr_stack_media_dir }}/media/{{ item }}"
     state: directory
     mode: "0775"
-  loop: "{{ root_dirs | product(media_subdirs) | list }}"
-  vars:
-    root_dirs:
-      - "{{ arr_stack_media_dir }}/torrents"
-      - "{{ arr_stack_media_dir }}/usenet/incomplete"
-      - "{{ arr_stack_media_dir }}/usenet/complete"
-      - "{{ arr_stack_media_dir }}/jdownloader"
-      - "{{ arr_stack_media_dir }}/media"
-    media_subdirs:
-      - music
-      - movies
-      - tv
+  loop:
+    - books
+    - movies
+    - music
+    - series
 
 - name: Pull image from registry
   community.docker.docker_image:
@@ -35,11 +56,14 @@
     name: "{{ item }}"
     source: pull
   loop:
-    - "{{ arr_stack_prowlarr.image }}"
-    - "{{ arr_stack_lidarr.image }}"
-    - "{{ arr_stack_sonarr.image }}"
-    - "{{ arr_stack_radarr.image }}"
+    - "{{ arr_stack_gluetun.image }}"
+    - "{{ arr_stack_qbittorrent.image }}"
+    - "{{ arr_stack_jdownloader.image }}"
     - "{{ arr_stack_bazarr.image }}"
+    - "{{ arr_stack_radarr.image }}"
+    - "{{ arr_stack_sonarr.image }}"
+    - "{{ arr_stack_lidarr.image }}"
+    - "{{ arr_stack_prowlarr.image }}"
 
 - name: Copy Docker Compose template
   ansible.builtin.template:

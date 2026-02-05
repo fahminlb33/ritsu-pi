@@ -7,84 +7,220 @@ networks:
     external: true
 
 services:
-  prowlarr:
-    container_name: prowlarr
-    image: "{{ arr_stack_prowlarr.image }}"
-    restart: unless-stopped
+  # ----------------- VPN -----------------
+  gluetun:
+    container_name: "gluetun"
+    image: "{{ arr_stack_gluetun.image }}"
+    restart: "unless-stopped"
+    privileged: true
     networks:
-      - ritsu-pi
+      - "ritsu-pi"
     ports:
-      - "{{ arr_stack_prowlarr.port }}:9696"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ timezone }}
+      # - "8888:8888/tcp" # HTTP proxy
+      # - "8388:8388/tcp" # Shadowsocks
+      # - "8388:8388/udp" # Shadowsocks
+      - "6881:6881/tcp" # Port Forwarding for qbittorrent
+      - "6881:6881/udp" # Port Forwarding for qbittorrent
+      - "{{ arr_stack_qbittorrent.port }}:{{ arr_stack_qbittorrent.port }}"
+      - "{{ arr_stack_jdownloader.vpn.web_port }}:{{ arr_stack_jdownloader.vpn.web_port }}"
+      - "{{ arr_stack_jdownloader.vpn.myjd_port }}:{{ arr_stack_jdownloader.vpn.myjd_port }}"
+    environment: {{ arr_stack_gluetun.env | to_yaml }}
+    cap_add:
+      - "NET_ADMIN"
     volumes:
-      - "{{ arr_stack_config_dir }}/prowlarr:/config"
-      - "{{ arr_stack_media_dir }}:/data"
+      - "{{ arr_stack_config_dir }}/gluetun:/gluetun"
+    devices:
+      - "/dev/net/tun:/dev/net/tun"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      # qbittorrent
+      - "traefik.http.routers.qbittorrent.rule=Host(`{{ arr_stack_qbittorrent.host }}`)"
+      - "traefik.http.routers.qbittorrent.entrypoints=websecure"
+      - "traefik.http.routers.qbittorrent.service=qbittorrent"
+      - "traefik.http.services.qbittorrent.loadbalancer.server.port={{ arr_stack_qbittorrent.port }}"
+      # jdownloader-vpn
+      - "traefik.http.routers.jdownloader-vpn.rule=Host(`{{ arr_stack_jdownloader.vpn.host }}`)"
+      - "traefik.http.routers.jdownloader-vpn.entrypoints=websecure"
+      - "traefik.http.routers.jdownloader-vpn.service=jdownloader-vpn"
+      - "traefik.http.services.jdownloader-vpn.loadbalancer.server.port={{ arr_stack_jdownloader.vpn.web_port  }}"
+    
+  # ----------------- DOWNLOADERS -----------------
+  qbittorrent:
+    container_name: "qbittorrent"
+    image: "{{ arr_stack_qbittorrent.image }}"
+    restart: "unless-stopped"
+    network_mode: "service:gluetun"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
+      - "WEBUI_PORT={{ arr_stack_qbittorrent.port }}"
+      - "TORRENTING_PORT=6881"
+    volumes:
+      - "{{ arr_stack_config_dir }}/qbittorrent:/config"
+      - "{{ arr_stack_media_dir }}/torrents:/data/torrents"
 
-  lidarr:
-    container_name: lidarr
-    image: "{{ arr_stack_lidarr.image }}"
-    restart: unless-stopped
-    networks:
-      - ritsu-pi
-    ports:
-      - "{{ arr_stack_lidarr.port }}:8686"
+  jdownloader-vpn:
+    container_name: "jdownloader-vpn"
+    image: "{{ arr_stack_jdownloader.image }}"
+    restart: "unless-stopped"
+    network_mode: "service:gluetun"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ timezone }}
+      - "USER_ID=1000"
+      - "GROUP_ID=1000"
+      - "TZ={{ timezone }}"
+      - "PORT={{ arr_stack_jdownloader.vpn.myjd_port }}"
+      - "MYJDOWNLOADER_EMAIL={{ arr_stack_jdownloader.myjd.email }}"
+      - "MYJDOWNLOADER_PASSWORD={{ arr_stack_jdownloader.myjd.password }}"
+      - "MYJDOWNLOADER_DEVICE_NAME={{ arr_stack_jdownloader.myjd.device }}-vpn"
+      - "JDOWNLOADER_HEADLESS=0"
+      - "WEB_LISTENING_PORT={{ arr_stack_jdownloader.vpn.web_port }}"
     volumes:
-      - '{{ arr_stack_config_dir }}/bazarr:/config'
-      - "{{ arr_stack_media_dir }}:/data"
+      - "{{ arr_stack_config_dir }}/jdownloader-vpn:/config"
+      - "{{ arr_stack_media_dir }}/jdownloader:/output"
 
-  sonarr:
-    container_name: sonarr
-    image: "{{ arr_stack_sonarr.image }}"
-    restart: unless-stopped
+  jdownloader-novpn:
+    container_name: "jdownloader-novpn"
+    image: "{{ arr_stack_jdownloader.image }}"
+    restart: "unless-stopped"
     networks:
-      - ritsu-pi
+      - "ritsu-pi"
     ports:
-      - "{{ arr_stack_sonarr.port }}:8989"
+      - "{{ arr_stack_jdownloader.novpn.web_port }}:{{ arr_stack_jdownloader.novpn.web_port }}"
+      - "{{ arr_stack_jdownloader.novpn.myjd_port }}:{{ arr_stack_jdownloader.novpn.myjd_port }}"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ timezone }}
+      - "USER_ID=1000"
+      - "GROUP_ID=1000"
+      - "TZ={{ timezone }}"
+      - "PORT={{ arr_stack_jdownloader.novpn.myjd_port }}"
+      - "MYJDOWNLOADER_EMAIL={{ arr_stack_jdownloader.myjd.email }}"
+      - "MYJDOWNLOADER_PASSWORD={{ arr_stack_jdownloader.myjd.password }}"
+      - "MYJDOWNLOADER_DEVICE_NAME={{ arr_stack_jdownloader.myjd.device }}-novpn"
+      - "JDOWNLOADER_HEADLESS=0"
+      - "WEB_LISTENING_PORT={{ arr_stack_jdownloader.novpn.web_port }}"
     volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '{{ arr_stack_config_dir }}/sonarr:/config'
-      - "{{ arr_stack_media_dir }}:/data"
+      - "{{ arr_stack_config_dir }}/jdownloader-novpn:/config"
+      - "{{ arr_stack_media_dir }}/jdownloader:/output"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.jdownloader-novpn.rule=Host(`{{ arr_stack_jdownloader.novpn.host }}`)"
+      - "traefik.http.routers.jdownloader-novpn.entrypoints=websecure"
+      - "traefik.http.services.jdownloader-novpn.loadbalancer.server.port={{ arr_stack_jdownloader.novpn.web_port }}"
 
-  radarr:
-    container_name: radarr
-    image: "{{ arr_stack_radarr.image }}"
-    restart: unless-stopped
-    networks:
-      - ritsu-pi
-    ports:
-      - "{{ arr_stack_radarr.port }}:7878"
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ timezone }}
-    volumes:
-      - '/etc/localtime:/etc/localtime:ro'
-      - '{{ arr_stack_config_dir }}/radarr:/config'
-      - "{{ arr_stack_media_dir }}:/data"
-      
+  # ----------------- ARR STACK -----------------
   bazarr:
-    container_name: bazarr
+    container_name: "bazarr"
     image: "{{ arr_stack_bazarr.image }}"
-    restart: unless-stopped
+    restart: "unless-stopped"
     networks:
-      - ritsu-pi
+      - "ritsu-pi"
     ports:
       - "{{ arr_stack_bazarr.port }}:6767"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ={{ timezone }}
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
     volumes:
-      - '{{ arr_stack_config_dir }}/bazarr:/config'
+      - "/etc/localtime:/etc/localtime:ro"
+      - "{{ arr_stack_config_dir }}/bazarr:/config"
       - "{{ arr_stack_media_dir }}:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.bazarr.rule=Host(`{{ arr_stack_bazarr.host }}`)"
+      - "traefik.http.routers.bazarr.entrypoints=websecure"
+      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
+
+  radarr:
+    container_name: "radarr"
+    image: "{{ arr_stack_radarr.image }}"
+    restart: "unless-stopped"
+    networks:
+      - "ritsu-pi"
+    ports:
+      - "{{ arr_stack_radarr.port }}:7878"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "{{ arr_stack_config_dir }}/radarr:/config"
+      - "{{ arr_stack_media_dir }}:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.radarr.rule=Host(`{{ arr_stack_radarr.host }}`)"
+      - "traefik.http.routers.radarr.entrypoints=websecure"
+      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
+
+  lidarr:
+    container_name: "lidarr"
+    image: "{{ arr_stack_lidarr.image }}"
+    restart: "unless-stopped"
+    networks:
+      - "ritsu-pi"
+    ports:
+      - "{{ arr_stack_lidarr.port }}:8686"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "{{ arr_stack_config_dir }}/lidarr:/config"
+      - "{{ arr_stack_media_dir }}:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.lidarr.rule=Host(`{{ arr_stack_lidarr.host }}`)"
+      - "traefik.http.routers.lidarr.entrypoints=websecure"
+      - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
+
+  sonarr:
+    container_name: "sonarr"
+    image: "{{ arr_stack_sonarr.image }}"
+    restart: "unless-stopped"
+    networks:
+      - "ritsu-pi"
+    ports:
+      - "{{ arr_stack_sonarr.port }}:8989"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "{{ arr_stack_config_dir }}/sonarr:/config"
+      - "{{ arr_stack_media_dir }}:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.sonarr.rule=Host(`{{ arr_stack_sonarr.host }}`)"
+      - "traefik.http.routers.sonarr.entrypoints=websecure"
+      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
+
+  prowlarr:
+    container_name: prowlarr
+    image: "{{ arr_stack_prowlarr.image }}"
+    restart: "unless-stopped"
+    networks:
+      - "ritsu-pi"
+    ports:
+      - "{{ arr_stack_prowlarr.port }}:9696"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "{{ arr_stack_config_dir }}/prowlarr:/config"
+      - "{{ arr_stack_media_dir }}:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.prowlarr.rule=Host(`{{ arr_stack_prowlarr.host }}`)"
+      - "traefik.http.routers.prowlarr.entrypoints=websecure"
+      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"

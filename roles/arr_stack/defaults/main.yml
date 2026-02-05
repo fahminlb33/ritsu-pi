@@ -1,24 +1,69 @@
 arr_stack_state: present
 arr_stack_config_dir: "{{ config_root }}/arr-stack"
-arr_stack_media_dir: "/media/merged"
+arr_stack_media_dir: "/mnt/pool/media_root"
+
+# VPN
+arr_stack_gluetun:
+  image: qmcgaw/gluetun:v3.41.0
+  env:
+    SERVER_COUNTRIES: "Canada"
+    VPN_TYPE: "wireguard"
+    VPN_PORT_FORWARDING: "on"
+    VPN_SERVICE_PROVIDER: "protonvpn"
+    VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+    WIREGUARD_PRIVATE_KEY: "PRIVATE-KEY-HERE"
+
+# Downloaders
+arr_stack_qbittorrent:
+  image: lscr.io/linuxserver/qbittorrent:5.1.2
+  # access
+  port: 8004
+  host: "qbittorrent.{{ server_domain }}"
+
+arr_stack_jdownloader:
+  image: jlesage/jdownloader-2:v25.07.2
+  # auth
+  myjd:
+    email: ""
+    password: ""
+    device: ""
+  # access
+  vpn:
+    myjd_port: 13001
+    web_port: 8201
+    host: "jdownloader-vpn.{{ server_domain }}"
+  novpn:
+    myjd_port: 13002
+    web_port: 8202
+    host: "jdownloader-novpn.{{ server_domain }}"
 
 # Arr Stack
-arr_stack_prowlarr:
-  image: lscr.io/linuxserver/prowlarr:2.0.5
-  port: 9696
-
-arr_stack_lidarr:
-  image: lscr.io/linuxserver/lidarr:2.13.3
+arr_stack_bazarr:
+  image: lscr.io/linuxserver/bazarr:v1.5.4-ls334
+  # access
   port: 6767
-
-arr_stack_sonarr:
-  image: lscr.io/linuxserver/sonarr:4.0.15
-  port: 6767
+  host: "bazarr.{{ server_domain }}"
 
 arr_stack_radarr:
-  image: lscr.io/linuxserver/radarr:5.26.2
-  port: 6767
+  image: lscr.io/linuxserver/radarr:6.0.4.10291-ls290
+  # access
+  port: 7878
+  host: "radarr.{{ server_domain }}"
 
-arr_stack_bazarr:
-  image: lscr.io/linuxserver/bazarr:1.5.2
-  port: 6767
+arr_stack_lidarr:
+  image: lscr.io/linuxserver/lidarr:3.1.0.4875-ls18
+  # acccess
+  port: 8686
+  host: "lidarr.{{ server_domain }}"
+
+arr_stack_sonarr:
+  image: lscr.io/linuxserver/sonarr:4.0.16.2944-ls301
+  # access
+  port: 8989
+  host: "sonarr.{{ server_domain }}"
+
+arr_stack_prowlarr:
+  image: lscr.io/linuxserver/prowlarr:2.3.0.5236-ls135
+  # access
+  port: 9696
+  host: "prowlarr.{{ server_domain }}"
