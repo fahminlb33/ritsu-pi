@@ -31,13 +31,12 @@ ritsu-pi packed quite a bunch of apps for your pi server. Docker is mandatory an
   - [x] Portainer
   - [x] Grafana
   - [x] Prometheus
-  - [x] [Vector](https://vector.dev/)
   - [x] Node Exporter
   - [x] cAdvisor Exporter
   - [x] Blackbox Exporter
   - [x] SpeedTest Exporter
   - [x] Mikrotik Exporter
-  - [x] Apcusbd Exporter
+  - [x] apcupsd Exporter
   - [x] Smartctl Exporter
 - [x] Flame Dashboard
 - [x] MLflow
