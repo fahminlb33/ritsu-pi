@@ -16,7 +16,7 @@
   community.docker.docker_container:
     name: mlflow
     image: "{{ mlflow_image }}"
-    command: mlflow server --host 0.0.0.0 --port {{ mlflow_port }}
+    command: mlflow server --host 0.0.0.0 --port {{ mlflow_port }} --allowed-hosts "{{ mlflow_host }}"
     restart_policy: unless-stopped
     working_dir: /home/mlflow
     env:
@@ -28,8 +28,9 @@
     volumes:
       - "{{ mlflow_config_dir_reg.path }}:/home/mlflow:rw"
     labels:
-      flame.type: "application"
-      flame.name: "MLflow"
-      flame.url: "http://{{ server_hostname }}:{{ mlflow_port }}"
-      flame.icon: "custom"
+      traefik.enable: "true"
+      traefik.docker.network: "ritsu-pi"
+      traefik.http.routers.mlflow.rule: "Host(`{{ mlflow_host }}`)"
+      traefik.http.routers.mlflow.entrypoints: "websecure"
+      traefik.http.services.mlflow.loadbalancer.server.port: "{{ mlflow_port }}"
     state: "{{ 'started' if mlflow_state == 'present' else 'absent' }}"

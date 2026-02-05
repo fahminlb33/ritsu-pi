@@ -1,5 +1,7 @@
 ---
 mlflow_state: present
-mlflow_image: ghcr.io/mlflow/mlflow:v3.3.2
-mlflow_port: 8009
 mlflow_config_dir: "{{ config_root }}/mlflow"
+mlflow_image: "ghcr.io/mlflow/mlflow:v3.9.0"
+# access
+mlflow_port: 8009
+mlflow_host: "mlflow.{{ server_domain }}"
