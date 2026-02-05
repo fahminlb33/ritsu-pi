@@ -1,10 +1,30 @@
 ---
 - name: Ensure samba dependencies are installed
-  ansible.builtin.apt:
+  ansible.builtin.dnf:
     name:
       - samba
       - samba-common
     state: present
+
+- name: Enable samba service
+  ansible.builtin.systemd:
+    name: smb
+    enabled: true
+    state: started
+
+- name: Add firewall rule for samba
+  ansible.builtin.firewalld:
+    service: samba
+    permanent: true
+    state: enabled
+    immediate: true
+
+# https://blog.vikramchauhan.com/selinux-fix-mergerfs-allow-docker-samba-access/
+- name: Set SELinux boolean for Samba if using MergerFS
+  ansible.builtin.seboolean:
+    name: samba_share_fusefs
+    state: true
+    persistent: true
 
 - name: Stat samba mount points
   ansible.builtin.stat:
@@ -17,6 +37,16 @@
     that: "{{ item.stat.exists }}"
     fail_msg: "{{ item.stat.path }} is missing"
   loop: "{{ samba_mount_points_stat.results }}"
+
+- name: Ensure samba mount point SELinux context is set
+  ansible.builtin.command: "semanage fcontext -a -t samba_share_t '{{ item.path }}(/.*)?'"
+  loop: "{{ samba_mount_points }}"
+  when: ansible_facts.selinux.status == "enabled"
+
+- name: Apply SELinux context changes
+  ansible.builtin.command: "restorecon -R '{{ item.path }}'"
+  loop: "{{ samba_mount_points }}"
+  when: ansible_facts.selinux.status == "enabled"
 
 - name: Create samba group
   ansible.builtin.group:
@@ -34,14 +64,17 @@
 
 - name: Create samba password
   ansible.builtin.shell: >
-    set -o nounset -o pipefail -o errexit &&
-    (echo {{ password }}; echo {{ password }}) \
+    set -e -o pipefail
+    && (pdbedit --user={{ username }} 2>&1 > /dev/null)
+    || (echo -e "{{ password }}\n{{ password }}")
     | smbpasswd -s -a {{ username }}
   args:
     executable: /bin/bash
   vars:
     username: "{{ samba_user.username }}"
     password: "{{ samba_user.password }}"
+  register: samba_create_user
+  changed_when: "'Added user' in samba_create_user.stdout"
   become: true
   no_log: true
 

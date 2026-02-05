@@ -1,7 +1,7 @@
 ---
 # SMB user
 samba_user:
-  group: smbusers
+  group: sambausers
   username: foo
   password: bar
 

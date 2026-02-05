@@ -247,7 +247,7 @@
 
   guest ok = false
   valid users = {{ samba_user.username }}, @{{ samba_user.group }}
-  force user = {{ samba_user.username }}
+  force user = {{ samba_user.force_user | default(samba_user.username) }}
   write list = @{{ samba_user.group }}
 
   create mask = 0775
