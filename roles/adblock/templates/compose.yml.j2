@@ -3,7 +3,7 @@
 name: adblock
 
 networks:
-  pihole:
+  ritsu-pi:
     external: true
 
 services:
@@ -12,19 +12,25 @@ services:
     image: "{{ adblock_dnscrypt.image }}"
     restart: unless-stopped
     networks:
-      pihole:
-        ipv4_address: "{{ adblock_docker_network.dnscrypt_bind_ip }}"
+      ritsu-pi:
+        ipv4_address: "{{ adblock_dnscrypt.bind_ip }}"
     ports:
-      - "{{ adblock_dnscrypt.port }}:{{ adblock_dnscrypt.port }}"
+      - "{{ adblock_dnscrypt.port }}:8080"
     volumes:
       - "{{ adblock_config_dir }}/dnscrypt/dnscrypt-proxy.toml:/config/dnscrypt-proxy.toml:ro"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.dnscrypt.rule=Host(`{{ adblock_dnscrypt.host }}`)"
+      - "traefik.http.routers.dnscrypt.entrypoints=websecure"
+      - "traefik.http.services.dnscrypt.loadbalancer.server.port=8080"
 
   pihole:
     container_name: pihole
     image: "{{ adblock_pihole.image }}"
     restart: unless-stopped
     networks:
-      - pihole
+      - ritsu-pi
     ports:
       - "53:53/tcp"
       - "53:53/udp"
@@ -37,7 +43,7 @@ services:
       - "TZ={{ timezone | default('Etc/UTC') }}"
       - "FTLCONF_webserver_api_password={{ adblock_pihole.password }}"
       - "FTLCONF_dns_listeningMode=all"
-      - "FTLCONF_dns_upstreams={{ adblock_docker_network.dnscrypt_bind_ip }}#5053"
+      - "FTLCONF_dns_upstreams={{ adblock_dnscrypt.bind_ip }}#5053"
     volumes:
       - "{{ adblock_config_dir }}/pihole:/etc/pihole"
     cap_add:
@@ -45,7 +51,8 @@ services:
       - SYS_TIME
       - SYS_NICE
     labels:
-      flame.type: "application"
-      flame.name: "Pi-Hole"
-      flame.url: "http://{{ server_hostname }}:{{ adblock_pihole.port }}"
-      flame.icon: "custom"
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.pihole.rule=Host(`{{ adblock_pihole.host }}`)"
+      - "traefik.http.routers.pihole.entrypoints=websecure"
+      - "traefik.http.services.pihole.loadbalancer.server.port=80"

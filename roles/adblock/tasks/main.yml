@@ -3,7 +3,7 @@
   ansible.builtin.file:
     path: "{{ adblock_config_dir }}/{{ item }}"
     state: directory
-    mode: "0775"
+    mode: "0755"
   loop:
     - dnscrypt
     - pihole
@@ -12,7 +12,7 @@
   ansible.builtin.template:
     src: templates/dnscrypt-proxy.toml.j2
     dest: "{{ adblock_config_dir }}/dnscrypt/dnscrypt-proxy.toml"
-    mode: "0775"
+    mode: "0755"
   notify: Restart DNSCrypt
 
 - name: Pull images from registry
@@ -28,16 +28,7 @@
   ansible.builtin.template:
     src: templates/compose.yml.j2
     dest: "{{ adblock_config_dir }}/compose.yml"
-    mode: "0775"
-
-- name: Create docker network
-  community.docker.docker_network:
-    name: pihole
-    driver: bridge
-    state: present
-    ipam_config:
-      - subnet: "{{ adblock_docker_network.subnet }}"
-        gateway: "{{ adblock_docker_network.gateway }}"
+    mode: "0755"
 
 - name: Start or stop Docker Compose services
   community.docker.docker_compose_v2:

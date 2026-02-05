@@ -2,16 +2,21 @@
 adblock_state: present
 adblock_config_dir: "{{ config_root }}/adblock"
 
-adblock_docker_network:
-  subnet: "172.19.0.0/16"
-  gateway: "172.19.0.1"
-  dnscrypt_bind_ip: "172.19.1.100"
-
 adblock_dnscrypt:
-  image: klutchell/dnscrypt-proxy:2.1.12
+  image: klutchell/dnscrypt-proxy:2.1.15
+  # auth
+  username: "CHANGE-ME"
+  password: "CHANGE-ME"
+  # access
+  port: 8302
+  host: "dnscrypt.{{ server_domain }}"
+  bind_ip: "172.19.1.100"
 
 adblock_pihole:
-  image: pihole/pihole:2025.08.0
-  port: 8003
-  port_https: 80031
+  image: pihole/pihole:2025.11.1
+  # auth
   password: CHANGE-ME
+  # access
+  port: 8001
+  port_https: 8301
+  host: "pihole.{{ server_domain }}"
