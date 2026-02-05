@@ -1,0 +1,17 @@
+---
+- name: Create configuration root directory
+  ansible.builtin.file:
+    path: "{{ config_root }}"
+    state: directory
+    mode: "0775"
+
+- name: Install required system packages
+  ansible.builtin.dnf:
+    name:
+      - jq
+      - git
+      - curl
+      - ca-certificates
+      - dnf-plugins-core
+    state: present
+  become: true

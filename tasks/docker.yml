@@ -1,20 +1,24 @@
 ---
-- name: Add Docker GPG apt key
-  ansible.builtin.get_url:
-    url: https://download.docker.com/linux/ubuntu/gpg
-    dest: /etc/apt/keyrings/docker.asc
-    mode: "0644"
+# https://blog.vikramchauhan.com/selinux-fix-mergerfs-allow-docker-samba-access/
+- name: Set SELinux boolean for Docker if using MergerFS
+  ansible.builtin.seboolean:
+    name: virt_sandbox_use_fusefs
+    state: true
+    persistent: true
   become: true
 
-- name: Add Docker apt repository
-  ansible.builtin.apt_repository:
-    repo: deb [arch={{ os_arch }} signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
-    state: present
+- name: Add Docker DNF repository
+  ansible.builtin.get_url:
+    url: https://download.docker.com/linux/fedora/docker-ce.repo
+    dest: /etc/yum.repos.d/docker-ce.repo
+    owner: root
+    group: root
+    mode: '0644'
   register: common_docker_repo
   become: true
 
-- name: Update apt and install Docker Engine
-  ansible.builtin.apt:
+- name: Update dnf and install Docker Engine
+  ansible.builtin.dnf:
     name:
       - docker-ce
       - docker-ce-cli
@@ -46,5 +50,9 @@
 - name: Create docker network
   community.docker.docker_network:
     name: ritsu-pi
-    driver: bridge
     state: present
+    driver: bridge
+    ipam_config:
+      - subnet: "{{ server_docker_network.subnet }}"
+        gateway: "{{ server_docker_network.gateway }}"
+        iprange: "{{ server_docker_network.ip_range }}"

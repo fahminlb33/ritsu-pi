@@ -13,10 +13,22 @@
     timezone: Asia/Jakarta
 
     # Flame dashboard
+    server_domain: ramiel.pi
     server_hostname: 10.20.20.101
+
+    # Network
+    server_docker_network:
+      gateway: "172.19.0.1"
+      subnet: "172.19.0.0/16"
+      ip_range: "172.19.0.0/24"
+
   pre_tasks:
-    - name: Include common tasks
-      ansible.builtin.import_tasks: tasks/main.yml
+    - name: Install basic packages
+      ansible.builtin.import_tasks: tasks/base.yml
+
+    - name: Install Docker
+      ansible.builtin.import_tasks: tasks/docker.yml
+
   roles:
     # ===> networking
     - role: adblock
@@ -26,63 +38,23 @@
         adblock_config_dir: "{{ config_root }}/adblock"
 
         adblock_dnscrypt:
-          image: klutchell/dnscrypt-proxy:2.1.14
-          port: 8302
+          image: klutchell/dnscrypt-proxy:2.1.15
+          # auth
           username: "{{ dnscrypt_username }}"
           password: "{{ dnscrypt_password }}"
+          # access
+          port: 8302
+          host: "dnscrypt.{{ server_domain }}"
+          bind_ip: "172.19.1.100"
 
         adblock_pihole:
-          image: pihole/pihole:2025.08.0
+          image: pihole/pihole:2025.11.1
+          # auth
+          password: "{{ pihole_password }}"
+          # access
           port: 8001
           port_https: 8301
-          password: "{{ pihole_password }}"
-
-    - role: downloader
-      tags: [networking, security, vpn, gluetun]
-      vars:
-        downloader_state: present
-        downloader_config_dir: "{{ config_root }}/downloader"
-
-        # VPN
-        downloader_gluetun:
-          image: qmcgaw/gluetun:v3.40.0
-          env:
-            TZ: "{{ timezone }}"
-            VPN_SERVICE_PROVIDER: "protonvpn"
-            VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
-            VPN_PORT_FORWARDING: "on"
-            PORT_FORWARD_ONLY: "on"
-            VPN_TYPE: "openvpn"
-            SERVER_COUNTRIES: "Indonesia,Singapore"
-            OPENVPN_USER: "{{ protonvpn_openvpn_username }}"
-            OPENVPN_PASSWORD: "{{ protonvpn_openvpn_password }}"
-            FIREWALL_VPN_INPUT_PORTS: "6881"
-
-        # Downloaders
-        downloader_qbittorrent:
-          image: lscr.io/linuxserver/qbittorrent:5.1.2
-          port: 8004
-          download_dir: "/mnt/pool/downloads"
-
-        downloader_sabnzbd:
-          state: absent
-          image: lscr.io/linuxserver/sabnzbd:4.5.3
-          port: 8005
-          download_dir_complete: "/mnt/pool/downloads"
-          download_dir_incomplete: "/mnt/pool/downloads"
-
-        downloader_jdownloader:
-          image: jlesage/jdownloader-2:v25.07.2
-          download_dir: "/mnt/pool/downloads"
-          ports:
-            vpn: 13001
-            vpn_web: 8201
-            novpn: 13002
-            novpn_web: 8202
-          myjd:
-            email: "{{ jdownloader_myjd_email }}"
-            password: "{{ jdownloader_myjd_password }}"
-            device: "ramiel"
+          host: "pihole.{{ server_domain }}"
 
     # ===> media server
     - role: arr_stack
@@ -90,54 +62,106 @@
       vars:
         arr_stack_state: present
         arr_stack_config_dir: "{{ config_root }}/arr-stack"
-        arr_stack_media_dir: /mnt/pool/media
+        arr_stack_media_dir: /mnt/pool/media_root
 
-        arr_stack_prowlarr:
-          image: lscr.io/linuxserver/prowlarr:2.0.5
-          port: 8201
+        # VPN
+        arr_stack_gluetun:
+          image: qmcgaw/gluetun:v3.41.0
+          env:
+            TZ: "{{ timezone }}"
+            VPN_SERVICE_PROVIDER: "protonvpn"
+            VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+            VPN_PORT_FORWARDING: "on"
+            PORT_FORWARD_ONLY: "on"
+            VPN_TYPE: "openvpn"
+            SERVER_COUNTRIES: "Indonesia,Singapore,Canada"
+            OPENVPN_USER: "{{ protonvpn_openvpn_username }}"
+            OPENVPN_PASSWORD: "{{ protonvpn_openvpn_password }}"
+            FIREWALL_VPN_INPUT_PORTS: "6881"
 
-        arr_stack_lidarr:
-          image: lscr.io/linuxserver/lidarr:2.13.3
-          port: 8202
+        # Downloaders
+        arr_stack_qbittorrent:
+          image: lscr.io/linuxserver/qbittorrent:5.1.2
+          # access
+          port: 8004
+          host: "qbittorrent.{{ server_domain }}"
 
-        arr_stack_sonarr:
-          image: lscr.io/linuxserver/sonarr:4.0.15
-          port: 8203
+        arr_stack_jdownloader:
+          image: jlesage/jdownloader-2:v25.07.2
+          download_dir: "/mnt/pool/downloads"
+          # auth
+          myjd:
+            email: "{{ jdownloader_myjd_email }}"
+            password: "{{ jdownloader_myjd_password }}"
+            device: "ramiel"
+          # access
+          vpn:
+            myjd_port: 13001
+            web_port: 8201
+            host: "jdownloader-vpn.{{ server_domain }}"
+          novpn:
+            myjd_port: 13002
+            web_port: 8202
+            host: "jdownloader-novpn.{{ server_domain }}"
+
+        # Arr Stack
+        arr_stack_bazarr:
+          image: lscr.io/linuxserver/bazarr:v1.5.4-ls334
+          # access
+          port: 8401
+          host: "bazarr.{{ server_domain }}"
 
         arr_stack_radarr:
-          image: lscr.io/linuxserver/radarr:5.26.2
-          port: 8204
+          image: lscr.io/linuxserver/radarr:6.0.4.10291-ls290
+          # access
+          port: 8402
+          host: "radarr.{{ server_domain }}"
 
-        arr_stack_bazarr:
-          image: lscr.io/linuxserver/bazarr:1.5.2
-          port: 8205
+        arr_stack_lidarr:
+          image: lscr.io/linuxserver/lidarr:3.1.0.4875-ls18
+          # acccess
+          port: 8403
+          host: "lidarr.{{ server_domain }}"
+
+        arr_stack_sonarr:
+          image: lscr.io/linuxserver/sonarr:4.0.16.2944-ls301
+          # access
+          port: 8404
+          host: "sonarr.{{ server_domain }}"
+
+        arr_stack_prowlarr:
+          image: lscr.io/linuxserver/prowlarr:2.3.0.5236-ls135
+          # access
+          port: 8405
+          host: "prowlarr.{{ server_domain }}"
 
     - role: jellyfin
       tags: [media, jellyfin]
       vars:
         jellyfin_state: present
-        jellyfin_image: jellyfin/jellyfin:10.10.7
+        jellyfin_image: jellyfin/jellyfin:10.11.6
         jellyfin_port: 8002
-        jellyfin_media_dir: /mnt/pool/media
+        jellyfin_media_dir: /mnt/pool/media_root/media
 
     - role: immich
       tags: [networking, security, pihole]
       vars:
         immich_state: present
         immich_port: 8003
+        immich_host: "immich.{{ server_domain }}"
 
         immich_config_dir: "{{ config_root }}/immich"
         immich_upload_dir: /mnt/pool/photos
 
         immich_images:
-          server: ghcr.io/immich-app/immich-server:v1.140.1
-          ml: ghcr.io/immich-app/immich-machine-learning:v1.140.1
-          postgres: ghcr.io/immich-app/postgres:14-vectorchord0.4.3-pgvectors0.2.0
-          redis: valkey/valkey:8
+          ml: ghcr.io/immich-app/immich-machine-learning:v2.5.3-openvino
+          server: ghcr.io/immich-app/immich-server:v2.5.3
+          postgres: ghcr.io/immich-app/postgres:17-vectorchord0.5.3-pgvector0.8.1
+          redis: valkey/valkey:9
 
         immich_hwaccel:
-          transcoding: quicksync
           ml: openvino
+          transcoding: quicksync
 
         immich_db:
           name: immich
@@ -152,72 +176,76 @@
         monitoring_state: present
         monitoring_config_dir: "{{ config_root }}/monitoring"
 
-        monitoring_portainer:
-          state: present
-          image: portainer/portainer-ce:2.33.1
-          port: 8306
-          port_https: 8006
-
         monitoring_grafana:
           state: present
-          image: grafana/grafana:12.1.1-ubuntu
-          port: 8007
+          image: grafana/grafana:12.3-ubuntu
+          # auth
           user:
             username: "{{ grafana_username }}"
             password: "{{ grafana_password }}"
             allow_signup: false
+          # access
+          port: 8007
+          host: "grafana.{{ server_domain }}"
 
         monitoring_prometheus:
           state: present
-          image: prom/prometheus:v3.5.0
-          port: 8008
+          image: prom/prometheus:v3.5.1
           scrape_interval: 15s
           retention:
             time: 2y
             size: 100GB
-          remote_write:
-            enabled: true
-            url: http://vector:9090
-          extra_config: {}
-            # - job_name: immich_api
-            #   static_configs:
-            #     - targets: ['immich-server:8081']
-            # - job_name: immich_microservices
-            #   static_configs:
-            #     - targets: ['immich-server:8082']
+          extra_config:
+            - job_name: immich_api
+              static_configs:
+                - targets: ['immich-server:8081']
+            - job_name: immich_microservices
+              static_configs:
+                - targets: ['immich-server:8082']
+          # access
+          port: 8005
+          host: "prometheus.{{ server_domain }}"
 
         monitoring_exporters:
           node:
             state: present
-            image: prom/node-exporter:v1.9.1
+            arch: amd64
+            bin_path: /usr/local/bin/node_exporter
+            # access
             port: 8101
+            host: "exporter-node.{{ server_domain }}"
 
           cadvisor:
             state: present
-            image: gcr.io/cadvisor/cadvisor:v0.52.0
+            image: ghcr.io/google/cadvisor:0.56.2
+            # access
             port: 8102
+            host: "exporter-cadvisor.{{ server_domain }}"
 
           blackbox:
             state: present
             image: prom/blackbox-exporter:v0.27.0
-            port: 8103
             ping_hosts:
               - https://www.google.com
               - https://www.github.com
+            # access
+            port: 8103
+            host: "exporter-blackbox.{{ server_domain }}"
 
           speedtest:
             state: present
-            image: fahminlb33/speedtest-exporter:1.0.5
-            port: 8104
+            image: fahminlb33/speedtest-exporter:1.1.0
             # Configure the sample_interval to limit the number of checks interval because
             # the speed test will consume a considerable amount of bandwidth.
             scrape_interval: 1h
             server_id:
+            # access
+            port: 8104
+            host: "exporter-speedtest.{{ server_domain }}"
 
           mikrotik:
             state: present
             image: ghcr.io/akpw/mktxp:1.2.12
-            port: 8105
             # Mikrotik router host
             router:
               host: 10.20.20.1
@@ -226,61 +254,42 @@
             user:
               username: "{{ mktxp_username }}"
               password: "{{ mktxp_password }}"
+            # access
+            port: 8105
+            host: "exporter-mikrotik.{{ server_domain }}"
 
-          apcusbd:
+          apcupsd:
             state: present
             image: ghcr.io/twodarek/apcupsd_exporter:0dd7e0c8ebf963f2d3a3441958838747dea8a6b8
+            # access
             port: 8106
-            # https://grafana.com/grafana/dashboards/19329-apc-ups/
+            host: "exporter-apcupsd.{{ server_domain }}"
 
           smartctl:
             state: present
             image: prometheuscommunity/smartctl-exporter:v0.14.0
+            # access
             port: 8107
+            host: "exporter-smartctl.{{ server_domain }}"
 
     - role: dashboard
       tags: [common, dashboard]
       vars:
         dashboard_state: present
-        dashboard_image: pawelmalak/flame:multiarch2.3.1
+        dashboard_image: ghcr.io/gethomepage/homepage:v1.9.0
         dashboard_config_dir: "{{ config_root }}/dashboard"
-        dashboard_password: "{{ dashboard_admin_password }}"
+        dashboard_host: "{{ server_domain }}"
 
     # ==> AI/ML tools
     - role: mlflow
       tags: [monitoring, database, mlflow]
       vars:
         mlflow_state: present
-        mlflow_image: ghcr.io/mlflow/mlflow:v3.3.2
-        mlflow_port: 8010
+        mlflow_image: ghcr.io/mlflow/mlflow:v3.9.0
         mlflow_config_dir: "{{ config_root }}/mlflow"
-
-    - role: ollama
-      tags: [ai, genai, llm, ollama]
-      vars:
-        ollama_state: present
-        ollama_port: 8011
-        ollama_open_webui_port: 8012
-
-        ollama_config_dir: "{{ config_root }}/ollama"
-
-        ollama_image: ollama/ollama:0.11.10
-        ollama_open_webui_image: ghcr.io/open-webui/open-webui:v0.6.28
-
-        ollama_rag_embedding:
-          model: nomic-embed-text:v1.5
-
-    # ==> databases
-    - role: postgresql
-      tags: [database, postgresql]
-      vars:
-        postgresql_major_version: 17
-        postgresql_extensions:
-          pg_search:
-            version: "0.18.0"
-          vectorchord:
-            version: "0.5.0"
-      become: true
+        # access
+        mlflow_port: 8010
+        mlflow_host: "mlflow.{{ server_domain }}"
 
     # ==> file sharing
     - role: samba
@@ -288,9 +297,10 @@
       vars:
         # SMB user
         samba_user:
-          group: smbusers
+          group: sambausers
           username: "{{ samba_user_username }}"
           password: "{{ samba_user_password }}"
+          force_user: "ramiel"
 
         # directories to share
         samba_mount_points:
@@ -299,3 +309,18 @@
             writeable: true
             browsable: true
       become: true
+
+    # ==> reverse proxy
+    - role: traefik
+      tags: [networking, reverse-proxy, traefik]
+      vars:
+        traefik_state: present
+        traefik_config_dir: "{{ config_root }}/traefik"
+
+        traefik_image: traefik:v3.6.7
+
+        traefik_tls:
+          cert_file: "certs/cert.pem"
+          key_file: "certs/key.pem"
+
+        traefik_host: traefik.ramiel.pi
