@@ -1,10 +1,8 @@
 ---
-- name: Restart Grafana
-  community.docker.docker_compose_v2:
+- name: Restart Node Exporter
+  service:
+    name: node_exporter
     state: restarted
-    project_src: "{{ monitoring_config_dir }}"
-    services:
-      - grafana
 
 - name: Restart Prometheus
   community.docker.docker_compose_v2:
@@ -13,12 +11,12 @@
     services:
       - prometheus
 
-- name: Restart Vector
+- name: Restart Grafana
   community.docker.docker_compose_v2:
     state: restarted
     project_src: "{{ monitoring_config_dir }}"
     services:
-      - vector
+      - grafana
 
 - name: Restart Mikrotik Exporter
   community.docker.docker_compose_v2:

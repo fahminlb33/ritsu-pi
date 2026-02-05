@@ -26,19 +26,19 @@
     src: templates/grafana/dashboards/{{ item.name }}
     dest: "{{ monitoring_config_dir }}/grafana/dashboards/{{ item.name }}"
     mode: "0775"
-  when: item.copy
+  when: item.do_copy
   loop:
     - name: docker_cadvisor.json
-      copy: "{{ monitoring_exporters.cadvisor.state == 'present' }}"
+      do_copy: "{{ monitoring_exporters.cadvisor.state == 'present' }}"
     - name: internet_uptime_blackbox.json
-      copy: "{{ monitoring_exporters.blackbox.state == 'present' }}"
+      do_copy: "{{ monitoring_exporters.blackbox.state == 'present' }}"
     - name: mikrotik_mktxp.json
-      copy: "{{ monitoring_exporters.mikrotik.state == 'present' }}"
+      do_copy: "{{ monitoring_exporters.mikrotik.state == 'present' }}"
     - name: node_exporter_full.json
-      copy: "{{ monitoring_exporters.node.state == 'present' }}"
+      do_copy: "{{ monitoring_exporters.node.state == 'present' }}"
     - name: node_exporter_summary.json
-      copy: "{{ monitoring_exporters.node.state == 'present' }}"
+      do_copy: "{{ monitoring_exporters.node.state == 'present' }}"
     - name: speedtest.json
-      copy: "{{ monitoring_exporters.speedtest.state == 'present' }}"
+      do_copy: "{{ monitoring_exporters.speedtest.state == 'present' }}"
     - name: apc_ups.json
-      copy: "{{ monitoring_exporters.apcusbd.state == 'present' }}"
+      do_copy: "{{ monitoring_exporters.apcupsd.state == 'present' }}"

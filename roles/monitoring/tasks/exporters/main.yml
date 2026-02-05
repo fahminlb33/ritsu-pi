@@ -1,3 +1,7 @@
+- name: Configure Node exporter
+  ansible.builtin.import_tasks: node.yml
+  when: monitoring_exporters.blackbox.state == "present"
+
 - name: Configure Blackbox exporter
   ansible.builtin.import_tasks: blackbox.yml
   when: monitoring_exporters.blackbox.state == "present"

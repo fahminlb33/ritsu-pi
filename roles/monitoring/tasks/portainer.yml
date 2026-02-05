@@ -1,7 +1,0 @@
----
-- name: Create Portainer directory
-  ansible.builtin.file:
-    path: "{{ monitoring_config_dir }}/portainer/data"
-    state: directory
-    mode: "0775"
-  register: monitoring_portainer_config_dir

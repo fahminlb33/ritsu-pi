@@ -2,74 +2,70 @@
 monitoring_state: present
 monitoring_config_dir: "{{ config_root }}/monitoring"
 
-monitoring_portainer:
-  state: present
-  image: portainer/portainer-ce:2.33.1
-  port: 9000
-  port_https: 9443
-
 monitoring_grafana:
   state: present
-  image: grafana/grafana:12.1.1-ubuntu
-  port: 3000
+  image: grafana/grafana:12.3-ubuntu
+  # auth
   user:
     username: CHANGE-ME
     password: CHANGE-ME
     allow_signup: false
+  # access
+  port: 3000
+  host: "grafana.{{ server_domain }}"
 
 monitoring_prometheus:
   state: present
   image: prom/prometheus:v3.5.0
-  port: 8005
   scrape_interval: 15s
   retention:
     time: 2y
     size: 100GB
-  remote_write:
-    enabled: true
-    url: http://vector:9090
   extra_config: {}
-
-monitoring_vector:
-  state: present
-  image: timberio/vector:0.49.0-debian
-  port: 8686
-  remote_write:
-    port: 9090
-    logs_path: /mnt/pool/prometheus-archive
+  # access
+  port: 8005
+  host: "prometheus.{{ server_domain }}"
 
 monitoring_exporters:
   node:
     state: present
-    image: prom/node-exporter:v1.9.1
+    arch: amd64
+    bin_path: /usr/local/bin/node_exporter
+    # access
     port: 8101
+    host: "exporter-node.{{ server_domain }}"
 
   cadvisor:
     state: present
-    image: gcr.io/cadvisor/cadvisor:v0.53.0
+    image: ghcr.io/google/cadvisor:0.56.2
+    # access
     port: 8102
+    host: "exporter-cadvisor.{{ server_domain }}"
 
   blackbox:
     state: present
-    image: prom/blackbox-exporter:v0.27.0
-    port: 8103
+    image: prom/blackbox-exporter:v0.28.0
     ping_hosts:
       - https://www.google.com
       - https://www.github.com
+    # access
+    port: 8103
+    host: "exporter-blackbox.{{ server_domain }}"
 
   speedtest:
     state: present
     image: fahminlb33/speedtest-exporter:1.0.5
-    port: 8104
     # Configure the sample_interval to limit the number of checks interval because
     # the speed test will consume a considerable amount of bandwidth.
     scrape_interval: 1h
     server_id:
+    # access
+    port: 8104
+    host: "exporter-speedtest.{{ server_domain }}"
 
   mikrotik:
     state: present
-    image: ghcr.io/akpw/mktxp:v1.2.12
-    port: 8105
+    image: ghcr.io/akpw/mktxp:v1.2.16
     # Mikrotik router host
     router:
       host: 10.20.20.1
@@ -78,14 +74,21 @@ monitoring_exporters:
     user:
       username: CHANGE-ME
       password: CHANGE-ME
+    # access
+    port: 8105
+    host: "exporter-mikrotik.{{ server_domain }}"
 
-  apcusbd:
+  # https://grafana.com/grafana/dashboards/19329-apc-ups/
+  apcupsd:
     state: present
-    image: ghcr.io/twodarek/apcupsd_exporter:0dd7e0c8ebf963f2d3a3441958838747dea8a6b8
+    image: ghcr.io/twodarek/apcupsd_exporter:8a26b6602bd7e9dbb0e1569ddd7fa5c85cebb8ff
+    # access
     port: 8106
-    # https://grafana.com/grafana/dashboards/19329-apc-ups/
+    host: "exporter-apcupsd.{{ server_domain }}"
 
   smartctl:
     state: present
-    image: prometheuscommunity/smartctl-exporter:v0.014.0
+    image: prometheuscommunity/smartctl-exporter:v0.14.0
+    # access
     port: 8107
+    host: "exporter-smartctl.{{ server_domain }}"

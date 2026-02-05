@@ -13,20 +13,15 @@
   loop: "{{ root_images + exporter_images }}"
   vars:
     root_images:
-      - "{{ monitoring_portainer.image }}"
       - "{{ monitoring_grafana.image }}"
       - "{{ monitoring_prometheus.image }}"
-      - "{{ monitoring_vector.image }}"
-    exporter_images: "{{ monitoring_exporters | dict2items | map(attribute='value.image') }}"
-
-- name: Configure Portainer
-  ansible.builtin.import_tasks: portainer.yml
+    exporter_images: "{{ monitoring_exporters | dict2items | selectattr('value.image', 'defined') | map(attribute='value.image') }}"
 
 - name: Configure Grafana
-  ansible.builtin.import_tasks: grafana.yml
+  ansible.builtin.import_tasks: install-grafana.yml
 
 - name: Configure Prometheus
-  ansible.builtin.import_tasks: prometheus.yml
+  ansible.builtin.import_tasks: install-prometheus.yml
 
 - name: Configure Prometheus exporters
   ansible.builtin.import_tasks: exporters/main.yml

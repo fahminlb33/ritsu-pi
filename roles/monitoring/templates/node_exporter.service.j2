@@ -1,0 +1,10 @@
+[Unit]
+Description=NodeExporter
+
+[Service]
+TimeoutStartSec=0
+Restart=on-failure
+ExecStart={{ monitoring_exporters.node.bin_path }} --web.listen-address=0.0.0.0:{{ monitoring_exporters.node.port }} {{ monitoring_exporters.node.extra_args | default('') }}
+
+[Install]
+WantedBy=multi-user.target

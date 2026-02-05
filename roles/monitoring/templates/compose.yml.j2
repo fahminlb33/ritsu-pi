@@ -7,27 +7,6 @@ networks:
     external: true
 
 services:
-{% if monitoring_portainer.state == 'present' %}
-  portainer:
-    container_name: portainer
-    image: "{{ monitoring_portainer.image }}"
-    restart: unless-stopped
-    privileged: true
-    ports:
-      - "{{ monitoring_portainer.port }}:8000"
-      - "{{ monitoring_portainer.port_https }}:9443"
-    networks:
-      - ritsu-pi
-    volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "{{ monitoring_config_dir }}/portainer/data:/data:rw"
-    labels:
-      flame.type: "application"
-      flame.name: "Portainer"
-      flame.url: "http://{{ server_hostname }}:{{ monitoring_portainer.port_https }}"
-      flame.icon: "custom"
-{% endif %}
-
 {% if monitoring_grafana.state == 'present' %}
   grafana:
     container_name: grafana
@@ -47,10 +26,11 @@ services:
       - "{{ monitoring_config_dir }}/grafana/dashboards:/var/lib/grafana/dashboards"
       - "{{ monitoring_config_dir }}/grafana/provisioning:/etc/grafana/provisioning"
     labels:
-      flame.type: "application"
-      flame.name: "Grafana"
-      flame.url: "http://{{ server_hostname }}:{{ monitoring_grafana.port }}"
-      flame.icon: "custom"
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.grafana.rule=Host(`{{ monitoring_grafana.host }}`)"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 {% endif %}
 
 {% if monitoring_prometheus.state == 'present' %}
@@ -72,50 +52,16 @@ services:
       - "{{ monitoring_config_dir }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
       - "{{ monitoring_config_dir }}/prometheus/data:/prometheus/data:rw"
     labels:
-      flame.type: "application"
-      flame.name: "Prometheus"
-      flame.url: "http://{{ server_hostname }}:{{ monitoring_prometheus.port }}"
-      flame.icon: "custom"
-{% endif %}
-
-{% if monitoring_vector.state == 'present' %}
-  vector:
-    container_name: vector
-    image: "{{ monitoring_vector.image }}"
-    restart: unless-stopped
-    ports:
-      - "{{ monitoring_vector.port }}:8686"
-    networks:
-      - ritsu-pi
-    volumes:
-      - "{{ monitoring_config_dir }}/vector/vector.yml:/etc/vector/vector.yaml:ro"
-      - "{{ monitoring_config_dir }}/vector/data:/var/lib/vector/"
-      - "{{ monitoring_vector.remote_write.logs_path }}:/opt/vector/logs:rw"
-{% endif %}
-
-{% if monitoring_exporters.node.state == 'present' %}
-  node:
-    container_name: node-exporter
-    image: "{{ monitoring_exporters.node.image }}"
-    command:
-      - --path.procfs=/host/proc
-      - --path.rootfs=/rootfs
-      - --path.sysfs=/host/sys
-      - --collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)
-    restart: unless-stopped
-    ports:
-     - "{{ monitoring_exporters.node.port }}:9100"
-    networks:
-      - ritsu-pi
-    volumes:
-      - /proc:/host/proc:ro
-      - /sys:/host/sys:ro
-      - /:/rootfs:ro
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.prometheus.rule=Host(`{{ monitoring_prometheus.host }}`)"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
 {% endif %}
 
 {% if monitoring_exporters.cadvisor.state == 'present' %}
   cadvisor:
-    container_name: cadvisor-exporter
+    container_name: exporter-cadvisor
     image: "{{ monitoring_exporters.cadvisor.image }}"
     restart: unless-stopped
     privileged: true
@@ -126,21 +72,22 @@ services:
     volumes:
       - /:/rootfs:ro
       - /sys:/sys:ro
+      - /dev/disk/:/dev/disk:ro
       - /var/run:/var/run:ro
       - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
     devices:
       - /dev/kmsg
     labels:
-      - flame.type=application
-      - flame.name=cAdvisor
-      - flame.url=http://{{ server_hostname }}:{{ monitoring_exporters.cadvisor.port }}
-      - flame.icon=custom
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.cadvisor.rule=Host(`{{ monitoring_exporters.cadvisor.host }}`)"
+      - "traefik.http.routers.cadvisor.entrypoints=websecure"
+      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
 {% endif %}
 
 {% if monitoring_exporters.blackbox.state == 'present' %}
   blackbox:
-    container_name: blackbox-exporter
+    container_name: exporter-blackbox
     image: "{{ monitoring_exporters.blackbox.image }}"
     command: --config.file=/config/blackbox.yml
     restart: unless-stopped
@@ -154,7 +101,7 @@ services:
 
 {% if monitoring_exporters.speedtest.state == 'present' %}
   speedtest:
-    container_name: speedtest-exporter
+    container_name: exporter-speedtest
     image: "{{ monitoring_exporters.speedtest.image }}"
     restart: unless-stopped    
     ports:
@@ -167,11 +114,17 @@ services:
       - ritsu-pi
     healthcheck:
       test: ["NONE"]
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.speedtest.rule=Host(`{{ monitoring_exporters.speedtest.host }}`)"
+      - "traefik.http.routers.speedtest.entrypoints=websecure"
+      - "traefik.http.services.speedtest.loadbalancer.server.port=9898"
 {% endif %}
 
 {% if monitoring_exporters.mikrotik.state == 'present' %}
   mikrotik:
-    container_name: mikrotik-exporter
+    container_name: exporter-mikrotik
     image: "{{ monitoring_exporters.mikrotik.image }}"
     command: --cfg-dir /mktxp_config export
     restart: unless-stopped
@@ -181,24 +134,36 @@ services:
       - ritsu-pi
     volumes:
       - "{{ monitoring_exporters_mikrotik_config_dir.path }}:/mktxp_config:rw"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.mikrotik.rule=Host(`{{ monitoring_exporters.mikrotik.host }}`)"
+      - "traefik.http.routers.mikrotik.entrypoints=websecure"
+      - "traefik.http.services.mikrotik.loadbalancer.server.port=49090"
 {% endif %}
 
-{% if monitoring_exporters.apcusbd.state == 'present' %}
-  apcusbd:
-    container_name: apcusbd-exporter
-    image: "{{ monitoring_exporters.apcusbd.image }}"
+{% if monitoring_exporters.apcupsd.state == 'present' %}
+  apcupsd:
+    container_name: exporter-apcupsd
+    image: "{{ monitoring_exporters.apcupsd.image }}"
     restart: unless-stopped
     environment:
       - "APCUPS_ADDR={{ ansible_default_ipv4.address }}:3551"
     networks:
       - ritsu-pi
     ports:
-      - "{{ monitoring_exporters.apcusbd.port }}:9162"
+      - "{{ monitoring_exporters.apcupsd.port }}:9162"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.apcupsd.rule=Host(`{{ monitoring_exporters.apcupsd.host }}`)"
+      - "traefik.http.routers.apcupsd.entrypoints=websecure"
+      - "traefik.http.services.apcupsd.loadbalancer.server.port=9162"
 {% endif %}
 
 {% if monitoring_exporters.smartctl.state == 'present' %}
   smartctl:
-    container_name: smartctl-exporter
+    container_name: exporter-smartctl
     image: "{{ monitoring_exporters.smartctl.image }}"
     restart: unless-stopped
     privileged: true
@@ -207,4 +172,10 @@ services:
       - ritsu-pi
     ports:
       - "{{ monitoring_exporters.smartctl.port }}:9633"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.smartctl.rule=Host(`{{ monitoring_exporters.smartctl.host }}`)"
+      - "traefik.http.routers.smartctl.entrypoints=websecure"
+      - "traefik.http.services.smartctl.loadbalancer.server.port=9633"
 {% endif %}

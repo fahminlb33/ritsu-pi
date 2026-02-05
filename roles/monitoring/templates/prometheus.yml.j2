@@ -10,7 +10,7 @@ scrape_configs:
 {% if monitoring_exporters.node.state == 'present' %}
   - job_name: node
     static_configs:
-      - targets: ["node:9100"]
+      - targets: ["{{ ansible_default_ipv4.address }}:{{ monitoring_exporters.node.port }}"]
 {% endif %}
 
 {% if monitoring_exporters.cadvisor.state == 'present' %}
@@ -48,15 +48,15 @@ scrape_configs:
 {% endif %}
 
 {% if monitoring_exporters.mikrotik.state == 'present' %}
-  - job_name: exporter_mikrotik
+  - job_name: mikrotik
     static_configs:
       - targets: ["mikrotik:49090"]
 {% endif %}
 
-{% if monitoring_exporters.apcusbd.state == 'present' %}
-  - job_name: apcusbd
+{% if monitoring_exporters.apcupsd.state == 'present' %}
+  - job_name: apcupsd
     static_configs:
-      - targets: ["apcusbd:9162"]
+      - targets: ["apcupsd:9162"]
 {% endif %}
 
 {% if monitoring_exporters.smartctl.state == 'present' %}
@@ -67,16 +67,4 @@ scrape_configs:
 
 {% if monitoring_prometheus.extra_config %}
 {{ monitoring_prometheus.extra_config | to_yaml | indent(width=2, first=True) }}
-{% endif %}
-
-{% if monitoring_prometheus.remote_write.enabled and monitoring_vector.state == 'present' %}
-# remote write to vector
-remote_write:
-  - name: vector
-    url: "http://vector:{{ monitoring_vector.remote_write.port }}"
-    queue_config:
-      max_shards: 20
-    write_relabel_configs:
-      - regex: 'container_label_.*'
-        action: 'labeldrop'
 {% endif %}
