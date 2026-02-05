@@ -5,3 +5,6 @@
 # Ansible Vault Key
 secrets.yml
 secrets_pass
+
+# Certs
+certs/*.pem
