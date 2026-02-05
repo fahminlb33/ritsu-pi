@@ -1,7 +1,0 @@
----
-postgresql_major_version: 17
-postgresql_extensions:
-  pg_search:
-    version: "0.18.0"
-  vectorchord:
-    version: "0.5.0"
