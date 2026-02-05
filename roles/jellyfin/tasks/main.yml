@@ -37,12 +37,13 @@
     volumes:
       - "{{ jellyfin_config_dir }}/config:/config:rw"
       - "{{ jellyfin_config_dir }}/cache:/cache:rw"
-      - "{{ jellyfin_media_dir }}:/media:rw"
+      - "{{ jellyfin_media_dir }}:/data/media:rw"
     devices:
       - "/dev/dri:/dev/dri"
     labels:
-      flame.type: "application"
-      flame.name: "Jellyfin"
-      flame.url: "http://{{ server_hostname }}:{{ jellyfin_port }}"
-      flame.icon: "custom"
+      traefik.enable: "true"
+      traefik.docker.network: "ritsu-pi"
+      traefik.http.routers.jellyfin.rule: "Host(`{{ jellyfin_host }}`)"
+      traefik.http.routers.jellyfin.entrypoints: "websecure"
+      traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
     state: "{{ 'started' if jellyfin_state == 'present' else 'absent' }}"

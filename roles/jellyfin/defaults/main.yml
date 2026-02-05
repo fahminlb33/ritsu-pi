@@ -1,8 +1,9 @@
 ---
 jellyfin_state: present
 
-jellyfin_image: jellyfin/jellyfin:10.10.7
+jellyfin_image: jellyfin/jellyfin:10.11.6
 jellyfin_port: 8002
+jellyfin_host: "jellyfin.{{ server_domain }}"
 
 jellyfin_config_dir: "{{ config_root }}/jellyfin"
-jellyfin_media_dir: /media/primary/media
+jellyfin_media_dir: /mnt/pool/media_root/media
