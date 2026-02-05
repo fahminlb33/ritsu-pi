@@ -1,0 +1,12 @@
+---
+traefik_state: present
+traefik_config_dir: "{{ config_root }}/traefik"
+
+traefik_image: traefik:v3.6.7
+
+traefik_tls:
+  cert_file: "{{ traefik_config_dir }}/tls/cert.pem"
+  key_file: "{{ traefik_config_dir }}/tls/key.pem"
+
+traefik_host: traefik.ramiel.pi
+traefik_dashboard_users: "CHANGE-ME"

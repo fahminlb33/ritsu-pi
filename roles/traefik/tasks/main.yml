@@ -1,0 +1,84 @@
+---
+- name: Create data directory
+  ansible.builtin.file:
+    path: "{{ traefik_config_dir }}/{{ item }}"
+    state: directory
+    mode: "0755"
+  loop:
+    - certs
+    - dynamic
+
+- name: Create TLS dynamic configuration file
+  ansible.builtin.template:
+    src: tls.yml.j2
+    dest: "{{ traefik_config_dir }}/dynamic/tls.yml"
+    mode: "0755"
+
+- name: Copy TLS certificate and key file
+  ansible.builtin.copy:
+    src: "{{ item.src }}"
+    dest: "{{ traefik_config_dir }}/certs/{{ item.dst }}"
+    mode: "0755"
+  loop:
+    - { src: "{{ traefik_tls.cert_file }}", dst: "local.crt" }
+    - { src: "{{ traefik_tls.key_file }}", dst: "local.key" }
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ traefik_state }}"
+    name: "{{ traefik_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: traefik
+    image: "{{ traefik_image }}"
+    restart_policy: unless-stopped
+    command:
+      # EntryPoints
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.web.http.redirections.entrypoint.permanent=true"
+      - "--entrypoints.websecure.address=:443"
+      - "--entrypoints.websecure.http.tls=true"
+
+      # Attach the static configuration tls.yaml file that contains the tls configuration settings
+      - "--providers.file.filename=/dynamic/tls.yml"
+
+      # Providers
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.network=proxy"
+
+      # API & Dashboard
+      - "--api.dashboard=true"
+      - "--api.insecure=false"
+
+      # Observability
+      - "--log.level=INFO"
+      - "--accesslog=true"
+      - "--metrics.prometheus=true"
+    security_opts:
+      - no-new-privileges:true
+    published_ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    networks:
+      - name: ritsu-pi
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - "{{ traefik_config_dir }}/dynamic:/dynamic:ro"
+      - "{{ traefik_config_dir }}/certs:/certs:ro"
+    labels:
+      # Enable self‑routing
+      traefik.enable: "true"
+      traefik.docker.network: "ritsu-pi"
+
+      # Dashboard router
+      traefik.http.routers.dashboard.rule: "Host(`{{ traefik_host }}`)"
+      traefik.http.routers.dashboard.entrypoints: "websecure"
+      traefik.http.routers.dashboard.service: "api@internal"
+      traefik.http.routers.dashboard.tls: "true"
+    state: "{{ 'started' if traefik_state == 'present' else 'absent' }}"
