@@ -67,3 +67,15 @@ arr_stack_prowlarr:
   # access
   port: 9696
   host: "prowlarr.{{ server_domain }}"
+
+arr_stack_jackett:
+  image: lscr.io/linuxserver/jackett:v0.24.1094-ls308
+  # access
+  port: 9117
+  host: "jackett.{{ server_domain }}"
+
+arr_stack_flaresolvarr:
+  image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
+  # access
+  port: 8191
+  host: "flaresolvarr.{{ server_domain }}"

@@ -224,3 +224,47 @@ services:
       - "traefik.http.routers.prowlarr.rule=Host(`{{ arr_stack_prowlarr.host }}`)"
       - "traefik.http.routers.prowlarr.entrypoints=websecure"
       - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
+
+  jackett:
+    container_name: jackett
+    image: "{{ arr_stack_jackett.image }}"
+    restart: "unless-stopped"
+    networks:
+      - "ritsu-pi"
+    ports:
+      - "{{ arr_stack_jackett.port }}:9117"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
+      - "AUTO_UPDATE=true"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "{{ arr_stack_config_dir }}/jackett:/config"
+      - "{{ arr_stack_media_dir }}:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=ritsu-pi"
+      - "traefik.http.routers.jackett.rule=Host(`{{ arr_stack_jackett.host }}`)"
+      - "traefik.http.routers.jackett.entrypoints=websecure"
+      - "traefik.http.services.jackett.loadbalancer.server.port=9117"
+  
+  flaresolvarr:
+    container_name: flaresolvarr
+    image: "{{ arr_stack_flaresolvarr.image }}"
+    restart: "unless-stopped"
+    networks:
+      - "ritsu-pi"
+    ports:
+      - "{{ arr_stack_flaresolvarr.port }}:8191"
+    environment:
+      - "PUID=1000"
+      - "PGID=1000"
+      - "TZ={{ timezone }}"
+      - "LOG_LEVEL=info"
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro"
+      - "{{ arr_stack_config_dir }}/prowlarr:/config"
+      - "{{ arr_stack_media_dir }}:/data"
+    labels:
+      - "traefik.enable=false"
