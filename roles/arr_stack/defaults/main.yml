@@ -16,9 +16,7 @@ arr_stack_gluetun:
 # Downloaders
 arr_stack_qbittorrent:
   image: lscr.io/linuxserver/qbittorrent:5.1.2
-  # access
   port: 8004
-  host: "qbittorrent.{{ server_domain }}"
 
 arr_stack_jdownloader:
   image: jlesage/jdownloader-2:v25.07.2
@@ -29,53 +27,37 @@ arr_stack_jdownloader:
     device: ""
   # access
   vpn:
-    myjd_port: 13001
     web_port: 8201
-    host: "jdownloader-vpn.{{ server_domain }}"
+    myjd_port: 13001
   novpn:
-    myjd_port: 13002
     web_port: 8202
-    host: "jdownloader-novpn.{{ server_domain }}"
+    myjd_port: 13002
 
 # Arr Stack
 arr_stack_bazarr:
   image: lscr.io/linuxserver/bazarr:v1.5.4-ls334
-  # access
   port: 6767
-  host: "bazarr.{{ server_domain }}"
 
 arr_stack_radarr:
   image: lscr.io/linuxserver/radarr:6.0.4.10291-ls290
-  # access
   port: 7878
-  host: "radarr.{{ server_domain }}"
 
 arr_stack_lidarr:
   image: lscr.io/linuxserver/lidarr:3.1.0.4875-ls18
-  # acccess
   port: 8686
-  host: "lidarr.{{ server_domain }}"
 
 arr_stack_sonarr:
   image: lscr.io/linuxserver/sonarr:4.0.16.2944-ls301
-  # access
   port: 8989
-  host: "sonarr.{{ server_domain }}"
 
 arr_stack_prowlarr:
   image: lscr.io/linuxserver/prowlarr:2.3.0.5236-ls135
-  # access
   port: 9696
-  host: "prowlarr.{{ server_domain }}"
 
 arr_stack_jackett:
   image: lscr.io/linuxserver/jackett:v0.24.1094-ls308
-  # access
   port: 9117
-  host: "jackett.{{ server_domain }}"
 
 arr_stack_flaresolvarr:
   image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
-  # access
   port: 8191
-  host: "flaresolvarr.{{ server_domain }}"

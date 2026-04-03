@@ -21,16 +21,11 @@
     working_dir: /home/mlflow
     env:
       MLFLOW_BACKEND_STORE_URI: sqlite:///mlflow.db
+      MLFLOW_SERVER_CORS_ALLOWED_ORIGINS: "localhost,http://{{ mlflow_cors }},https://{{ mlflow_cors }}"
     published_ports:
       - "{{ mlflow_port }}:{{ mlflow_port }}"
     networks:
       - name: ritsu-pi
     volumes:
       - "{{ mlflow_config_dir_reg.path }}:/home/mlflow:rw"
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "ritsu-pi"
-      traefik.http.routers.mlflow.rule: "Host(`{{ mlflow_host }}`)"
-      traefik.http.routers.mlflow.entrypoints: "websecure"
-      traefik.http.services.mlflow.loadbalancer.server.port: "{{ mlflow_port }}"
     state: "{{ 'started' if mlflow_state == 'present' else 'absent' }}"

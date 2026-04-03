@@ -1,0 +1,69 @@
+---
+- name: Install nginx
+  ansible.builtin.dnf:
+    name:
+      - nginx
+    state: latest
+
+- name: Ensure nginx directories exists
+  ansible.builtin.file:
+    path: "/etc/nginx/{{ item }}"
+    state: directory
+  loop:
+    - conf.d
+    - default.d
+
+- name: Add default_server to listen 80 in nginx.conf
+  ansible.builtin.replace:
+    path: /etc/nginx/nginx.conf
+    # Matches 'listen 80;' or 'listen 80' with other options, 
+    # but ignores if 'default_server' is already there.
+    regexp: '^\s*(listen\s+80(?!.*default_server).*);'
+    replace: '    listen 80 default_server;'
+    validate: /usr/sbin/nginx -t -c %s
+  notify: Restart Nginx
+
+- name: Create default server (default.d) configuration
+  ansible.builtin.template:
+    src: "default-server.conf.j2"
+    dest: "/etc/nginx/default.d/default-server.conf"
+  notify: Restart Nginx
+
+- name: Create shared (conf.d) configuration (TLS, Upgrade header)
+  ansible.builtin.template:
+    src: shared.conf.j2
+    dest: "/etc/nginx/conf.d/a_shared.conf"
+  notify: Restart Nginx
+
+- name: Create sites (conf.d) configuration
+  ansible.builtin.template:
+    src: site.conf.j2
+    dest: "/etc/nginx/conf.d/{{ item.hostname }}.conf"
+  loop: "{{ nginx_vhosts }}"
+  notify: Restart Nginx
+
+- name: Add DNS records to CloudFlare
+  ansible.builtin.script: files/cloudflare-dns.py
+  args:
+    executable: python3
+  environment: 
+    CLOUDFLARE_API_TOKEN: "{{ nginx_cloudflare_token }}"
+    CLOUDFLARE_ZONE_ID: "{{ nginx_cloudflare_zone_id }}"
+    CNAME_HOST:  "{{ item.hostname }}"
+    CNAME_VALUE: "{{ nginx_apex_domain }}"
+    DEFAULT_A_IP: "{{ nginx_ip }}"
+  loop: "{{ nginx_vhosts }}"
+  register: nginx_cloudflare_script
+  changed_when: "'No changes required' not in nginx_cloudflare_script.stdout"
+
+- name: Allow firewall rules
+  ansible.posix.firewalld:
+    service: "{{ item }}"
+    state: enabled
+    permanent: true
+    immediate: true
+    offline: true
+  loop:
+    - http
+    - https
+    - http3

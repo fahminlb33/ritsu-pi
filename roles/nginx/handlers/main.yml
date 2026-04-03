@@ -1,0 +1,10 @@
+---
+- name: Restart Nginx
+  ansible.builtin.systemd:
+    name: nginx
+    state: restarted
+
+- name: Restart Cockpit
+  ansible.builtin.systemd:
+    name: cockpit
+    state: restarted

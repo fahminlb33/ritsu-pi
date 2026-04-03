@@ -40,10 +40,4 @@
       - "{{ jellyfin_media_dir }}:/data/media:rw"
     devices:
       - "/dev/dri:/dev/dri"
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "ritsu-pi"
-      traefik.http.routers.jellyfin.rule: "Host(`{{ jellyfin_host }}`)"
-      traefik.http.routers.jellyfin.entrypoints: "websecure"
-      traefik.http.services.jellyfin.loadbalancer.server.port: "8096"
     state: "{{ 'started' if jellyfin_state == 'present' else 'absent' }}"

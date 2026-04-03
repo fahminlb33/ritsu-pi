@@ -12,9 +12,9 @@
     # Timezone
     timezone: Asia/Jakarta
 
-    # Flame dashboard
-    server_domain: ramiel.pi
-    server_hostname: 10.20.20.101
+    # Server Host
+    server_ip: 10.20.20.101
+    server_hostname: ritsu.net
 
     # Network
     server_docker_network:
@@ -22,39 +22,153 @@
       subnet: "172.19.0.0/16"
       ip_range: "172.19.0.0/24"
 
-  pre_tasks:
-    - name: Install basic packages
-      ansible.builtin.import_tasks: tasks/base.yml
-
-    - name: Install Docker
-      ansible.builtin.import_tasks: tasks/docker.yml
+  # pre_tasks:
+  #   - name: Install basic packages
+  #     ansible.builtin.import_tasks: tasks/base.yml
+  #   - name: Install Docker
+  #     ansible.builtin.import_tasks: tasks/docker.yml
 
   roles:
+    # ==> file sharing
+    - role: samba
+      tags: [file, media, share, samba]
+      become: true
+      vars:
+        # SMB user
+        samba_user:
+          group: sambausers
+          username: "{{ samba_user_username }}"
+          password: "{{ samba_user_password }}"
+          force_user: "ramiel"
+
+        # directories to share
+        samba_mount_points:
+          - name: ramiel
+            path: /mnt/pool
+            writeable: true
+            browsable: true
+
+    # ===> dahboard
+    - role: dashboard
+      tags: [common, dashboard]
+      vars:
+        dashboard_state: present
+        dashboard_image: ghcr.io/gethomepage/homepage:v1.12.3
+        dashboard_config_dir: "{{ config_root }}/dashboard"
+        dashboard_port: 8000
+
     # ===> networking
-    - role: adblock
+    - role: dns
       tags: [networking, security, adblock, dnscrypt, pihole]
       vars:
-        adblock_state: present
-        adblock_config_dir: "{{ config_root }}/adblock"
+        dns_state: present
+        dns_config_dir: "{{ config_root }}/dns"
 
-        adblock_dnscrypt:
+        dns_dnscrypt:
           image: klutchell/dnscrypt-proxy:2.1.15
           # auth
           username: "{{ dnscrypt_username }}"
           password: "{{ dnscrypt_password }}"
           # access
-          port: 8302
-          host: "dnscrypt.{{ server_domain }}"
+          port: 8001
           bind_ip: "172.19.1.100"
 
-        adblock_pihole:
-          image: pihole/pihole:2025.11.1
+        dns_pihole:
+          image: pihole/pihole:2026.02.0
           # auth
           password: "{{ pihole_password }}"
           # access
-          port: 8001
-          port_https: 8301
-          host: "pihole.{{ server_domain }}"
+          port: 8002
+
+    # ===> monitoring
+    - role: monitoring
+      tags: [monitoring, prometheus]
+      vars:
+        monitoring_state: present
+        monitoring_config_dir: "{{ config_root }}/monitoring"
+
+        monitoring_grafana:
+          state: present
+          image: grafana/grafana:12.3-ubuntu
+          # access
+          port: 8003
+          # auth
+          user:
+            username: "{{ grafana_username }}"
+            password: "{{ grafana_password }}"
+            allow_signup: false
+
+        monitoring_prometheus:
+          state: present
+          image: prom/prometheus:v3.11.0
+          # access
+          port: 8004
+          # prom settings
+          scrape_interval: 15s
+          retention:
+            time: 2y
+            size: 100GB
+          extra_config: []
+            # currently immich exposes useless metrics
+            # - job_name: immich_api
+            #   static_configs:
+            #     - targets: ['immich-server:8081']
+            # - job_name: immich_microservices
+            #   static_configs:
+            #     - targets: ['immich-server:8082']
+
+        monitoring_exporters:
+          node:
+            state: present
+            arch: amd64
+            bin_path: /usr/local/bin/node_exporter
+            port: 8101
+
+          cadvisor:
+            state: present
+            image: ghcr.io/google/cadvisor:0.56.2
+            port: 8102
+
+          blackbox:
+            state: present
+            image: prom/blackbox-exporter:v0.28.0
+            port: 8103
+            ping_hosts:
+              - https://www.google.com
+              - https://www.github.com
+
+          speedtest:
+            state: present
+            image: fahminlb33/speedtest-exporter:1.1.0
+            # access
+            port: 8104
+            # Configure the sample_interval to limit the number of checks interval because
+            # the speed test will consume a considerable amount of bandwidth.
+            scrape_interval: 1h
+            server_id:
+
+          mikrotik:
+            state: present
+            image: ghcr.io/akpw/mktxp:1.2.17
+            port: 8105
+            # Mikrotik router host
+            router:
+              host: 10.20.20.1
+              port: 8728
+            # Mikrotik user with API access
+            user:
+              username: "{{ mktxp_username }}"
+              password: "{{ mktxp_password }}"
+
+          apcupsd:
+            state: present
+            image: ghcr.io/twodarek/apcupsd_exporter:0dd7e0c8ebf963f2d3a3441958838747dea8a6b8
+            port: 8106
+
+          smartctl:
+            state: present
+            image: prometheuscommunity/smartctl-exporter:v0.14.0
+            port: 8107
 
     # ===> media server
     - role: arr_stack
@@ -81,13 +195,11 @@
 
         # Downloaders
         arr_stack_qbittorrent:
-          image: lscr.io/linuxserver/qbittorrent:5.1.2
-          # access
-          port: 8004
-          host: "qbittorrent.{{ server_domain }}"
+          image: lscr.io/linuxserver/qbittorrent:5.1.4
+          port: 8005
 
         arr_stack_jdownloader:
-          image: jlesage/jdownloader-2:v25.07.2
+          image: jlesage/jdownloader-2:v26.03.1
           download_dir: "/mnt/pool/downloads"
           # auth
           myjd:
@@ -97,77 +209,60 @@
           # access
           vpn:
             myjd_port: 13001
-            web_port: 8201
-            host: "jdownloader-vpn.{{ server_domain }}"
+            web_port: 8006
           novpn:
             myjd_port: 13002
-            web_port: 8202
-            host: "jdownloader-novpn.{{ server_domain }}"
+            web_port: 8007
 
         # Arr Stack
         arr_stack_bazarr:
-          image: lscr.io/linuxserver/bazarr:v1.5.4-ls334
-          # access
-          port: 8401
-          host: "bazarr.{{ server_domain }}"
+          image: lscr.io/linuxserver/bazarr:v1.5.6-ls342
+          port: 8201
 
         arr_stack_radarr:
-          image: lscr.io/linuxserver/radarr:6.0.4.10291-ls290
-          # access
-          port: 8402
-          host: "radarr.{{ server_domain }}"
+          image: lscr.io/linuxserver/radarr:6.1.1.10360-ls297
+          port: 8202
 
         arr_stack_lidarr:
-          image: lscr.io/linuxserver/lidarr:3.1.0.4875-ls18
-          # acccess
-          port: 8403
-          host: "lidarr.{{ server_domain }}"
+          image: lscr.io/linuxserver/lidarr:3.1.0.4875-ls22
+          port: 8203
 
         arr_stack_sonarr:
-          image: lscr.io/linuxserver/sonarr:4.0.16.2944-ls301
-          # access
-          port: 8404
-          host: "sonarr.{{ server_domain }}"
+          image: lscr.io/linuxserver/sonarr:4.0.17.2952-ls305
+          port: 8204
 
         arr_stack_prowlarr:
-          image: lscr.io/linuxserver/prowlarr:2.3.0.5236-ls135
-          # access
-          port: 8405
-          host: "prowlarr.{{ server_domain }}"
+          image: lscr.io/linuxserver/prowlarr:2.3.0.5236-ls140
+          port: 8205
 
         arr_stack_jackett:
-          image: lscr.io/linuxserver/jackett:v0.24.1094-ls308
-          # access
-          port: 9117
-          host: "jackett.{{ server_domain }}"
+          image: lscr.io/linuxserver/jackett:v0.24.1528-ls363
+          port: 8206
 
         arr_stack_flaresolvarr:
           image: ghcr.io/flaresolverr/flaresolverr:v3.4.6
-          # access
-          port: 8191
-          host: "flaresolvarr.{{ server_domain }}"
+          port: 8207
 
     - role: jellyfin
       tags: [media, jellyfin]
       vars:
         jellyfin_state: present
         jellyfin_image: jellyfin/jellyfin:10.11.6
-        jellyfin_port: 8002
         jellyfin_media_dir: /mnt/pool/media_root/media
+        jellyfin_port: 8008
 
     - role: immich
       tags: [networking, security, pihole]
       vars:
         immich_state: present
-        immich_port: 8003
-        immich_host: "immich.{{ server_domain }}"
+        immich_port: 8009
 
         immich_config_dir: "{{ config_root }}/immich"
         immich_upload_dir: /mnt/pool/photos
 
         immich_images:
-          ml: ghcr.io/immich-app/immich-machine-learning:v2.5.3-openvino
-          server: ghcr.io/immich-app/immich-server:v2.5.3
+          ml: ghcr.io/immich-app/immich-machine-learning:v2.6.3-openvino
+          server: ghcr.io/immich-app/immich-server:v2.6.3
           postgres: ghcr.io/immich-app/postgres:17-vectorchord0.5.3-pgvector0.8.1
           redis: valkey/valkey:9
 
@@ -181,158 +276,134 @@
           password: "{{ immich_db_password }}"
           storage_type: HDD
 
-    # ===> monitoring
-    - role: monitoring
-      tags: [monitoring, prometheus]
-      vars:
-        monitoring_state: present
-        monitoring_config_dir: "{{ config_root }}/monitoring"
-
-        monitoring_grafana:
-          state: present
-          image: grafana/grafana:12.3-ubuntu
-          # auth
-          user:
-            username: "{{ grafana_username }}"
-            password: "{{ grafana_password }}"
-            allow_signup: false
-          # access
-          port: 8007
-          host: "grafana.{{ server_domain }}"
-
-        monitoring_prometheus:
-          state: present
-          image: prom/prometheus:v3.5.1
-          scrape_interval: 15s
-          retention:
-            time: 2y
-            size: 100GB
-          extra_config:
-            - job_name: immich_api
-              static_configs:
-                - targets: ['immich-server:8081']
-            - job_name: immich_microservices
-              static_configs:
-                - targets: ['immich-server:8082']
-          # access
-          port: 8005
-          host: "prometheus.{{ server_domain }}"
-
-        monitoring_exporters:
-          node:
-            state: present
-            arch: amd64
-            bin_path: /usr/local/bin/node_exporter
-            # access
-            port: 8101
-            host: "exporter-node.{{ server_domain }}"
-
-          cadvisor:
-            state: present
-            image: ghcr.io/google/cadvisor:0.56.2
-            # access
-            port: 8102
-            host: "exporter-cadvisor.{{ server_domain }}"
-
-          blackbox:
-            state: present
-            image: prom/blackbox-exporter:v0.27.0
-            ping_hosts:
-              - https://www.google.com
-              - https://www.github.com
-            # access
-            port: 8103
-            host: "exporter-blackbox.{{ server_domain }}"
-
-          speedtest:
-            state: present
-            image: fahminlb33/speedtest-exporter:1.1.0
-            # Configure the sample_interval to limit the number of checks interval because
-            # the speed test will consume a considerable amount of bandwidth.
-            scrape_interval: 1h
-            server_id:
-            # access
-            port: 8104
-            host: "exporter-speedtest.{{ server_domain }}"
-
-          mikrotik:
-            state: present
-            image: ghcr.io/akpw/mktxp:1.2.12
-            # Mikrotik router host
-            router:
-              host: 10.20.20.1
-              port: 8728
-            # Mikrotik user with API access
-            user:
-              username: "{{ mktxp_username }}"
-              password: "{{ mktxp_password }}"
-            # access
-            port: 8105
-            host: "exporter-mikrotik.{{ server_domain }}"
-
-          apcupsd:
-            state: present
-            image: ghcr.io/twodarek/apcupsd_exporter:0dd7e0c8ebf963f2d3a3441958838747dea8a6b8
-            # access
-            port: 8106
-            host: "exporter-apcupsd.{{ server_domain }}"
-
-          smartctl:
-            state: present
-            image: prometheuscommunity/smartctl-exporter:v0.14.0
-            # access
-            port: 8107
-            host: "exporter-smartctl.{{ server_domain }}"
-
-    - role: dashboard
-      tags: [common, dashboard]
-      vars:
-        dashboard_state: present
-        dashboard_image: ghcr.io/gethomepage/homepage:v1.9.0
-        dashboard_config_dir: "{{ config_root }}/dashboard"
-        dashboard_host: "{{ server_domain }}"
-
     # ==> AI/ML tools
     - role: mlflow
       tags: [monitoring, database, mlflow]
       vars:
         mlflow_state: present
-        mlflow_image: ghcr.io/mlflow/mlflow:v3.9.0
-        mlflow_config_dir: "{{ config_root }}/mlflow"
-        # access
         mlflow_port: 8010
-        mlflow_host: "mlflow.{{ server_domain }}"
+        mlflow_image: ghcr.io/mlflow/mlflow:v3.10.1
+        mlflow_config_dir: "{{ config_root }}/mlflow"
+        mlflow_cors: "mlflow.{{ server_hostname }}"
 
-    # ==> file sharing
-    - role: samba
-      tags: [file, media, share, samba]
+    # ==> development tools
+    - role: seq
+      tags: [monitoring, database, mlflow]
       vars:
-        # SMB user
-        samba_user:
-          group: sambausers
-          username: "{{ samba_user_username }}"
-          password: "{{ samba_user_password }}"
-          force_user: "ramiel"
+        seq_state: present
+        seq_image: datalust/seq:2025.2.15571
+        seq_port: 8011
+        seq_password: "{{ seq_admin_password }}"
+        seq_config_dir: "{{ config_root }}/seq"
 
-        # directories to share
-        samba_mount_points:
-          - name: ramiel
-            path: /mnt/pool
-            writeable: true
-            browsable: true
-      become: true
+    - role: sonarqube
+      tags: [monitoring, database, mlflow]
+      vars:
+        sonarqube_state: present
+        sonarqube_image: sonarqube:26.3.0.120487-community
+        sonarqube_config_dir: "{{ config_root }}/sonarqube"
+        sonarqube_port: 8012
+        # database
+        sonarqube_db_url: "{{ sonar_db_url }}"
+        sonarqube_db_username: "{{ sonar_db_username }}"
+        sonarqube_db_password: "{{ sonar_db_password }}"
+
+    - role: garage
+      tags: [monitoring, database, mlflow]
+      vars:
+        garage_state: present
+        garage_image: dxflrs/garage:v2.2.0
+        garage_config_dir: "{{ config_root }}/garage"
+        garage_upload_dir: "{{ config_root }}/garage/data"
+        garage_ports:
+          rpc: 3901
+          s3_api: 3900
+          s3_web: 3902
+          k2v: 3904
+          admin: 3903
 
     # ==> reverse proxy
-    - role: traefik
-      tags: [networking, reverse-proxy, traefik]
+    - role: nginx
+      tags: [networking, reverse-proxy, nginx]
+      become: true
       vars:
-        traefik_state: present
-        traefik_config_dir: "{{ config_root }}/traefik"
-
-        traefik_image: traefik:v3.6.7
-
-        traefik_tls:
-          cert_file: "certs/cert.pem"
-          key_file: "certs/key.pem"
-
-        traefik_host: traefik.ramiel.pi
+        nginx_state: present
+        nginx_cloudflare_token: "{{ nginx_cloudflare_api_key }}"
+        nginx_cloudflare_zone_id: "{{ nginx_cloudflare_api_zone_id }}"
+        nginx_apex_domain: "{{ server_hostname }}"
+        nginx_ip: "{{ server_ip }}"
+        nginx_cockpit_vhost: cockpit.{{ server_hostname }}
+        nginx_vhosts:
+          # dashboard
+          - hostname: "{{ server_hostname }}" # this will create A record instead of CNAME
+            upstream: localhost:8000
+          # cockpit
+          - hostname: "cockpit.{{ server_hostname }}"
+            upstream: https://localhost:9090
+          # networking
+          - hostname: "dnscrypt.{{ server_hostname }}"
+            upstream: localhost:8001
+          - hostname: "pihole.{{ server_hostname }}"
+            upstream: localhost:8002
+          # monitoring
+          - hostname: "grafana.{{ server_hostname }}"
+            upstream: localhost:8003
+          - hostname: "prometheus.{{ server_hostname }}"
+            upstream: localhost:8004
+          - hostname: "exporter-node.{{ server_hostname }}"
+            upstream: localhost:8101
+          - hostname: "exporter-cadvisor.{{ server_hostname }}"
+            upstream: localhost:8102
+          - hostname: "exporter-blackbox.{{ server_hostname }}"
+            upstream: localhost:8103
+          - hostname: "exporter-speedtest.{{ server_hostname }}"
+            upstream: localhost:8104
+          - hostname: "exporter-mikrotik.{{ server_hostname }}"
+            upstream: localhost:8105
+          - hostname: "exporter-apcupsd.{{ server_hostname }}"
+            upstream: localhost:8106
+          - hostname: "exporter-smartctl.{{ server_hostname }}"
+            upstream: localhost:8107
+          # arr stack
+          - hostname: "qbittorrent.{{ server_hostname }}"
+            upstream: localhost:8005
+          - hostname: "jdownloader-vpn.{{ server_hostname }}"
+            upstream: localhost:8006
+          - hostname: "jdownloader-novpn.{{ server_hostname }}"
+            upstream: localhost:8007
+          - hostname: "bazarr.{{ server_hostname }}"
+            upstream: localhost:8201
+          - hostname: "radarr.{{ server_hostname }}"
+            upstream: localhost:8202
+          - hostname: "lidarr.{{ server_hostname }}"
+            upstream: localhost:8203
+          - hostname: "sonarr.{{ server_hostname }}"
+            upstream: localhost:8204
+          - hostname: "prowlarr.{{ server_hostname }}"
+            upstream: localhost:8205
+          - hostname: "jackett.{{ server_hostname }}"
+            upstream: localhost:8206
+          - hostname: "flaresolverr.{{ server_hostname }}"
+            upstream: localhost:8207
+          # jellyfin
+          - hostname: "jellyfin.{{ server_hostname }}"
+            upstream: localhost:8008
+          # immich
+          - hostname: "immich.{{ server_hostname }}"
+            upstream: localhost:8009
+          # mlflow
+          - hostname: "mlflow.{{ server_hostname }}"
+            upstream: localhost:8010
+          # seq
+          - hostname: "seq.{{ server_hostname }}"
+            upstream: localhost:8011
+          # sonarqube
+          - hostname: "sonarqube.{{ server_hostname }}"
+            upstream: localhost:8012
+          # garage
+          - hostname: "garage-s3.{{ server_hostname }}"
+            upstream: localhost:3900
+          - hostname: "garage-s3-admin.{{ server_hostname }}"
+            upstream: localhost:3902
+          - hostname: "garage-admin.{{ server_hostname }}"
+            upstream: localhost:3903

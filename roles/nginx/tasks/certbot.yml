@@ -1,0 +1,19 @@
+---
+# TODO: CERTBOT
+# https://certbot-dns-cloudflare.readthedocs.io/en/stable/
+# https://eff-certbot.readthedocs.io/en/latest/using.html#setting-up-automated-renewal
+# https://ongkhaiwei.medium.com/generate-lets-encrypt-certificate-with-dns-challenge-and-namecheap-e5999a040708
+# https://github.com/geerlingguy/ansible-role-certbot/blob/master/tasks/create-cert-standalone.yml
+
+# - name: Install certbot
+
+# - name: Create certbot + cloudflare auth config
+# chmod 600
+
+# - name: Request certificate
+#   ansible.builtin.shell: >
+#     certbot certonly \
+#       --dns-cloudflare \
+#       --dns-cloudflare-credentials {{ reverse_proxy_config_dir }} \
+#       -d "{{ reverse_proxy_apex_domain }}" \
+#       -d "*.{{ reverse_proxy_apex_domain }}"

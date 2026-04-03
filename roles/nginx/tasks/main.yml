@@ -1,0 +1,6 @@
+---
+- name: Configure nginx
+  ansible.builtin.import_tasks: nginx.yml
+
+- name: Configure certbot
+  ansible.builtin.import_tasks: certbot.yml

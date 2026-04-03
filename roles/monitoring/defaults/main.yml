@@ -12,7 +12,6 @@ monitoring_grafana:
     allow_signup: false
   # access
   port: 3000
-  host: "grafana.{{ server_domain }}"
 
 monitoring_prometheus:
   state: present
@@ -22,25 +21,19 @@ monitoring_prometheus:
     time: 2y
     size: 100GB
   extra_config: {}
-  # access
   port: 8005
-  host: "prometheus.{{ server_domain }}"
 
 monitoring_exporters:
   node:
     state: present
     arch: amd64
     bin_path: /usr/local/bin/node_exporter
-    # access
     port: 8101
-    host: "exporter-node.{{ server_domain }}"
 
   cadvisor:
     state: present
     image: ghcr.io/google/cadvisor:0.56.2
-    # access
     port: 8102
-    host: "exporter-cadvisor.{{ server_domain }}"
 
   blackbox:
     state: present
@@ -48,9 +41,7 @@ monitoring_exporters:
     ping_hosts:
       - https://www.google.com
       - https://www.github.com
-    # access
     port: 8103
-    host: "exporter-blackbox.{{ server_domain }}"
 
   speedtest:
     state: present
@@ -59,13 +50,12 @@ monitoring_exporters:
     # the speed test will consume a considerable amount of bandwidth.
     scrape_interval: 1h
     server_id:
-    # access
     port: 8104
-    host: "exporter-speedtest.{{ server_domain }}"
 
   mikrotik:
     state: present
     image: ghcr.io/akpw/mktxp:v1.2.16
+    port: 8105
     # Mikrotik router host
     router:
       host: 10.20.20.1
@@ -74,21 +64,14 @@ monitoring_exporters:
     user:
       username: CHANGE-ME
       password: CHANGE-ME
-    # access
-    port: 8105
-    host: "exporter-mikrotik.{{ server_domain }}"
 
   # https://grafana.com/grafana/dashboards/19329-apc-ups/
   apcupsd:
     state: present
     image: ghcr.io/twodarek/apcupsd_exporter:8a26b6602bd7e9dbb0e1569ddd7fa5c85cebb8ff
-    # access
     port: 8106
-    host: "exporter-apcupsd.{{ server_domain }}"
 
   smartctl:
     state: present
     image: prometheuscommunity/smartctl-exporter:v0.14.0
-    # access
     port: 8107
-    host: "exporter-smartctl.{{ server_domain }}"

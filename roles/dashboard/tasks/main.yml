@@ -6,12 +6,11 @@
     mode: "0775"
   register: dashboard_config_dir_reg
 
-- name: Create DNSCrypt configuration
+- name: Create Dashboard configuration
   ansible.builtin.template:
     src: templates/settings.yml.j2
     dest: "{{ dashboard_config_dir_reg.path }}/settings.yml"
     mode: "0755"
-  notify: Restart DNSCrypt
 
 - name: Pull image from registry
   community.docker.docker_image:
@@ -24,6 +23,8 @@
     name: dashboard
     image: "{{ dashboard_image }}"
     restart_policy: unless-stopped
+    ports:
+      - "{{ dashboard_port }}:3000"
     networks:
       - name: ritsu-pi
     volumes:
@@ -32,10 +33,5 @@
     env:
       PUID: "1000"
       PGID: "1000"
-      HOMEPAGE_ALLOWED_HOSTS: "{{ dashboard_host }}"
-    labels:
-      traefik.enable: "true"
-      traefik.docker.network: "ritsu-pi"
-      traefik.http.routers.homelab-dashboard.rule: "Host(`{{ dashboard_host }}`)"
-      traefik.http.routers.homelab-dashboard.entrypoints: "websecure"
+      HOMEPAGE_ALLOWED_HOSTS: "{{ server_domain }},dashboard:3000"
     state: "{{ 'started' if dashboard_state == 'present' else 'absent' }}"

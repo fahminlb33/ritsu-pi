@@ -31,20 +31,7 @@ services:
       - "{{ arr_stack_config_dir }}/gluetun:/gluetun"
     devices:
       - "/dev/net/tun:/dev/net/tun"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      # qbittorrent
-      - "traefik.http.routers.qbittorrent.rule=Host(`{{ arr_stack_qbittorrent.host }}`)"
-      - "traefik.http.routers.qbittorrent.entrypoints=websecure"
-      - "traefik.http.routers.qbittorrent.service=qbittorrent"
-      - "traefik.http.services.qbittorrent.loadbalancer.server.port={{ arr_stack_qbittorrent.port }}"
-      # jdownloader-vpn
-      - "traefik.http.routers.jdownloader-vpn.rule=Host(`{{ arr_stack_jdownloader.vpn.host }}`)"
-      - "traefik.http.routers.jdownloader-vpn.entrypoints=websecure"
-      - "traefik.http.routers.jdownloader-vpn.service=jdownloader-vpn"
-      - "traefik.http.services.jdownloader-vpn.loadbalancer.server.port={{ arr_stack_jdownloader.vpn.web_port  }}"
-    
+
   # ----------------- DOWNLOADERS -----------------
   qbittorrent:
     container_name: "qbittorrent"
@@ -102,13 +89,7 @@ services:
     volumes:
       - "{{ arr_stack_config_dir }}/jdownloader-novpn:/config"
       - "{{ arr_stack_media_dir }}/jdownloader:/output"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.jdownloader-novpn.rule=Host(`{{ arr_stack_jdownloader.novpn.host }}`)"
-      - "traefik.http.routers.jdownloader-novpn.entrypoints=websecure"
-      - "traefik.http.services.jdownloader-novpn.loadbalancer.server.port={{ arr_stack_jdownloader.novpn.web_port }}"
-
+  
   # ----------------- ARR STACK -----------------
   bazarr:
     container_name: "bazarr"
@@ -126,12 +107,6 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ arr_stack_config_dir }}/bazarr:/config"
       - "{{ arr_stack_media_dir }}:/data"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.bazarr.rule=Host(`{{ arr_stack_bazarr.host }}`)"
-      - "traefik.http.routers.bazarr.entrypoints=websecure"
-      - "traefik.http.services.bazarr.loadbalancer.server.port=6767"
 
   radarr:
     container_name: "radarr"
@@ -149,12 +124,6 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ arr_stack_config_dir }}/radarr:/config"
       - "{{ arr_stack_media_dir }}:/data"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.radarr.rule=Host(`{{ arr_stack_radarr.host }}`)"
-      - "traefik.http.routers.radarr.entrypoints=websecure"
-      - "traefik.http.services.radarr.loadbalancer.server.port=7878"
 
   lidarr:
     container_name: "lidarr"
@@ -172,12 +141,6 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ arr_stack_config_dir }}/lidarr:/config"
       - "{{ arr_stack_media_dir }}:/data"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.lidarr.rule=Host(`{{ arr_stack_lidarr.host }}`)"
-      - "traefik.http.routers.lidarr.entrypoints=websecure"
-      - "traefik.http.services.lidarr.loadbalancer.server.port=8686"
 
   sonarr:
     container_name: "sonarr"
@@ -195,12 +158,6 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ arr_stack_config_dir }}/sonarr:/config"
       - "{{ arr_stack_media_dir }}:/data"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.sonarr.rule=Host(`{{ arr_stack_sonarr.host }}`)"
-      - "traefik.http.routers.sonarr.entrypoints=websecure"
-      - "traefik.http.services.sonarr.loadbalancer.server.port=8989"
 
   prowlarr:
     container_name: prowlarr
@@ -218,12 +175,6 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ arr_stack_config_dir }}/prowlarr:/config"
       - "{{ arr_stack_media_dir }}:/data"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.prowlarr.rule=Host(`{{ arr_stack_prowlarr.host }}`)"
-      - "traefik.http.routers.prowlarr.entrypoints=websecure"
-      - "traefik.http.services.prowlarr.loadbalancer.server.port=9696"
 
   jackett:
     container_name: jackett
@@ -242,12 +193,6 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ arr_stack_config_dir }}/jackett:/config"
       - "{{ arr_stack_media_dir }}:/data"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.jackett.rule=Host(`{{ arr_stack_jackett.host }}`)"
-      - "traefik.http.routers.jackett.entrypoints=websecure"
-      - "traefik.http.services.jackett.loadbalancer.server.port=9117"
   
   flaresolvarr:
     container_name: flaresolvarr
@@ -266,5 +211,3 @@ services:
       - "/etc/localtime:/etc/localtime:ro"
       - "{{ arr_stack_config_dir }}/prowlarr:/config"
       - "{{ arr_stack_media_dir }}:/data"
-    labels:
-      - "traefik.enable=false"

@@ -25,12 +25,6 @@ services:
       - database
     healthcheck:
       disable: false
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.immich.rule=Host(`{{ immich_host }}`)"
-      - "traefik.http.routers.immich.entrypoints=websecure"
-      - "traefik.http.services.immich.loadbalancer.server.port=2283"
     extends:
       file: hwaccel.transcoding.yml
       service: "{{ immich_hwaccel.transcoding | default('cpu') }}"

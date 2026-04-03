@@ -25,12 +25,6 @@ services:
       - "{{ monitoring_config_dir }}/grafana/data:/var/lib/grafana"
       - "{{ monitoring_config_dir }}/grafana/dashboards:/var/lib/grafana/dashboards"
       - "{{ monitoring_config_dir }}/grafana/provisioning:/etc/grafana/provisioning"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.grafana.rule=Host(`{{ monitoring_grafana.host }}`)"
-      - "traefik.http.routers.grafana.entrypoints=websecure"
-      - "traefik.http.services.grafana.loadbalancer.server.port=3000"
 {% endif %}
 
 {% if monitoring_prometheus.state == 'present' %}
@@ -51,12 +45,6 @@ services:
     volumes:
       - "{{ monitoring_config_dir }}/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro"
       - "{{ monitoring_config_dir }}/prometheus/data:/prometheus/data:rw"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.prometheus.rule=Host(`{{ monitoring_prometheus.host }}`)"
-      - "traefik.http.routers.prometheus.entrypoints=websecure"
-      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
 {% endif %}
 
 {% if monitoring_exporters.cadvisor.state == 'present' %}
@@ -77,12 +65,6 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
     devices:
       - /dev/kmsg
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.cadvisor.rule=Host(`{{ monitoring_exporters.cadvisor.host }}`)"
-      - "traefik.http.routers.cadvisor.entrypoints=websecure"
-      - "traefik.http.services.cadvisor.loadbalancer.server.port=8080"
 {% endif %}
 
 {% if monitoring_exporters.blackbox.state == 'present' %}
@@ -114,19 +96,13 @@ services:
       - ritsu-pi
     healthcheck:
       test: ["NONE"]
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.speedtest.rule=Host(`{{ monitoring_exporters.speedtest.host }}`)"
-      - "traefik.http.routers.speedtest.entrypoints=websecure"
-      - "traefik.http.services.speedtest.loadbalancer.server.port=9898"
 {% endif %}
 
 {% if monitoring_exporters.mikrotik.state == 'present' %}
   mikrotik:
     container_name: exporter-mikrotik
     image: "{{ monitoring_exporters.mikrotik.image }}"
-    command: --cfg-dir /mktxp_config export
+    command: mktxp --cfg-dir /mktxp_config export
     restart: unless-stopped
     ports:
       - "{{ monitoring_exporters.mikrotik.port }}:49090"
@@ -134,12 +110,6 @@ services:
       - ritsu-pi
     volumes:
       - "{{ monitoring_exporters_mikrotik_config_dir.path }}:/mktxp_config:rw"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.mikrotik.rule=Host(`{{ monitoring_exporters.mikrotik.host }}`)"
-      - "traefik.http.routers.mikrotik.entrypoints=websecure"
-      - "traefik.http.services.mikrotik.loadbalancer.server.port=49090"
 {% endif %}
 
 {% if monitoring_exporters.apcupsd.state == 'present' %}
@@ -153,12 +123,6 @@ services:
       - ritsu-pi
     ports:
       - "{{ monitoring_exporters.apcupsd.port }}:9162"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.apcupsd.rule=Host(`{{ monitoring_exporters.apcupsd.host }}`)"
-      - "traefik.http.routers.apcupsd.entrypoints=websecure"
-      - "traefik.http.services.apcupsd.loadbalancer.server.port=9162"
 {% endif %}
 
 {% if monitoring_exporters.smartctl.state == 'present' %}
@@ -172,10 +136,4 @@ services:
       - ritsu-pi
     ports:
       - "{{ monitoring_exporters.smartctl.port }}:9633"
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=ritsu-pi"
-      - "traefik.http.routers.smartctl.rule=Host(`{{ monitoring_exporters.smartctl.host }}`)"
-      - "traefik.http.routers.smartctl.entrypoints=websecure"
-      - "traefik.http.services.smartctl.loadbalancer.server.port=9633"
 {% endif %}

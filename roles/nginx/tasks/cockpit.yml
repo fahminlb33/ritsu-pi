@@ -1,0 +1,19 @@
+---
+- name: Check if cockpit config exists
+  ansible.builtin.stat:
+    path: "/etc/cockpit/cockpit.conf"
+  register: nginx_cockpit_stat
+
+- name: Configure Cockpit for Nginx reverse proxy
+  ansible.builtin.ini_file:
+    path: /etc/cockpit/cockpit.conf
+    section: WebService
+    option: "{{ item.key }}"
+    value: "{{ item.value }}"
+    mode: '0644'
+    create: yes
+  loop:
+    - { key: 'Origins', value: 'https://{{ nginx_cockpit_vhost }} wss://{{ nginx_cockpit_vhost }}' }
+    - { key: 'ProtocolHeader', value: 'X-Forwarded-Proto' }
+  notify: Restart Cockpit
+  when: jellyfin_media_dir_exists.stat.exists
