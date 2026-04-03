@@ -1,0 +1,27 @@
+db_engine = "sqlite"
+data_dir = "/var/lib/garage/data"
+metadata_dir = "/var/lib/garage/meta"
+
+replication_factor = 1
+
+rpc_bind_addr = "[::]:{{ garage_ports.rpc }}"
+rpc_public_addr = "127.0.0.1:{{ garage_ports.rpc }}"
+rpc_secret = "{{ query('community.general.random_string', length=64, upper=false, lower=false, override_special=hex_chars, numbers=false) }}"
+
+[s3_api]
+s3_region = "garage"
+api_bind_addr = "[::]:{{ garage_ports.s3_api }}"
+root_domain = ".s3.garage.localhost"
+
+[s3_web]
+bind_addr = "[::]:{{ garage_ports.s3_web }}"
+root_domain = ".web.garage.localhost"
+index = "index.html"
+
+[k2v_api]
+api_bind_addr = "[::]:{{ garage_ports.k2v_api }}"
+
+[admin]
+api_bind_addr = "[::]:{{ garage_ports.admin_api }}"
+admin_token = "{{ query('community.general.random_string', length=32, base64=True, upper=false, lower=false, override_special=hex_chars, numbers=false) }}"
+metrics_token = "{{ query('community.general.random_string', length=32, base64=True, upper=false, lower=false, override_special=hex_chars, numbers=false) }}"

@@ -1,0 +1,11 @@
+---
+garage_state: present
+garage_image: dxflrs/garage:v2.2.0
+garage_config_dir: "{{ config_root }}/garage"
+garage_upload_dir: "{{ config_root }}/garage/data"
+garage_ports:
+  rpc: 3901
+  s3_api: 3900
+  s3_web: 3901
+  k2v: 3904
+  admin: 3903

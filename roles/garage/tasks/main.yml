@@ -1,0 +1,50 @@
+---
+- name: Create garage config directory
+  ansible.builtin.file:
+    path: "{{ garage_config_dir }}/meta"
+    state: directory
+    mode: "0775"
+
+- name: Create garage data directory
+  ansible.builtin.file:
+    path: "{{ garage_upload_dir }}"
+    state: directory
+    mode: "0775"
+
+- name: Stat garage config file
+  ansible.builtin.stat:
+    path: "{{ garage_config_dir }}/garage.toml"
+  register: garage_config_file_stat
+
+- name: Generate garage config file
+  ansible.builtin.template:
+    src: "templates/garage.toml.j2"
+    dest: "{{ garage_config_dir }}/garage.toml"
+  vars:
+    hex_chars: '0123456789ABCDEF'
+  when: not garage_config_file_stat.stat.exists
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ garage_state }}"
+    name: "{{ garage_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: garage
+    image: "{{ garage_image }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ garage_ports.rpc }}:{{ garage_ports.rpc }}"
+      - "{{ garage_ports.s3_api }}:{{ garage_ports.s3_api }}"
+      - "{{ garage_ports.s3_web }}:{{ garage_ports.s3_web }}"
+      - "{{ garage_ports.k2v }}:{{ garage_ports.k2v }}"
+      - "{{ garage_ports.admin }}:{{ garage_ports.admin }}"
+    networks:
+      - name: ritsu-pi
+    volumes:
+      - "{{ garage_config_dir }}/garage.toml:/etc/garage.toml"
+      - "{{ garage_config_dir }}/meta:/var/lib/garage/meta:rw"
+      - "{{ garage_upload_dir }}:/var/lib/garage/data:rw"
+    state: "{{ 'started' if garage_state == 'present' else 'absent' }}"
