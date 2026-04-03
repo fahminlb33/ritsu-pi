@@ -1,0 +1,9 @@
+---
+sonarqube_state: present
+sonarqube_image: sonarqube:26.3.0.120487-community
+sonarqube_config_dir: "{{ config_root }}/sonarqube"
+sonarqube_port: 9000
+# database
+sonarqube_db_url: jdbc:postgresql://host.docker.internal:5432/sonar
+sonarqube_db_username: USER HERE
+sonarqube_db_password: PASSWORD HERE

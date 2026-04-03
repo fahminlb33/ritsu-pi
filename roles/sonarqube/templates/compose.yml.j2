@@ -1,0 +1,34 @@
+volumes:
+  sonarqube_data:
+  sonarqube_logs:
+  sonarqube_temp:
+  sonarqube_extensions:
+
+networks:
+  ritsu-pi:
+    external: true
+
+services:
+  sonarqube:
+    image: "{{ sonarqube_image }}"
+    hostname: sonarqube
+    container_name: sonarqube
+    read_only: true
+    restart: unless-stopped
+    ports:
+      - "{{ sonarqube_port }}:9000"
+    networks:
+      - ritsu-pi
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SONAR_JDBC_URL: "{{ sonarqube_db_url }}"
+      SONAR_JDBC_USERNAME: "{{ sonarqube_db_username }}"
+      SONAR_JDBC_PASSWORD: "{{ sonarqube_db_password }}"
+    tmpfs:
+      - /tmp:size=256M,mode=1777
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/temp
+      - sonarqube_extensions:/opt/sonarqube/extensions

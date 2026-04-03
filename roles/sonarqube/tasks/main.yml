@@ -1,0 +1,24 @@
+---
+- name: Create SonarQube config directory
+  ansible.builtin.file:
+    path: "{{ sonarqube_config_dir }}"
+    state: directory
+    mode: "0775"
+
+- name: Generate SonarQube compose file
+  ansible.builtin.template:
+    src: "templates/compose.yml.j2"
+    dest: "{{ sonarqube_config_dir }}/compose.yml"
+    mode: "0775"
+  
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ sonarqube_state }}"
+    name: "{{ sonarqube_image }}"
+    source: pull
+
+- name: Start Docker Compose services
+  community.docker.docker_compose_v2:
+    state: "{{ sonarqube_state }}"
+    project_src: "{{ sonarqube_config_dir }}"
+    remove_orphans: true
