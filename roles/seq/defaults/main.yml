@@ -1,0 +1,6 @@
+---
+seq_state: present
+seq_port: 5341
+seq_image: datalust/seq:2025.2.15571
+seq_config_dir: "{{ config_root }}/seq"
+seq_password: "PASSWORD HERE"

@@ -1,0 +1,31 @@
+---
+- name: Create Seq config directory
+  ansible.builtin.file:
+    path: "{{ seq_config_dir }}/{{ item }}"
+    state: directory
+    mode: "0775"
+  loop:
+    - "seq-data"
+  ignore_errors: true
+
+- name: Pull image from registry
+  community.docker.docker_image:
+    state: "{{ seq_state }}"
+    name: "{{ seq_image }}"
+    source: pull
+
+- name: Start and connect container to network
+  community.docker.docker_container:
+    name: seq
+    image: "{{ seq_image }}"
+    restart_policy: unless-stopped
+    published_ports:
+      - "{{ seq_port }}:80"
+    networks:
+      - name: ritsu-pi
+    env:
+      ACCEPT_EULA: "Y"
+      SEQ_PASSWORD: "{{ seq_password }}"
+    volumes:
+      - "{{ seq_config_dir }}/seq-data:/data:rw"
+    state: "{{ 'started' if seq_state == 'present' else 'absent' }}"
