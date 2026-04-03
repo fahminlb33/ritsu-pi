@@ -2,6 +2,6 @@
 - name: Restart DNSCrypt
   community.docker.docker_compose_v2:
     state: restarted
-    project_src: "{{ adblock_config_dir }}"
+    project_src: "{{ dns_config_dir }}"
     services:
       - dnscrypt

@@ -30,9 +30,9 @@
 
 server_names = [
   'google',
-  'nextdns',
-  'wikimedia',
   'cloudflare', 
+  # 'nextdns',
+  # 'wikimedia',
   # 'mullvad-doh',
   # 'scaleway-fr',
   # 'scaleway-ams',
@@ -976,8 +976,8 @@ listen_address = "0.0.0.0:8080"
 ## Optional username and password for basic authentication
 ## To disable authentication, set username to an empty string: username = ""
 ## If both username and password are empty, no authentication is required
-username = "{{ adblock_dnscrypt.username }}"
-password = "{{ adblock_dnscrypt.password }}"
+username = "{{ dns_dnscrypt.username }}"
+password = "{{ dns_dnscrypt.password }}"
 
 ## Optional TLS certificate and key for HTTPS
 ## If both are empty, HTTP will be used

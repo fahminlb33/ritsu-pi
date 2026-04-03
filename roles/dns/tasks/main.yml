@@ -1,7 +1,7 @@
 ---
 - name: Create config directories
   ansible.builtin.file:
-    path: "{{ adblock_config_dir }}/{{ item }}"
+    path: "{{ dns_config_dir }}/{{ item }}"
     state: directory
     mode: "0755"
   loop:
@@ -11,27 +11,27 @@
 - name: Create DNSCrypt configuration
   ansible.builtin.template:
     src: templates/dnscrypt-proxy.toml.j2
-    dest: "{{ adblock_config_dir }}/dnscrypt/dnscrypt-proxy.toml"
+    dest: "{{ dns_config_dir }}/dnscrypt/dnscrypt-proxy.toml"
     mode: "0755"
   notify: Restart DNSCrypt
 
 - name: Pull images from registry
   community.docker.docker_image:
-    state: "{{ adblock_state }}"
+    state: "{{ dns_state }}"
     name: "{{ item }}"
     source: pull
   loop:
-    - "{{ adblock_dnscrypt.image }}"
-    - "{{ adblock_pihole.image }}"
+    - "{{ dns_dnscrypt.image }}"
+    - "{{ dns_pihole.image }}"
 
 - name: Copy Docker Compose template
   ansible.builtin.template:
     src: templates/compose.yml.j2
-    dest: "{{ adblock_config_dir }}/compose.yml"
+    dest: "{{ dns_config_dir }}/compose.yml"
     mode: "0755"
 
 - name: Start or stop Docker Compose services
   community.docker.docker_compose_v2:
-    state: "{{ adblock_state }}"
-    project_src: "{{ adblock_config_dir }}"
+    state: "{{ dns_state }}"
+    project_src: "{{ dns_config_dir }}"
     remove_orphans: true

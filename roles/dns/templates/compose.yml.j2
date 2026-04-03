@@ -1,0 +1,45 @@
+# {{ ansible_managed }}
+
+name: dns
+
+networks:
+  ritsu-pi:
+    external: true
+
+services:
+  dnscrypt:
+    container_name: dnscrypt
+    image: "{{ dns_dnscrypt.image }}"
+    restart: unless-stopped
+    networks:
+      ritsu-pi:
+        ipv4_address: "{{ dns_dnscrypt.bind_ip }}"
+    ports:
+      - "{{ dns_dnscrypt.port }}:8080"
+    volumes:
+      - "{{ dns_config_dir }}/dnscrypt/dnscrypt-proxy.toml:/config/dnscrypt-proxy.toml:ro"
+
+  pihole:
+    container_name: pihole
+    image: "{{ dns_pihole.image }}"
+    restart: unless-stopped
+    networks:
+      - ritsu-pi
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+      - "{{ dns_pihole.port }}:80/tcp"
+    dns:
+      - "1.1.1.1"
+      - "1.0.0.1"
+    environment:
+      - "TZ={{ timezone | default('Etc/UTC') }}"
+      - "FTLCONF_webserver_api_password={{ dns_pihole.password }}"
+      - "FTLCONF_dns_listeningMode=all"
+      - "FTLCONF_dns_upstreams={{ dns_dnscrypt.bind_ip }}#5053"
+    volumes:
+      - "{{ dns_config_dir }}/pihole:/etc/pihole"
+    cap_add:
+      - NET_ADMIN
+      - SYS_TIME
+      - SYS_NICE
