@@ -22,11 +22,11 @@
       subnet: "172.19.0.0/16"
       ip_range: "172.19.0.0/24"
 
-  # pre_tasks:
-  #   - name: Install basic packages
-  #     ansible.builtin.import_tasks: tasks/base.yml
-  #   - name: Install Docker
-  #     ansible.builtin.import_tasks: tasks/docker.yml
+  pre_tasks:
+    - name: Install basic packages
+      ansible.builtin.import_tasks: tasks/base.yml
+    - name: Install Docker
+      ansible.builtin.import_tasks: tasks/docker.yml
 
   roles:
     # ==> file sharing
@@ -65,7 +65,7 @@
         dns_config_dir: "{{ config_root }}/dns"
 
         dns_dnscrypt:
-          image: klutchell/dnscrypt-proxy:2.1.15
+          image: ghcr.io/klutchell/dnscrypt-proxy:2.1.15
           # auth
           username: "{{ dnscrypt_username }}"
           password: "{{ dnscrypt_password }}"
@@ -74,7 +74,7 @@
           bind_ip: "172.19.1.100"
 
         dns_pihole:
-          image: pihole/pihole:2026.02.0
+          image: pihole/pihole:2026.04.0
           # auth
           password: "{{ pihole_password }}"
           # access
@@ -89,7 +89,7 @@
 
         monitoring_grafana:
           state: present
-          image: grafana/grafana:12.3-ubuntu
+          image: grafana/grafana:12.4.2
           # access
           port: 8003
           # auth
@@ -100,7 +100,7 @@
 
         monitoring_prometheus:
           state: present
-          image: prom/prometheus:v3.11.0
+          image: prom/prometheus:v3.11.1
           # access
           port: 8004
           # prom settings
@@ -162,7 +162,7 @@
 
           apcupsd:
             state: present
-            image: ghcr.io/twodarek/apcupsd_exporter:0dd7e0c8ebf963f2d3a3441958838747dea8a6b8
+            image: ghcr.io/twodarek/apcupsd_exporter:c038fd768fd5208c3629068c848e6dbe922ac8c0
             port: 8106
 
           smartctl:
@@ -232,11 +232,11 @@
           port: 8204
 
         arr_stack_prowlarr:
-          image: lscr.io/linuxserver/prowlarr:2.3.0.5236-ls140
+          image: lscr.io/linuxserver/prowlarr:2.3.5.5327-ls141
           port: 8205
 
         arr_stack_jackett:
-          image: lscr.io/linuxserver/jackett:v0.24.1528-ls363
+          image: lscr.io/linuxserver/jackett:v0.24.1554-ls368
           port: 8206
 
         arr_stack_flaresolvarr:
@@ -247,7 +247,7 @@
       tags: [media, jellyfin]
       vars:
         jellyfin_state: present
-        jellyfin_image: jellyfin/jellyfin:10.11.6
+        jellyfin_image: jellyfin/jellyfin:10.11.8
         jellyfin_media_dir: /mnt/pool/media_root/media
         jellyfin_port: 8008
 
@@ -261,8 +261,8 @@
         immich_upload_dir: /mnt/pool/photos
 
         immich_images:
-          ml: ghcr.io/immich-app/immich-machine-learning:v2.6.3-openvino
-          server: ghcr.io/immich-app/immich-server:v2.6.3
+          ml: ghcr.io/immich-app/immich-machine-learning:v2.7.2-openvino
+          server: ghcr.io/immich-app/immich-server:v2.7.2
           postgres: ghcr.io/immich-app/postgres:17-vectorchord0.5.3-pgvector0.8.1
           redis: valkey/valkey:9
 
@@ -282,7 +282,7 @@
       vars:
         mlflow_state: present
         mlflow_port: 8010
-        mlflow_image: ghcr.io/mlflow/mlflow:v3.10.1
+        mlflow_image: ghcr.io/mlflow/mlflow:v3.11.1
         mlflow_config_dir: "{{ config_root }}/mlflow"
         mlflow_cors: "mlflow.{{ server_hostname }}"
 
@@ -291,7 +291,7 @@
       tags: [monitoring, database, mlflow]
       vars:
         seq_state: present
-        seq_image: datalust/seq:2025.2.15571
+        seq_image: datalust/seq:2025.2.16202
         seq_port: 8011
         seq_password: "{{ seq_admin_password }}"
         seq_config_dir: "{{ config_root }}/seq"
