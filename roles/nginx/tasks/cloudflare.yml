@@ -1,0 +1,15 @@
+---
+- name: Add DNS records to CloudFlare
+  ansible.builtin.script: files/cloudflare-dns.py
+  args:
+    executable: python3
+  environment: 
+    CLOUDFLARE_API_TOKEN: "{{ nginx_cloudflare_token }}"
+    CLOUDFLARE_ZONE_ID: "{{ nginx_cloudflare_zone_id }}"
+    CNAME_HOST:  "{{ item.hostname }}"
+    CNAME_VALUE: "{{ nginx_apex_domain }}"
+    DEFAULT_A_IP: "{{ nginx_ip }}"
+  loop: "{{ nginx_vhosts }}"
+  when: "item.managed_dns | default(false)"
+  register: nginx_cloudflare_script
+  changed_when: "'No changes required' not in nginx_cloudflare_script.stdout"

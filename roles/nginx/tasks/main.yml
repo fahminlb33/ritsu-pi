@@ -4,3 +4,6 @@
 
 - name: Configure certbot
   ansible.builtin.import_tasks: certbot.yml
+
+- name: Configure managed DNS via CloudFlare
+  ansible.builtin.import_tasks: cloudflare.yml
