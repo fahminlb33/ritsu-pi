@@ -1,0 +1,90 @@
+---
+- name: Reverse Proxy
+  hosts: ritsu_pi
+  vars_files:
+    - secrets.yml
+  roles:
+    - role: nginx
+      tags: [networking, reverse-proxy, nginx]
+      become: true
+      vars:
+        nginx_state: present
+        nginx_cloudflare_token: "{{ nginx_cloudflare_api_key }}"
+        nginx_cloudflare_zone_id: "{{ nginx_cloudflare_api_zone_id }}"
+        nginx_apex_domain: "{{ server_hostname }}"
+        nginx_ip: "{{ server_ip }}"
+        nginx_cockpit_vhost: cockpit.{{ server_hostname }}
+        nginx_vhosts:
+          # dashboard
+          - hostname: "{{ server_hostname }}" # this will create A record instead of CNAME
+            upstream: localhost:8000
+          # cockpit
+          - hostname: "cockpit.{{ server_hostname }}"
+            upstream: https://localhost:9090
+          # networking
+          - hostname: "dnscrypt.{{ server_hostname }}"
+            upstream: localhost:8001
+          - hostname: "pihole.{{ server_hostname }}"
+            upstream: localhost:8002
+          # monitoring
+          - hostname: "grafana.{{ server_hostname }}"
+            upstream: localhost:8003
+          - hostname: "prometheus.{{ server_hostname }}"
+            upstream: localhost:8004
+          - hostname: "exporter-node.{{ server_hostname }}"
+            upstream: localhost:8101
+          - hostname: "exporter-cadvisor.{{ server_hostname }}"
+            upstream: localhost:8102
+          - hostname: "exporter-blackbox.{{ server_hostname }}"
+            upstream: localhost:8103
+          - hostname: "exporter-speedtest.{{ server_hostname }}"
+            upstream: localhost:8104
+          - hostname: "exporter-mikrotik.{{ server_hostname }}"
+            upstream: localhost:8105
+          - hostname: "exporter-apcupsd.{{ server_hostname }}"
+            upstream: localhost:8106
+          - hostname: "exporter-smartctl.{{ server_hostname }}"
+            upstream: localhost:8107
+          # arr stack
+          - hostname: "qbittorrent.{{ server_hostname }}"
+            upstream: localhost:8005
+          - hostname: "jdownloader-vpn.{{ server_hostname }}"
+            upstream: localhost:8006
+          - hostname: "jdownloader-novpn.{{ server_hostname }}"
+            upstream: localhost:8007
+          - hostname: "bazarr.{{ server_hostname }}"
+            upstream: localhost:8201
+          - hostname: "radarr.{{ server_hostname }}"
+            upstream: localhost:8202
+          - hostname: "lidarr.{{ server_hostname }}"
+            upstream: localhost:8203
+          - hostname: "sonarr.{{ server_hostname }}"
+            upstream: localhost:8204
+          - hostname: "prowlarr.{{ server_hostname }}"
+            upstream: localhost:8205
+          - hostname: "jackett.{{ server_hostname }}"
+            upstream: localhost:8206
+          - hostname: "flaresolverr.{{ server_hostname }}"
+            upstream: localhost:8207
+          # jellyfin
+          - hostname: "jellyfin.{{ server_hostname }}"
+            upstream: localhost:8008
+          # immich
+          - hostname: "immich.{{ server_hostname }}"
+            upstream: localhost:8009
+          # mlflow
+          - hostname: "mlflow.{{ server_hostname }}"
+            upstream: localhost:8010
+          # seq
+          - hostname: "seq.{{ server_hostname }}"
+            upstream: localhost:8011
+          # sonarqube
+          - hostname: "sonarqube.{{ server_hostname }}"
+            upstream: localhost:8012
+          # garage
+          - hostname: "garage-s3.{{ server_hostname }}"
+            upstream: localhost:3900
+          - hostname: "garage-s3-admin.{{ server_hostname }}"
+            upstream: localhost:3902
+          - hostname: "garage-admin.{{ server_hostname }}"
+            upstream: localhost:3903

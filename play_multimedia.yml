@@ -1,0 +1,110 @@
+---
+- name: Multimedia
+  hosts: ritsu_pi
+  vars_files:
+    - secrets.yml
+  roles:
+    - role: jellyfin
+      tags: [media, jellyfin]
+      vars:
+        jellyfin_state: present
+        jellyfin_image: jellyfin/jellyfin:10.11.10
+        jellyfin_media_dir: /mnt/pool/media_root/media
+        jellyfin_port: 8008
+
+    - role: immich
+      tags: [networking, security, pihole]
+      vars:
+        immich_state: present
+        immich_port: 8009
+
+        immich_config_dir: "{{ config_root }}/immich"
+        immich_upload_dir: /mnt/pool/photos
+
+        immich_images:
+          ml: ghcr.io/immich-app/immich-machine-learning:v2.7.5-openvino
+          server: ghcr.io/immich-app/immich-server:v2.7.5
+          postgres: ghcr.io/immich-app/postgres:17-vectorchord0.5.3-pgvector0.8.1
+          redis: valkey/valkey:9
+
+        immich_hwaccel:
+          ml: openvino
+          transcoding: quicksync
+
+        immich_db:
+          name: immich
+          username: "{{ immich_db_username }}"
+          password: "{{ immich_db_password }}"
+          storage_type: HDD
+
+    - role: arr_stack
+      tags: [networking, security, vpn, gluetun]
+      vars:
+        arr_stack_state: present
+        arr_stack_config_dir: "{{ config_root }}/arr-stack"
+        arr_stack_media_dir: /mnt/pool/media_root
+
+        # VPN
+        arr_stack_gluetun:
+          image: qmcgaw/gluetun:v3.41.1
+          env:
+            TZ: "{{ timezone }}"
+            VPN_SERVICE_PROVIDER: "protonvpn"
+            VPN_PORT_FORWARDING_PROVIDER: "protonvpn"
+            VPN_PORT_FORWARDING: "on"
+            PORT_FORWARD_ONLY: "on"
+            VPN_TYPE: "openvpn"
+            SERVER_COUNTRIES: "Indonesia,Singapore,Canada"
+            OPENVPN_USER: "{{ protonvpn_openvpn_username }}"
+            OPENVPN_PASSWORD: "{{ protonvpn_openvpn_password }}"
+            FIREWALL_VPN_INPUT_PORTS: "6881"
+
+        # Downloaders
+        arr_stack_jdownloader:
+          image: jlesage/jdownloader-2:v26.03.1
+          download_dir: "/mnt/pool/downloads"
+          # auth
+          myjd:
+            email: "{{ jdownloader_myjd_email }}"
+            password: "{{ jdownloader_myjd_password }}"
+            device: "ramiel"
+          # access
+          vpn:
+            myjd_port: 13001
+            web_port: 8006
+          novpn:
+            myjd_port: 13002
+            web_port: 8007
+
+        arr_stack_qbittorrent:
+          image: lscr.io/linuxserver/qbittorrent:5.2.1_v2.0.12-ls459
+          port: 8005
+
+        # Arr Stack
+        arr_stack_bazarr:
+          image: lscr.io/linuxserver/bazarr:v1.5.6-ls342
+          port: 8201
+
+        arr_stack_radarr:
+          image: lscr.io/linuxserver/radarr:6.1.1.10360-ls297
+          port: 8202
+
+        arr_stack_lidarr:
+          image: lscr.io/linuxserver/lidarr:3.1.0.4875-ls22
+          port: 8203
+
+        arr_stack_sonarr:
+          image: lscr.io/linuxserver/sonarr:4.0.17.2952-ls305
+          port: 8204
+
+        arr_stack_prowlarr:
+          image: lscr.io/linuxserver/prowlarr:2.3.5.5327-ls141
+          port: 8205
+
+        arr_stack_jackett:
+          image: lscr.io/linuxserver/jackett:v0.24.1985-ls417
+          port: 8206
+
+        arr_stack_flaresolverr:
+          image: ghcr.io/flaresolverr/flaresolverr:v3.5.0
+          port: 8207

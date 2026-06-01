@@ -4,3 +4,20 @@ ritsu_pi:
     ramiel:
       ansible_host: 10.20.20.101
       ansible_user: ramiel
+  
+      # Location where configuration files be stored.
+      # Note: ALWAYS USE ABSOLUTE PATH
+      config_root: /home/ramiel/ritsu-pi
+
+      # Timezone
+      timezone: Asia/Jakarta
+
+      # Server Host
+      server_ip: 10.20.20.101
+      server_hostname: ritsu.net
+
+      # Network
+      server_docker_network:
+        gateway: "172.19.0.1"
+        subnet: "172.19.0.0/16"
+        ip_range: "172.19.0.0/24"

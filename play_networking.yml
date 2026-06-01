@@ -1,0 +1,56 @@
+---
+- name: Networking
+  hosts: ritsu_pi
+  vars_files:
+    - secrets.yml
+  roles:
+    # ==> file sharing
+    - role: samba
+      tags: [file, media, share, samba]
+      become: true
+      vars:
+        # SMB user
+        samba_user:
+          group: sambausers
+          username: "{{ samba_user_username }}"
+          password: "{{ samba_user_password }}"
+          force_user: "ramiel"
+
+        # directories to share
+        samba_mount_points:
+          - name: ramiel
+            path: /mnt/pool
+            writeable: true
+            browsable: true
+
+    # ===> networking
+    - role: dns
+      tags: [networking, security, adblock, dnscrypt, pihole]
+      vars:
+        dns_state: present
+        dns_config_dir: "{{ config_root }}/dns"
+
+        dns_dnscrypt:
+          image: ghcr.io/klutchell/dnscrypt-proxy:2.1.16
+          # auth
+          username: "{{ dnscrypt_username }}"
+          password: "{{ dnscrypt_password }}"
+          # access
+          port: 8001
+          bind_ip: "172.19.1.100"
+
+        dns_pihole:
+          image: pihole/pihole:2026.05.0
+          # auth
+          password: "{{ pihole_password }}"
+          # access
+          port: 8002
+
+    # ===> dahboard
+    - role: dashboard
+      tags: [common, dashboard]
+      vars:
+        dashboard_state: present
+        dashboard_image: ghcr.io/gethomepage/homepage:v1.13.1
+        dashboard_config_dir: "{{ config_root }}/dashboard"
+        dashboard_port: 8000

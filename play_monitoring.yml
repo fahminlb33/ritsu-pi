@@ -1,0 +1,96 @@
+---
+- name: Monitoring
+  hosts: ritsu_pi
+  vars_files:
+    - secrets.yml
+  roles:
+    - role: monitoring
+      tags: [monitoring, prometheus]
+      vars:
+        monitoring_state: present
+        monitoring_config_dir: "{{ config_root }}/monitoring"
+
+        monitoring_grafana:
+          state: present
+          image: grafana/grafana:13.1.0-25893932881
+          # access
+          port: 8003
+          # auth
+          user:
+            username: "{{ grafana_username }}"
+            password: "{{ grafana_password }}"
+            allow_signup: false
+
+        monitoring_prometheus:
+          state: present
+          image: prom/prometheus:v3.12.0
+          # access
+          port: 8004
+          # prom settings
+          scrape_interval: 15s
+          retention:
+            time: 2y
+            size: 100GB
+          extra_config: []
+            # currently immich exposes useless metrics
+            # - job_name: immich_api
+            #   static_configs:
+            #     - targets: ['immich-server:8081']
+            # - job_name: immich_microservices
+            #   static_configs:
+            #     - targets: ['immich-server:8082']
+
+        monitoring_exporters:
+          node:
+            state: present
+            arch: amd64
+            bin_path: /usr/local/bin/node_exporter
+            port: 8101
+            extra_args:
+              - "--collector.netdev.device-exclude=^(veth|br-).*$"
+
+          cadvisor:
+            state: present
+            image: ghcr.io/google/cadvisor:0.57.0
+            port: 8102
+
+          blackbox:
+            state: present
+            image: prom/blackbox-exporter:v0.28.0
+            port: 8103
+            ping_hosts:
+              - https://www.google.com
+              - https://www.github.com
+
+          speedtest:
+            state: present
+            image: fahminlb33/speedtest-exporter:1.1.0
+            # access
+            port: 8104
+            # Configure the sample_interval to limit the number of checks interval because
+            # the speed test will consume a considerable amount of bandwidth.
+            scrape_interval: 1h
+            server_id:
+
+          mikrotik:
+            state: present
+            image: ghcr.io/akpw/mktxp:1.2.17
+            port: 8105
+            # Mikrotik router host
+            router:
+              host: 10.20.20.1
+              port: 8728
+            # Mikrotik user with API access
+            user:
+              username: "{{ mktxp_username }}"
+              password: "{{ mktxp_password }}"
+
+          apcupsd:
+            state: present
+            image: ghcr.io/twodarek/apcupsd_exporter:c038fd768fd5208c3629068c848e6dbe922ac8c0
+            port: 8106
+
+          smartctl:
+            state: present
+            image: prometheuscommunity/smartctl-exporter:v0.14.0
+            port: 8107

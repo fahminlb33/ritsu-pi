@@ -1,0 +1,49 @@
+---
+- name: Development Tools
+  hosts: ritsu_pi
+  vars_files:
+    - secrets.yml
+  roles:
+    - role: mlflow
+      tags: [monitoring, database, mlflow]
+      vars:
+        mlflow_state: present
+        mlflow_port: 8010
+        mlflow_image: ghcr.io/mlflow/mlflow:v3.11.1
+        mlflow_config_dir: "{{ config_root }}/mlflow"
+        mlflow_cors: "mlflow.{{ server_hostname }}"
+
+    - role: seq
+      tags: [monitoring, database, mlflow]
+      vars:
+        seq_state: present
+        seq_image: datalust/seq:2025.2.16202
+        seq_port: 8011
+        seq_password: "{{ seq_admin_password }}"
+        seq_config_dir: "{{ config_root }}/seq"
+
+    - role: sonarqube
+      tags: [monitoring, database, mlflow]
+      vars:
+        sonarqube_state: present
+        sonarqube_image: sonarqube:26.5.0.122743-community
+        sonarqube_config_dir: "{{ config_root }}/sonarqube"
+        sonarqube_port: 8012
+        # database
+        sonarqube_db_url: "{{ sonar_db_url }}"
+        sonarqube_db_username: "{{ sonar_db_username }}"
+        sonarqube_db_password: "{{ sonar_db_password }}"
+
+    - role: garage
+      tags: [monitoring, database, mlflow]
+      vars:
+        garage_state: present
+        garage_image: dxflrs/garage:v2.3.0
+        garage_config_dir: "{{ config_root }}/garage"
+        garage_upload_dir: "{{ config_root }}/garage/data"
+        garage_ports:
+          rpc: 3901
+          s3_api: 3900
+          s3_web: 3902
+          k2v: 3904
+          admin: 3903
