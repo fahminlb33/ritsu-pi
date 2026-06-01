@@ -10,6 +10,6 @@
     CNAME_VALUE: "{{ nginx_apex_domain }}"
     DEFAULT_A_IP: "{{ nginx_ip }}"
   loop: "{{ nginx_vhosts }}"
-  when: "item.managed_dns | default(false)"
+  when: "item.managed_dns | default(True)"
   register: nginx_cloudflare_script
   changed_when: "'No changes required' not in nginx_cloudflare_script.stdout"
