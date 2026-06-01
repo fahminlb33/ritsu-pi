@@ -7,4 +7,3 @@ nginx_cockpit_vhost: cockpit.ritsu.net
 nginx_vhosts:
   - hostname: www.testing.com
     upstream: docker-host:port
-    config_name: default
