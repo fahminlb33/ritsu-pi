@@ -67,7 +67,7 @@
     - "{{ arr_stack_lidarr.image }}"
     - "{{ arr_stack_prowlarr.image }}"
     - "{{ arr_stack_jackett.image }}"
-    - "{{ arr_stack_flaresolvarr.image }}"
+    - "{{ arr_stack_flaresolverr.image }}"
 
 - name: Copy Docker Compose template
   ansible.builtin.template:

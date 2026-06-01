@@ -196,12 +196,12 @@ services:
   
   flaresolvarr:
     container_name: flaresolvarr
-    image: "{{ arr_stack_flaresolvarr.image }}"
+    image: "{{ arr_stack_flaresolverr.image }}"
     restart: "unless-stopped"
     networks:
       - "ritsu-pi"
     ports:
-      - "{{ arr_stack_flaresolvarr.port }}:8191"
+      - "{{ arr_stack_flaresolverr.port }}:8191"
     environment:
       - "PUID=1000"
       - "PGID=1000"
