@@ -88,3 +88,9 @@
             upstream: localhost:3902
           - hostname: "garage-admin.{{ server_hostname }}"
             upstream: localhost:3903
+          # zot registry
+          - hostname: "registry.{{ server_hostname }}"
+            upstream: localhost:5000
+          - hostname: "registry.kodesiana.com"
+            upstream: localhost:5000
+            managed_dns: false
