@@ -47,6 +47,12 @@ services:
     volumes:
       - "{{ arr_stack_config_dir }}/qbittorrent:/config"
       - "{{ arr_stack_media_dir }}/torrents:/data/torrents"
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 256M
 
   jdownloader-vpn:
     container_name: "jdownloader-vpn"
