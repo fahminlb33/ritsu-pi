@@ -8,9 +8,12 @@
 
 - name: Create Dashboard configuration
   ansible.builtin.template:
-    src: templates/settings.yml.j2
-    dest: "{{ dashboard_config_dir_reg.path }}/settings.yml"
+    src: "templates/{{ item }}.j2"
+    dest: "{{ dashboard_config_dir_reg.path }}/{{ item }}"
     mode: "0755"
+  loop:
+    - settings.yaml
+    - services.yaml
 
 - name: Pull image from registry
   community.docker.docker_image:
@@ -33,5 +36,5 @@
     env:
       PUID: "1000"
       PGID: "1000"
-      HOMEPAGE_ALLOWED_HOSTS: "{{ server_domain }},dashboard:3000"
+      HOMEPAGE_ALLOWED_HOSTS: "{{ server_hostname }},dashboard:3000"
     state: "{{ 'started' if dashboard_state == 'present' else 'absent' }}"
