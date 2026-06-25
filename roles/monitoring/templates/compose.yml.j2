@@ -7,6 +7,18 @@ networks:
     external: true
 
 services:
+{% if monitoring_dockhand.state == 'present' %}
+  dockhand:
+    image: "{{ monitoring_dockhand.image }}"
+    container_name: dockhand
+    restart: unless-stopped
+    ports:
+      - "{{ monitoring_dockhand.port }}:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "{{ monitoring_config_dir }}/dockhand:/app/data"
+{% endif %}
+
 {% if monitoring_grafana.state == 'present' %}
   grafana:
     container_name: grafana

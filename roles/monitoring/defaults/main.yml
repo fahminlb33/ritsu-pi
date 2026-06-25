@@ -2,6 +2,12 @@
 monitoring_state: present
 monitoring_config_dir: "{{ config_root }}/monitoring"
 
+monitoring_dockhand:
+  state: present
+  image: fnsys/dockhand:v1.0.35
+  # access
+  port: 3000
+
 monitoring_grafana:
   state: present
   image: grafana/grafana:12.3-ubuntu

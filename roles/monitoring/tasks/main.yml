@@ -5,6 +5,13 @@
     state: directory
     mode: "0775"
 
+- name: Create dockhand config directory
+  ansible.builtin.file:
+    path: "{{ monitoring_config_dir }}"
+    state: directory
+    mode: "0775"
+  when: "monitoring_dockhand.state == 'present'"
+
 - name: Pull image from registry
   community.docker.docker_image:
     state: "{{ monitoring_state }}"

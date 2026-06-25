@@ -31,6 +31,8 @@
             upstream: localhost:8003
           - hostname: "prometheus.{{ server_hostname }}"
             upstream: localhost:8004
+          - hostname: "dockhand.{{ server_hostname }}"
+            upstream: localhost:8013
           - hostname: "exporter-node.{{ server_hostname }}"
             upstream: localhost:8101
           - hostname: "exporter-cadvisor.{{ server_hostname }}"
